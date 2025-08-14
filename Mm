@@ -733,29 +733,35 @@ function OrionLib:MakeWindow(WindowConfig)
     LoadSequence() 
 end
 
--- ===== إطار مع ألوان متحركة =====
+-- ===== إضافة إطار متحرك بين الأحمر والأخضر =====
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 3
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(255, 0, 0) -- لون ابتدائي
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = MainWindow
 
--- Gradient داخلي
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)) -- أحمر مرة ثانية
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
+local TweenService = game:GetService("TweenService")
 
--- تحريك الألوان
+local colors = {
+    Color3.fromRGB(255, 0, 0), -- أحمر
+    Color3.fromRGB(0, 255, 0)  -- أخضر
+}
+
+local index = 1
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+
 task.spawn(function()
     while MainWindow and MainWindow.Parent do
-        for i = 0, 360, 2 do
-            gradient.Rotation = i
-            task.wait(0.02)
-        end
+        -- اللون التالي
+        local nextColor = colors[index]
+
+        -- عمل أنميشن سلس للون
+        local tween = TweenService:Create(stroke, tweenInfo, {Color = nextColor})
+        tween:Play()
+        tween.Completed:Wait()
+
+        -- تحديث الفهرس
+        index = (index % #colors) + 1
     end
 end)
 -- ================================================
