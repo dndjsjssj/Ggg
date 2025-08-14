@@ -765,29 +765,34 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
     ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
 }
-gradient.Rotation = 0 -- أفقي
+gradient.Rotation = 0
 gradient.Parent = stroke
 
--- تحريك التدرج بشكل أفقي وعمودي معكوس
+-- حركة التدرج على شكل مربع متعرج (رأسياً مع انعكاس)
 task.spawn(function()
-    local offsetX = 0
-    local offsetY = 0
-    local direction = 1
-    while true do
-        -- تحرك أفقي + عمودي
-        offsetX = (offsetX + 0.01 * direction) % 1
-        offsetY = (offsetY + 0.01 * direction) % 1
-        gradient.Offset = Vector2.new(offsetX, offsetY)
+    local x = 0
+    local y = 0
+    local dirY = 1 -- 1: ينزل، -1: يصعد
+    local dirX = 1 -- 1: يمين، -1: يسار
 
-        -- إذا وصلنا الحد الأعلى أو الأدنى نغير الاتجاه
-        if offsetY >= 1 or offsetY <= 0 then
-            direction = -direction
+    while true do
+        -- تحديث الإحداثيات
+        x = x + 0.01 * dirX
+        y = y + 0.01 * dirY
+
+        -- عكس الاتجاه عند الوصول لأعلى أو أسفل
+        if y >= 1 then
+            dirY = -1
+            dirX = -1 -- عكس أفقي عند الصعود
+        elseif y <= 0 then
+            dirY = 1
+            dirX = 1 -- عكس أفقي عند النزول
         end
 
+        gradient.Offset = Vector2.new(x, y)
         task.wait(interval)
     end
 end)
-
 
 local TabFunction = {}
     
