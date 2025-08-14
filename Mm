@@ -739,8 +739,6 @@ local thickness = 4 -- سماكة الحواف
 local interval = 0.02
 local cornerRadius = UDim.new(0, 8)
 local moveSpeed = 100 -- سرعة الحركة بالبكسل بالثانية
-local lineColor1 = Color3.fromRGB(0, 255, 0) -- الأخضر الأول
-local lineColor2 = Color3.fromRGB(0, 200, 0) -- الأخضر الثاني (تدرج خفيف)
 
 -- ===== الإطار الأحمر =====
 local borderFrame = Instance.new("Frame")
@@ -760,15 +758,16 @@ stroke.Color = Color3.fromRGB(255, 255, 255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
+-- ===== UIGradient الأحمر =====
+local redGradient = Instance.new("UIGradient")
+redGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
 }
-gradient.Rotation = 90
-gradient.Parent = stroke
+redGradient.Rotation = 90
+redGradient.Parent = stroke
 
--- تحريك الجريدينت الأحمر
+-- تحريك التدرج الأحمر
 task.spawn(function()
     local offset = 0
     local direction = 1
@@ -776,27 +775,17 @@ task.spawn(function()
         offset = offset + 0.01 * direction
         if offset >= 1 then direction = -1
         elseif offset <= 0 then direction = 1 end
-        gradient.Offset = Vector2.new(0, offset)
+        redGradient.Offset = Vector2.new(0, offset)
         task.wait(interval)
     end
 end)
 
--- ===== دالة لإنشاء خط أخضر متحرك =====
-local function createMovingLine(color)
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, 50, 0, thickness)
-    line.BackgroundTransparency = 1
-    line.ZIndex = MainWindow.ZIndex + 2
-    line.Parent = MainWindow
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 4)
-    corner.Parent = line
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 2
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = line
+-- ===== إضافة خطوط داخلية خضراء =====
+local function addInnerGreenLine(color, directionMultiplier)
+    local strokeGreen = Instance.new("UIStroke")
+    strokeGreen.Thickness = thickness
+    strokeGreen.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    strokeGreen.Parent = borderFrame
 
     local grad = Instance.new("UIGradient")
     grad.Color = ColorSequence.new{
@@ -805,71 +794,25 @@ local function createMovingLine(color)
     }
     grad.Rotation = 0
     grad.Offset = Vector2.new(0,0)
-    grad.Parent = stroke
+    grad.Parent = strokeGreen
 
-    -- تحريك التدرج
+    -- تحريك التدرج الأخضر
     task.spawn(function()
         local offset = 0
-        local direction = 1
         while true do
-            offset = offset + 0.01 * direction
-            if offset >= 1 then direction = -1
-            elseif offset <= 0 then direction = 1 end
-            grad.Offset = Vector2.new(offset, 0)
+            offset = offset + 0.01 * directionMultiplier
+            if offset >= 1 then offset = 0
+            elseif offset <= 0 then offset = 1 end
+            grad.Offset = Vector2.new(offset,0)
             task.wait(interval)
         end
     end)
-
-    return line
 end
 
--- إنشاء خطين أخضرين
-local line1 = createMovingLine(lineColor1)
-local line2 = createMovingLine(lineColor2)
-
--- طول الحواف الأربعة
-local function getPerimeter()
-    local w = MainWindow.AbsoluteSize.X
-    local h = MainWindow.AbsoluteSize.Y
-    return (w + h) * 2
-end
-
--- تحديث موقع الخط على طول الحواف (محوري الوسط)
-local function setLinePosition(line, dist)
-    local w = MainWindow.AbsoluteSize.X
-    local h = MainWindow.AbsoluteSize.Y
-
-    dist = dist % getPerimeter()
-
-    if dist < w then
-        -- أعلى
-        line.Size = UDim2.new(0, 50, 0, thickness)
-        line.Position = UDim2.new(0, dist, 0, (thickness/2))
-    elseif dist < w + h then
-        -- يمين
-        line.Size = UDim2.new(0, thickness, 0, 50)
-        line.Position = UDim2.new(1, -thickness/2, 0, dist - w)
-    elseif dist < w + h + w then
-        -- أسفل
-        line.Size = UDim2.new(0, 50, 0, thickness)
-        line.Position = UDim2.new(1, -(dist - (w + h) + 50), 1, -thickness/2)
-    else
-        -- يسار
-        line.Size = UDim2.new(0, thickness, 0, 50)
-        line.Position = UDim2.new(0, -thickness/2, 1, -(dist - (w + h + w) + 50))
-    end
-end
-
--- تحريك الخطين
-local dist1 = 0
-local dist2 = getPerimeter() / 2 -- عكس الثاني
-
-game:GetService("RunService").RenderStepped:Connect(function(dt)
-    dist1 = dist1 + moveSpeed * dt
-    dist2 = dist2 - moveSpeed * dt
-    setLinePosition(line1, dist1)
-    setLinePosition(line2, dist2)
-end)
+-- إضافة الخطين الأخضرين متحركين داخل الإطار
+addInnerGreenLine(Color3.fromRGB(0,255,0), 1)    -- الأول
+addInnerGreenLine(Color3.fromRGB(0,200,0), -1)   -- الثاني عكس الأول
+ 
     
 local TabFunction = {}
     
