@@ -729,56 +729,36 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-	if WindowConfig.IntroEnabled then
-    LoadSequence()
-end	
+	if WindowConfig.IntroEnabled then 
+    LoadSequence() 
+end
 
--- ===== إطار متدرج متحرك + تغيير ألوان =====
+-- ===== إطار مع ألوان متحركة =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 3
-stroke.Transparency = 0
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Color = Color3.fromRGB(255, 255, 255) -- مهم حتى يطلع التدرج
 stroke.Parent = MainWindow
 
+-- Gradient داخلي
 local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),   -- أحمر
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))    -- أحمر
-})
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)) -- أحمر مرة ثانية
+}
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- حركة دوران التدرج
+-- تحريك الألوان
 task.spawn(function()
     while MainWindow and MainWindow.Parent do
-        for i = 0, 360, 1 do
+        for i = 0, 360, 2 do
             gradient.Rotation = i
             task.wait(0.02)
         end
     end
 end)
-
--- تغيير ألوان التدرج كل نصف ثانية
-local colorSets = {
-    { Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0) }, -- أحمر وأخضر
-    { Color3.fromRGB(0, 255, 0), Color3.fromRGB(255, 0, 0) }  -- أخضر وأحمر
-}
-local idx = 1
-
-task.spawn(function()
-    while MainWindow and MainWindow.Parent do
-        gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, colorSets[idx][1]),
-            ColorSequenceKeypoint.new(0.5, colorSets[idx][2]),
-            ColorSequenceKeypoint.new(1, colorSets[idx][1])
-        })
-        idx = (idx % #colorSets) + 1
-        task.wait(0.5)
-    end
-end)
--- =========================================
+-- ================================================
 
 local TabFunction = {}
 
