@@ -729,54 +729,61 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-if WindowConfig.IntroEnabled then
-    LoadSequence()
+بس باع هسه هاذ سكربتي شلون اسوي خط اخضر فوك و خط اخضر جوه if WindowConfig.IntroEnabled then LoadSequence() end
+
+local thickness = 4 -- سماكة الحواف
+local interval = 0.02
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
+
+-- إنشاء إطار واحد حول MainWindow
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = MainWindow.ZIndex + 1
+borderFrame.Parent = MainWindow
+
+-- إضافة UICorner للإطار
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- إضافة UIStroke للإطار
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255,255,255)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- إضافة UIGradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- فوك أحمر
+ColorSequenceKeypoint.new(1, Color3.fromRGB(0,255,0))    -- جوه أخضر
+}
+gradient.Rotation = 90 -- رأسي
+gradient.Parent = stroke
+
+-- تحريك الفوك والجوه بالعكس
+task.spawn(function()
+local offset = 0
+local direction = 1
+while true do
+offset = offset + 0.01 * direction
+
+if offset >= 1 then  
+        direction = -1  
+    elseif offset <= 0 then  
+        direction = 1  
+    end  
+
+    gradient.Offset = Vector2.new(0, offset)  
+    task.wait(interval)  
 end
 
--- دالة لإنشاء خط أسود أفقي متحرك فوق الإطار
-local function createOverlayBlackLineHorizontal(color, reverse)
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, 50, 0, 4) -- سماكة الخط أفقي
-    line.BackgroundTransparency = 1
-    line.ZIndex = borderFrame.ZIndex + 5 -- فوق الأحمر
-    line.Parent = MainWindow
+end)
 
-    -- UIStroke أبيض
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 2
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = line
 
-    -- UIGradient أسود متحرك
-    local grad = Instance.new("UIGradient")
-    grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, color),
-        ColorSequenceKeypoint.new(1, color)
-    }
-    grad.Rotation = 0
-    grad.Offset = Vector2.new(0, 0)
-    grad.Parent = stroke
-
-    local w = borderFrame.AbsoluteSize.X -- عرض الإطار
-    local dist = reverse and w or 0
-
-    game:GetService("RunService").RenderStepped:Connect(function(dt)
-        dist = dist + (reverse and -1 or 1) * 100 * dt -- سرعة 100px/s
-        dist = dist % w
-        line.Position = UDim2.new(0, dist, 0, 0) -- فوق الإطار فقط
-
-        -- تحريك التدرج
-        local offset = (grad.Offset.X + 0.01) % 1
-        grad.Offset = Vector2.new(offset, 0)
-    end)
-end
-
--- إنشاء الخطين الأسودين الأفقيين فوق الأحمر
-createOverlayBlackLineHorizontal(Color3.fromRGB(0,0,0), false) -- الأول
-createOverlayBlackLineHorizontal(Color3.fromRGB(0,0,0), true)  -- الثاني عكس الأول
-
--- باقي الكود
 local TabFunction = {}
     
 
