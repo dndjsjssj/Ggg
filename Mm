@@ -737,7 +737,7 @@ end
 -- ===== الإعدادات =====
 local thickness = 4 -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
-local rotationSpeed = 20 -- سرعة دوران أبطأ
+local rotationSpeed = 10 -- سرعة الدوران أصبحت أبطأ لتجنب القفزات
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -755,7 +755,7 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 255, 255) -- أبيض أساس للألوان
+stroke.Color = Color3.fromRGB(255, 255, 255) -- أبيض أساسي للألوان
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
@@ -764,18 +764,18 @@ local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     -- أخضر قصير في الأعلى
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.05, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.1, Color3.fromRGB(0, 0, 0)),
 
-    -- أحمر بين الأعلى والأسفل
-    ColorSequenceKeypoint.new(0.05, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)),
+    -- أحمر ثابت في المنتصف
+    ColorSequenceKeypoint.new(0.1, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)),
 
-    -- أسود قصير في الأسفل
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 0, 0)),
+    -- أسود قصير بعد الأحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 0, 0)),
 
     -- أحمر يكمل الإطار
-    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
@@ -783,9 +783,9 @@ gradient.Parent = stroke
 
 -- ===== تحريك الألوان =====
 game:GetService("RunService").RenderStepped:Connect(function(dt)
+    -- زيادة تدريجية Rotation لتكون سلسة وأبطأ
     gradient.Rotation = (gradient.Rotation + rotationSpeed * dt) % 360
 end)
-
 
 local TabFunction = {}
     
