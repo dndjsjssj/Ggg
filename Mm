@@ -729,44 +729,30 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-	-- التأكد من تشغيل المقدمة لو مفعل
-if WindowConfig.IntroEnabled then 
+	if WindowConfig.IntroEnabled then 
     LoadSequence() 
 end
 
--- إنشاء إطار للإطار المتحرك
+-- إنشاء إطار متحرك حول MainWindow
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
+borderFrame.Size = UDim2.new(1, 6, 1, 6) -- سماكة الإطار 3px لكل جانب
+borderFrame.Position = UDim2.new(0, -3, 0, -3) -- لتغطية الحواف
+borderFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- البداية أحمر
 borderFrame.BorderSizePixel = 0
 borderFrame.ZIndex = 999
 borderFrame.Parent = MainWindow
 
--- إضافة إطار داخلي صغير للحواف
-local innerStroke = Instance.new("Frame")
-innerStroke.Size = UDim2.new(1, 0, 1, 0)
-innerStroke.BackgroundTransparency = 1
-innerStroke.BorderSizePixel = 0
-innerStroke.Parent = borderFrame
-
--- إضافة UIGradient على الإطار الداخلي
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
-}
-gradient.Rotation = 0
-gradient.Parent = innerStroke
-
--- تحريك الألوان
+-- تحريك اللون الأحمر والأخضر
 task.spawn(function()
+    local toggle = true
     while borderFrame and borderFrame.Parent do
-        for i = 0, 360, 1 do
-            gradient.Rotation = i
-            task.wait(0.02)
+        if toggle then
+            borderFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- أخضر
+        else
+            borderFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- أحمر
         end
+        toggle = not toggle
+        task.wait(0.5) -- سرعة التغيير، قلل الرقم لتسريع الحركة
     end
 end)
 
