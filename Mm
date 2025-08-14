@@ -729,41 +729,43 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-	if-- التأكد من تشغيل المقدمة لو مفعل
+	-- التأكد من تشغيل المقدمة لو مفعل
 if WindowConfig.IntroEnabled then 
     LoadSequence() 
 end
 
--- إنشاء إطار شفاف فوق MainWindow
+-- إنشاء إطار للإطار المتحرك
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = 999 -- فوق كل شيء
+borderFrame.BorderSizePixel = 0
+borderFrame.ZIndex = 999
 borderFrame.Parent = MainWindow
 
--- إضافة UIStroke للإطار
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 3
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
+-- إضافة إطار داخلي صغير للحواف
+local innerStroke = Instance.new("Frame")
+innerStroke.Size = UDim2.new(1, 0, 1, 0)
+innerStroke.BackgroundTransparency = 1
+innerStroke.BorderSizePixel = 0
+innerStroke.Parent = borderFrame
 
--- إضافة UIGradient للألوان الأحمر والأخضر
+-- إضافة UIGradient على الإطار الداخلي
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))    -- أحمر مرة ثانية
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
 }
 gradient.Rotation = 0
-gradient.Parent = stroke
+gradient.Parent = innerStroke
 
--- تحريك الألوان بشكل دائري
+-- تحريك الألوان
 task.spawn(function()
     while borderFrame and borderFrame.Parent do
         for i = 0, 360, 1 do
             gradient.Rotation = i
-            task.wait(0.02) -- سرعة الحركة، قلل الرقم لتسريعها
+            task.wait(0.02)
         end
     end
 end)
