@@ -731,22 +731,22 @@ function OrionLib:MakeWindow(WindowConfig)
 
 if WindowConfig.IntroEnabled then LoadSequence() end
 
--- دالة لإنشاء خط أسود يتحرك حول الإطار الأحمر
-local function createOverlayBlackLine(color, reverse)
+-- دالة لإنشاء خط أسود أفقي متحرك فوق الإطار
+local function createOverlayBlackLineHorizontal(color, reverse)
     local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, 50, 0, 4) -- عرض الخط
+    line.Size = UDim2.new(0, 50, 0, 4) -- سماكة الخط أفقي
     line.BackgroundTransparency = 1
-    line.ZIndex = borderFrame.ZIndex + 5
+    line.ZIndex = borderFrame.ZIndex + 5 -- فوق الأحمر
     line.Parent = MainWindow
 
-    -- إطار الخط
+    -- UIStroke أبيض
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
-    stroke.Color = Color3.fromRGB(255, 255, 255) -- أبيض ثابت
+    stroke.Color = Color3.fromRGB(255, 255, 255)
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = line
 
-    -- تدرج أسود متحرك
+    -- UIGradient أسود متحرك
     local grad = Instance.new("UIGradient")
     grad.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, color),
@@ -756,39 +756,14 @@ local function createOverlayBlackLine(color, reverse)
     grad.Offset = Vector2.new(0, 0)
     grad.Parent = stroke
 
-    -- محيط الإطار
-    local function getPerimeter()
-        local w = borderFrame.AbsoluteSize.X
-        local h = borderFrame.AbsoluteSize.Y
-        return (w + h) * 2
-    end
+    local w = borderFrame.AbsoluteSize.X -- عرض الإطار
 
-    -- تحديد مكان الخط بناءً على المسافة
-    local function setLinePosition(line, dist)
-        local w = borderFrame.AbsoluteSize.X
-        local h = borderFrame.AbsoluteSize.Y
-        dist = dist % getPerimeter()
-
-        if dist < w then
-            line.Size = UDim2.new(0, 50, 0, 4)
-            line.Position = UDim2.new(0, dist, 0, 0)
-        elseif dist < w + h then
-            line.Size = UDim2.new(0, 4, 0, 50)
-            line.Position = UDim2.new(1, -4, 0, dist - w)
-        elseif dist < w + h + w then
-            line.Size = UDim2.new(0, 50, 0, 4)
-            line.Position = UDim2.new(1, -(dist - (w + h) + 50), 1, -4)
-        else
-            line.Size = UDim2.new(0, 4, 0, 50)
-            line.Position = UDim2.new(0, 0, 1, -(dist - (w + h + w) + 50))
-        end
-    end
-
-    local dist = reverse and getPerimeter() / 2 or 0
+    local dist = reverse and w or 0
 
     game:GetService("RunService").RenderStepped:Connect(function(dt)
-        dist = dist + (reverse and -1 or 1) * 100 * dt
-        setLinePosition(line, dist)
+        dist = dist + (reverse and -1 or 1) * 100 * dt -- سرعة 100px/s
+        dist = dist % w
+        line.Position = UDim2.new(0, dist, 0, 0) -- فوق الإطار فقط
 
         -- تحريك التدرج
         local offset = (grad.Offset.X + 0.01) % 1
@@ -796,9 +771,9 @@ local function createOverlayBlackLine(color, reverse)
     end)
 end
 
--- خطين أسودين يتحركان عكس بعض
-createOverlayBlackLine(Color3.fromRGB(0, 0, 0), false) -- الأول
-createOverlayBlackLine(Color3.fromRGB(0, 0, 0), true)  -- الثاني
+-- إنشاء الخطين الأسودين الأفقيين فوق الأحمر
+createOverlayBlackLineHorizontal(Color3.fromRGB(0,0,0), false) -- الأول
+createOverlayBlackLineHorizontal(Color3.fromRGB(0,0,0), true)  -- الثاني عكس الأول
 
 local TabFunction = {}
     
