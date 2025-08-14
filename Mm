@@ -737,7 +737,7 @@ end
 -- ===== الإعدادات =====
 local thickness = 4 -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
-local rotationSpeed = 60 -- درجة بالدقيقة (سرعة دوران الألوان)
+local rotationSpeed = 60 -- سرعة دوران الألوان
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -755,23 +755,37 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 255, 255) -- اللون الأساسي (لا يؤثر كثيرًا مع الجريدينت)
+stroke.Color = Color3.fromRGB(255, 255, 255) -- أبيض أساس للألوان
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
 -- ===== التدرج اللوني =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 0))  -- أخضر
+    -- أخضر قصير في الأعلى
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(0.05, Color3.fromRGB(0, 255, 0)),
+
+    -- أحمر بين الأعلى والأسفل
+    ColorSequenceKeypoint.new(0.05, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)),
+
+    -- أسود قصير في الأسفل
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 0, 0)),
+
+    -- أحمر يكمل الإطار
+    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك الجريدينت بشكل دائري =====
+-- ===== تحريك الألوان =====
 game:GetService("RunService").RenderStepped:Connect(function(dt)
     gradient.Rotation = (gradient.Rotation + rotationSpeed * dt) % 360
 end)
+
 
 local TabFunction = {}
     
