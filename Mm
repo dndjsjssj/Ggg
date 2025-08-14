@@ -733,76 +733,144 @@ function OrionLib:MakeWindow(WindowConfig)
     LoadSequence()
 end
 
-local thickness = 4 -- سماكة الحواف
+local thickness = 4
+local greenThickness = 4
 local interval = 0.02
-local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
+local MainWindow = script.Parent
 
--- إنشاء إطار واحد حول MainWindow
+-- تحديد الفراغات الشفافة
+local topGap = 50     -- الفراغ العلوي (فوك)
+local middleGap = 50  -- الفراغ الأوسط (جوّه)
+
+-- الإطار الأحمر الأساسي
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.Size = UDim2.new(1,0,1,0)
+borderFrame.Position = UDim2.new(0,0,0,0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
--- إضافة UICorner للإطار
-local corner = Instance.new("UICorner")
-corner.CornerRadius = cornerRadius
-corner.Parent = borderFrame
-
--- إضافة UIStroke للإطار
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255,255,255)
+stroke.Color = Color3.fromRGB(255,0,0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- إضافة UIGradient للإطار
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
-}
-gradient.Rotation = 0 -- نتركه 0، سنعدل الـ Offset
-gradient.Parent = stroke
+-- إنشاء الخط الأخضر العلوي (فوك)
+local greenLineTop = Instance.new("Frame")
+greenLineTop.Size = UDim2.new(0, 50, 0, greenThickness)
+greenLineTop.BackgroundColor3 = Color3.fromRGB(0,255,0)
+greenLineTop.BorderSizePixel = 0
+greenLineTop.ZIndex = stroke.ZIndex + 1
+greenLineTop.Parent = borderFrame
 
--- تحريك التدرج حول الإطار بشكل مربع
-task.spawn(function()
-    local offsetX, offsetY = 0, 0
-    local speed = 0.01
-    local direction = "right"
+-- إنشاء الخط الأخضر الأوسط (جوّه)
+local greenLineMiddle = Instance.new("Frame")
+greenLineMiddle.Size = UDim2.new(0, 50, 0, greenThickness)
+greenLineMiddle.BackgroundColor3 = Color3.fromRGB(0,255,0)
+greenLineMiddle.BorderSizePixel = 0
+greenLineMiddle.ZIndex = stroke.ZIndex + 1
+greenLineMiddle.Parent = borderFrame
 
-    while true do
-        if direction == "right" then
-            offsetX = offsetX + speed
-            if offsetX >= 1 then
-                offsetX = 1
-                direction = "down"
-            end
-        elseif direction == "down" then
-            offsetY = offsetY + speed
-            if offsetY >= 1 then
-                offsetY = 1
-                direction = "left"
-            end
-        elseif direction == "left" then
-            offsetX = offsetX - speed
-            if offsetX <= 0 then
-                offsetX = 0
-                direction = "up"
-            end
-        elseif direction == "up" then
-            offsetY = offsetY - speed
-            if offsetY <= 0 then
-                offsetY = 0
-                direction = "right"
-            end
+-- حركة الخطوط داخل الفراغات
+local RunService = game:GetService("RunService")
+local width = borderFrame.AbsoluteSize.X
+local height = borderFrame.AbsoluteSize.Y
+local speed = 200
+
+borderFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+    width = borderFrame.AbsoluteSize.X
+    height = borderFrame.AbsoluteSize.Y
+end)
+
+-- إعداد المتغيرات
+local topPosX = 0
+local topPosY = topGap
+local middlePosX = width
+local middlePosY = topGap + middleGap
+local topDirection = "right"
+local middleDirection = "left"
+
+RunService.RenderStepped:Connect(function(delta)
+    -- خط الفوك (أعلى)
+    if topDirection == "right" then
+        topPosX = topPosX + speed * delta
+        if topPosX >= width - greenLineTop.AbsoluteSize.X then
+            topPosX = width - greenLineTop.AbsoluteSize.X
+            topDirection = "down"
+            greenLineTop.Size = UDim2.new(0, greenThickness, 0, middleGap)
+        else
+            greenLineTop.Size = UDim2.new(0,50,0,greenThickness)
         end
-
-        gradient.Offset = Vector2.new(offsetX, offsetY)
-        task.wait(interval)
+    elseif topDirection == "down" then
+        topPosY = topPosY + speed * delta
+        if topPosY >= topGap + middleGap then
+            topPosY = topGap + middleGap
+            topDirection = "left"
+            greenLineTop.Size = UDim2.new(0,50,0,greenThickness)
+        else
+            greenLineTop.Size = UDim2.new(0,greenThickness,0, middleGap)
+        end
+    elseif topDirection == "left" then
+        topPosX = topPosX - speed * delta
+        if topPosX <= 0 then
+            topPosX = 0
+            topDirection = "up"
+            greenLineTop.Size = UDim2.new(0,greenThickness,0,middleGap)
+        else
+            greenLineTop.Size = UDim2.new(0,50,0,greenThickness)
+        end
+    elseif topDirection == "up" then
+        topPosY = topPosY - speed * delta
+        if topPosY <= topGap then
+            topPosY = topGap
+            topDirection = "right"
+            greenLineTop.Size = UDim2.new(0,50,0,greenThickness)
+        else
+            greenLineTop.Size = UDim2.new(0,greenThickness,0,middleGap)
+        end
     end
+    greenLineTop.Position = UDim2.new(0, topPosX, 0, topPosY)
+
+    -- خط الجوه (منتصف)
+    if middleDirection == "left" then
+        middlePosX = middlePosX - speed * delta
+        if middlePosX <= 0 then
+            middlePosX = 0
+            middleDirection = "up"
+            greenLineMiddle.Size = UDim2.new(0,greenThickness,0,middleGap)
+        else
+            greenLineMiddle.Size = UDim2.new(0,50,0,greenThickness)
+        end
+    elseif middleDirection == "up" then
+        middlePosY = middlePosY - speed * delta
+        if middlePosY <= topGap then
+            middlePosY = topGap
+            middleDirection = "right"
+            greenLineMiddle.Size = UDim2.new(0,50,0,greenThickness)
+        else
+            greenLineMiddle.Size = UDim2.new(0,greenThickness,0,middleGap)
+        end
+    elseif middleDirection == "right" then
+        middlePosX = middlePosX + speed * delta
+        if middlePosX >= width - greenLineMiddle.AbsoluteSize.X then
+            middlePosX = width - greenLineMiddle.AbsoluteSize.X
+            middleDirection = "down"
+            greenLineMiddle.Size = UDim2.new(0,greenThickness,0,middleGap)
+        else
+            greenLineMiddle.Size = UDim2.new(0,50,0,greenThickness)
+        end
+    elseif middleDirection == "down" then
+        middlePosY = middlePosY + speed * delta
+        if middlePosY >= topGap + middleGap then
+            middlePosY = topGap + middleGap
+            middleDirection = "left"
+            greenLineMiddle.Size = UDim2.new(0,50,0,greenThickness)
+        else
+            greenLineMiddle.Size = UDim2.new(0,greenThickness,0,middleGap)
+        end
+    end
+    greenLineMiddle.Position = UDim2.new(0, middlePosX, 0, middlePosY)
 end)
 
 local TabFunction = {}
