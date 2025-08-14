@@ -729,7 +729,9 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-if WindowConfig.IntroEnabled then LoadSequence() end
+if WindowConfig.IntroEnabled then
+    LoadSequence()
+end
 
 -- دالة لإنشاء خط أسود أفقي متحرك فوق الإطار
 local function createOverlayBlackLineHorizontal(color, reverse)
@@ -757,7 +759,6 @@ local function createOverlayBlackLineHorizontal(color, reverse)
     grad.Parent = stroke
 
     local w = borderFrame.AbsoluteSize.X -- عرض الإطار
-
     local dist = reverse and w or 0
 
     game:GetService("RunService").RenderStepped:Connect(function(dt)
@@ -775,6 +776,7 @@ end
 createOverlayBlackLineHorizontal(Color3.fromRGB(0,0,0), false) -- الأول
 createOverlayBlackLineHorizontal(Color3.fromRGB(0,0,0), true)  -- الثاني عكس الأول
 
+-- باقي الكود
 local TabFunction = {}
     
 
