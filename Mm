@@ -736,8 +736,8 @@ end
 
 -- ===== الإعدادات =====
 local thickness = 4                   -- سماكة الحواف
-local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local rotationSpeed = 5                -- سرعة دوران أبطأ لتجنب التقطيع
+local cornerRadius = UDim.new(0, 8)  -- نصف قطر الزوايا
+local rotationSpeed = 5               -- سرعة دوران أبطأ لتجنب التقطيع
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -759,24 +759,14 @@ stroke.Color = Color3.fromRGB(255, 0, 0) -- افتراضي، يتغير بالـ
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (بدون تكرار الأسود حتى ما يقطع) =====
+-- ===== التدرج اللوني (خط أسود واحد في الوسط) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    -- أحمر
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 0, 0)),
-
-    -- أسود أعلى المنتصف
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-
-    -- أحمر بين الأسودين
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)),
-
-    -- أسود أسفل المنتصف
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 255, 0)),
-
-    -- أحمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر فوق
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),     -- الأسود في الوسط
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- أحمر تحت
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
