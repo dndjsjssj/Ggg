@@ -739,7 +739,8 @@ local thickness = 4 -- سماكة الحواف
 local interval = 0.02
 local cornerRadius = UDim.new(0, 8)
 local moveSpeed = 100 -- سرعة الحركة بالبكسل بالثانية
-local lineColor = Color3.fromRGB(0, 255, 0) -- الأخضر
+local lineColor1 = Color3.fromRGB(0, 255, 0) -- الأخضر الأول
+local lineColor2 = Color3.fromRGB(0, 200, 0) -- الأخضر الثاني (تدرج خفيف)
 
 -- ===== الإطار الأحمر =====
 local borderFrame = Instance.new("Frame")
@@ -780,8 +781,8 @@ task.spawn(function()
     end
 end)
 
--- ===== دالة لإنشاء خط أخضر =====
-local function createMovingLine()
+-- ===== دالة لإنشاء خط أخضر متحرك =====
+local function createMovingLine(color)
     local line = Instance.new("Frame")
     line.Size = UDim2.new(0, 50, 0, thickness)
     line.BackgroundTransparency = 1
@@ -799,18 +800,32 @@ local function createMovingLine()
 
     local grad = Instance.new("UIGradient")
     grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, lineColor),
-        ColorSequenceKeypoint.new(1, lineColor)
+        ColorSequenceKeypoint.new(0, color),
+        ColorSequenceKeypoint.new(1, color)
     }
     grad.Rotation = 0
+    grad.Offset = Vector2.new(0,0)
     grad.Parent = stroke
+
+    -- تحريك التدرج
+    task.spawn(function()
+        local offset = 0
+        local direction = 1
+        while true do
+            offset = offset + 0.01 * direction
+            if offset >= 1 then direction = -1
+            elseif offset <= 0 then direction = 1 end
+            grad.Offset = Vector2.new(offset, 0)
+            task.wait(interval)
+        end
+    end)
 
     return line
 end
 
--- إنشاء خطين
-local line1 = createMovingLine()
-local line2 = createMovingLine()
+-- إنشاء خطين أخضرين
+local line1 = createMovingLine(lineColor1)
+local line2 = createMovingLine(lineColor2)
 
 -- طول الحواف الأربعة
 local function getPerimeter()
@@ -855,7 +870,7 @@ game:GetService("RunService").RenderStepped:Connect(function(dt)
     setLinePosition(line1, dist1)
     setLinePosition(line2, dist2)
 end)
-
+    
 local TabFunction = {}
     
 
