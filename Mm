@@ -733,38 +733,52 @@ function OrionLib:MakeWindow(WindowConfig)
     LoadSequence() 
 end
 
--- إنشاء Frame خلف MainWindow
-local backFrame = Instance.new("Frame")
-backFrame.Size = UDim2.new(1, 0, 1, 0)
-backFrame.Position = UDim2.new(0, 0, 0, 0)
-backFrame.BackgroundTransparency = 1
-backFrame.BorderSizePixel = 0
-backFrame.ZIndex = MainWindow.ZIndex - 1 -- خلف MainWindow
-backFrame.Parent = MainWindow.Parent
+local thickness = 4 -- سماكة الحواف
+local interval = 0.02
 
--- إضافة UIStroke للحواف
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 4 -- سماكة الحواف
-stroke.Color = Color3.fromRGB(255, 255, 255) -- اللون أبيض
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = backFrame
+-- دالة لإنشاء حافة مع UIGradient
+local function createEdge(position, size)
+    local edge = Instance.new("Frame")
+    edge.Size = size
+    edge.Position = position
+    edge.BackgroundTransparency = 1
+    edge.BorderSizePixel = 0
+    edge.ZIndex = MainWindow.ZIndex + 1
+    edge.Parent = MainWindow
 
--- إضافة UIGradient على UIStroke
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر مرة ثانية
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness
+    stroke.Color = Color3.fromRGB(255,255,255)
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = edge
+
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
+    }
+    gradient.Rotation = 0
+    gradient.Parent = stroke
+
+    return gradient
+end
+
+-- إنشاء الحواف الأربعة
+local topGrad = createEdge(UDim2.new(0,0,0,0), UDim2.new(1,0,0,thickness))
+local bottomGrad = createEdge(UDim2.new(0,0,1,-thickness), UDim2.new(1,0,0,thickness))
+local leftGrad = createEdge(UDim2.new(0,0,0,0), UDim2.new(0,thickness,1,0))
+local rightGrad = createEdge(UDim2.new(1,-thickness,0,0), UDim2.new(0,thickness,1,0))
 
 -- تحريك التدرج بشكل دائري
 task.spawn(function()
-    while backFrame and backFrame.Parent do
+    while true do
         for i = 0, 360, 1 do
-            gradient.Rotation = i
-            task.wait(0.02)
+            topGrad.Rotation = i
+            bottomGrad.Rotation = i
+            leftGrad.Rotation = i
+            rightGrad.Rotation = i
+            task.wait(interval)
         end
     end
 end)
