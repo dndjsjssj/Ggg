@@ -731,7 +731,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 
 if WindowConfig.IntroEnabled then
-if WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
