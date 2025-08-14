@@ -730,139 +730,56 @@ function OrionLib:MakeWindow(WindowConfig)
 	end 
 
 
+سوي هاذ
+
 if WindowConfig.IntroEnabled then
-    LoadSequence()
+LoadSequence()
 end
 
-local thickness = 4
-local MainWindow = script.Parent
-local speed = 200
+local thickness = 4 -- سماكة الحواف
 local interval = 0.02
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
 
--- الإطار الأحمر الأساسي
+-- إنشاء إطار واحد حول MainWindow
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1,0,1,0)
-borderFrame.Position = UDim2.new(0,0,0,0)
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
+-- إضافة UICorner للإطار
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- إضافة UIStroke للإطار
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255,0,0)
+stroke.Color = Color3.fromRGB(255,255,255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- الخط الأخضر الأول
-local greenLine1 = Instance.new("Frame")
-greenLine1.Size = UDim2.new(0,50,0,thickness)
-greenLine1.BackgroundColor3 = Color3.fromRGB(0,255,0)
-greenLine1.BorderSizePixel = 0
-greenLine1.ZIndex = stroke.ZIndex + 1
-greenLine1.Parent = borderFrame
+-- إضافة UIGradient للإطار
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
+ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
+}
+gradient.Rotation = 0 -- أفقي
+gradient.Parent = stroke
 
--- الخط الأخضر الثاني (عكس الأول)
-local greenLine2 = Instance.new("Frame")
-greenLine2.Size = UDim2.new(0,50,0,thickness)
-greenLine2.BackgroundColor3 = Color3.fromRGB(0,255,0)
-greenLine2.BorderSizePixel = 0
-greenLine2.ZIndex = stroke.ZIndex + 1
-greenLine2.Parent = borderFrame
-
--- إعدادات الحركة
-local RunService = game:GetService("RunService")
-local width, height = borderFrame.AbsoluteSize.X, borderFrame.AbsoluteSize.Y
-borderFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-    width = borderFrame.AbsoluteSize.X
-    height = borderFrame.AbsoluteSize.Y
+-- تحريك التدرج بشكل أفقي مستمر
+task.spawn(function()
+local offset = 0
+while true do
+offset = (offset + 0.01) % 1
+gradient.Offset = Vector2.new(offset, 0)
+task.wait(interval)
+end
 end)
-
-local pos1X, pos1Y = 0,0
-local pos2X, pos2Y = width, height
-local dir1, dir2 = "right", "left"
-
-RunService.RenderStepped:Connect(function(delta)
-    -- الخط الأول (اتجاه طبيعي)
-    if dir1 == "right" then
-        pos1X = pos1X + speed*delta
-        if pos1X >= width - greenLine1.AbsoluteSize.X then
-            pos1X = width - greenLine1.AbsoluteSize.X
-            dir1 = "down"
-            greenLine1.Size = UDim2.new(0,thickness,0,50)
-        else
-            greenLine1.Size = UDim2.new(0,50,0,thickness)
-        end
-    elseif dir1 == "down" then
-        pos1Y = pos1Y + speed*delta
-        if pos1Y >= height - greenLine1.AbsoluteSize.X then
-            pos1Y = height - greenLine1.AbsoluteSize.X
-            dir1 = "left"
-            greenLine1.Size = UDim2.new(0,50,0,thickness)
-        else
-            greenLine1.Size = UDim2.new(0,thickness,0,50)
-        end
-    elseif dir1 == "left" then
-        pos1X = pos1X - speed*delta
-        if pos1X <= 0 then
-            pos1X = 0
-            dir1 = "up"
-            greenLine1.Size = UDim2.new(0,thickness,0,50)
-        else
-            greenLine1.Size = UDim2.new(0,50,0,thickness)
-        end
-    elseif dir1 == "up" then
-        pos1Y = pos1Y - speed*delta
-        if pos1Y <= 0 then
-            pos1Y = 0
-            dir1 = "right"
-            greenLine1.Size = UDim2.new(0,50,0,thickness)
-        else
-            greenLine1.Size = UDim2.new(0,thickness,0,50)
-        end
-    end
-    greenLine1.Position = UDim2.new(0,pos1X,0,pos1Y)
-
-    -- الخط الثاني (عكس الخط الأول)
-    if dir2 == "left" then
-        pos2X = pos2X - speed*delta
-        if pos2X <= 0 then
-            pos2X = 0
-            dir2 = "up"
-            greenLine2.Size = UDim2.new(0,thickness,0,50)
-        else
-            greenLine2.Size = UDim2.new(0,50,0,thickness)
-        end
-    elseif dir2 == "up" then
-        pos2Y = pos2Y - speed*delta
-        if pos2Y <= 0 then
-            pos2Y = 0
-            dir2 = "right"
-            greenLine2.Size = UDim2.new(0,50,0,thickness)
-        else
-            greenLine2.Size = UDim2.new(0,thickness,0,50)
-        end
-    elseif dir2 == "right" then
-        pos2X = pos2X + speed*delta
-        if pos2X >= width - greenLine2.AbsoluteSize.X then
-            pos2X = width - greenLine2.AbsoluteSize.X
-            dir2 = "down"
-            greenLine2.Size = UDim2.new(0,thickness,0,50)
-        else
-            greenLine2.Size = UDim2.new(0,50,0,thickness)
-        end
-    elseif dir2 == "down" then
-        pos2Y = pos2Y + speed*delta
-        if pos2Y >= height - greenLine2.AbsoluteSize.X then
-            pos2Y = height - greenLine2.AbsoluteSize.X
-            dir2 = "left"
-            greenLine2.Size = UDim2.new(0,50,0,thickness)
-        else
-            greenLine2.Size = UDim2.new(0,thickness,0,50)
-        end
-    end
-    greenLine2.Position = UDim2.new(0,pos2X,0,pos2Y)
-end)
-
+            
 local TabFunction = {}
     
 
