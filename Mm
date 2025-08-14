@@ -729,7 +729,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-
+if WindowConfig.IntroEnabled then LoadSequence() end
 
 -- دالة لإنشاء خط أخضر يتحرك فوق الإطار الأحمر
 local function createOverlayGreenLine(color, reverse)
