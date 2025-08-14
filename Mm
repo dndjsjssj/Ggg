@@ -730,66 +730,59 @@ function OrionLib:MakeWindow(WindowConfig)
 	end 
 
 
-if WindowConfig.IntroEnabled then
-    LoadSequence()
-end
+if WindowConfig.IntroEnabled then LoadSequence() end
 
 local thickness = 4
 local interval = 0.02
 local cornerRadius = UDim.new(0, 8)
 
--- إطار حول MainWindow
+-- إنشاء إطار واحد حول MainWindow
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1,0,1,0)
-borderFrame.Position = UDim2.new(0,0,0,0)
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
--- UICorner
+-- إضافة UICorner للإطار
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- UIStroke
+-- إضافة UIStroke للإطار
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255,255,255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- UIGradient
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
+-- إضافة UIGradient لفوك
+local topGradient = Instance.new("UIGradient")
+topGradient.Color = ColorSequence.new(Color3.fromRGB(255,0,0)) -- لون ثابت للفوك
+topGradient.Rotation = 0
+topGradient.Parent = stroke
 
--- حركة متزامنة: فوك يمين+نزول، جوه يسار+صعود
+-- إضافة UIGradient للجوه (معكوس)
+local bottomGradient = Instance.new("UIGradient")
+bottomGradient.Color = ColorSequence.new(Color3.fromRGB(0,255,0)) -- لون ثابت للجوه
+bottomGradient.Rotation = 0
+bottomGradient.Parent = stroke
+
+-- حركة متعاكسة
 task.spawn(function()
-    local xTop, yTop = 0, 0       -- إحداثيات فوك
-    local xBottom, yBottom = 1, 1 -- إحداثيات جوه
-    local speed = 0.01
-    local dir = 1 -- اتجاه الحركة: 1 للنزول، -1 للصعود
+    local offsetTop = 0
+    local offsetBottom = 1
+    local dir = 1
 
     while true do
-        -- تحديث إحداثيات فوك
-        xTop = xTop + speed * dir
-        yTop = yTop + speed * dir
+        -- تحديث الإحداثيات
+        offsetTop = offsetTop + 0.01 * dir
+        offsetBottom = offsetBottom - 0.01 * dir
 
-        -- تحديث إحداثيات جوه (معكوس)
-        xBottom = xBottom - speed * dir
-        yBottom = yBottom - speed * dir
+        topGradient.Offset = Vector2.new(0, offsetTop)
+        bottomGradient.Offset = Vector2.new(0, offsetBottom)
 
-        -- تطبيق Offset على Gradient
-        gradient.Offset = Vector2.new(xTop, yTop) -- الفوك
-        -- إذا أردت جوه يكون Gradient ثاني، يمكن تضيف Gradient آخر وتخلي Offset = Vector2.new(xBottom, yBottom)
-
-        -- عكس الاتجاه عند الوصول للأعلى أو الأسفل
-        if yTop >= 1 or yTop <= 0 then
+        if offsetTop >= 1 or offsetTop <= 0 then
             dir = -dir
         end
 
