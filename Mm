@@ -729,48 +729,41 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-	if WindowConfig.IntroEnabled then 
+	if-- التأكد من تشغيل المقدمة لو مفعل
+if WindowConfig.IntroEnabled then 
     LoadSequence() 
 end
 
--- ===== إنشاء إطار شفاف فوق MainWindow =====
+-- إنشاء إطار شفاف فوق MainWindow
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.BackgroundTransparency = 1
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.ZIndex = 999
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = 999 -- فوق كل شيء
 borderFrame.Parent = MainWindow
 
--- ===== إضافة UIStroke =====
+-- إضافة UIStroke للإطار
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 5 -- سمك واضح
+stroke.Thickness = 3
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== إضافة UIGradient بخطوط أحمر وأخضر =====
+-- إضافة UIGradient للألوان الأحمر والأخضر
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.1, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)), -- أحمر
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),   -- أحمر
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.9, Color3.fromRGB(0, 255, 0)), -- أخضر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))  -- أحمر
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))    -- أحمر مرة ثانية
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك الألوان ببطء =====
+-- تحريك الألوان بشكل دائري
 task.spawn(function()
-    while MainWindow and MainWindow.Parent do
-        for i = 0, 360, 0.5 do -- التحريك بطيء
+    while borderFrame and borderFrame.Parent do
+        for i = 0, 360, 1 do
             gradient.Rotation = i
-            task.wait(0.03)
+            task.wait(0.02) -- سرعة الحركة، قلل الرقم لتسريعها
         end
     end
 end)
