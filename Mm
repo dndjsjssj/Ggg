@@ -730,7 +730,9 @@ function OrionLib:MakeWindow(WindowConfig)
 	end 
 
 
-if WindowConfig.IntroEnabled then LoadSequence() end
+if WindowConfig.IntroEnabled then
+    LoadSequence()
+end
 
 local thickness = 4 -- سماكة الحواف
 local interval = 0.02
@@ -765,21 +767,59 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 90 -- رأسي
 gradient.Parent = stroke
 
--- تحريك الفوك والجوه بالعكس
+-- تحريك الجريدينت
 task.spawn(function()
     local offset = 0
     local direction = 1
     while true do
         offset = offset + 0.01 * direction
-
         if offset >= 1 then
             direction = -1
         elseif offset <= 0 then
             direction = 1
         end
-
         gradient.Offset = Vector2.new(0, offset)
         task.wait(interval)
+    end
+end)
+
+---------------------------------
+-- خطوط خضراء فوق وتحت تتحرك بالعكس
+---------------------------------
+local moveSpeed = 50 -- السرعة
+local lineColor = Color3.fromRGB(0, 255, 0)
+
+-- خط علوي
+local topLine = Instance.new("Frame")
+topLine.Size = UDim2.new(1, 0, 0, thickness)
+topLine.Position = UDim2.new(0, 0, 0, -thickness)
+topLine.BackgroundColor3 = lineColor
+topLine.BorderSizePixel = 0
+topLine.ZIndex = MainWindow.ZIndex + 2
+topLine.Parent = MainWindow
+
+-- خط سفلي
+local bottomLine = Instance.new("Frame")
+bottomLine.Size = UDim2.new(1, 0, 0, thickness)
+bottomLine.Position = UDim2.new(0, 0, 1, 0)
+bottomLine.BackgroundColor3 = lineColor
+bottomLine.BorderSizePixel = 0
+bottomLine.ZIndex = MainWindow.ZIndex + 2
+bottomLine.Parent = MainWindow
+
+-- تحريك الخطوط
+game:GetService("RunService").RenderStepped:Connect(function(dt)
+    -- تحريك العلوي يمين
+    topLine.Position = topLine.Position + UDim2.new(dt * moveSpeed / MainWindow.AbsoluteSize.X, 0, 0, 0)
+    -- تحريك السفلي يسار
+    bottomLine.Position = bottomLine.Position - UDim2.new(dt * moveSpeed / MainWindow.AbsoluteSize.X, 0, 0, 0)
+
+    -- إعادة تموضع إذا خرج الخط
+    if topLine.Position.X.Scale >= 1 then
+        topLine.Position = UDim2.new(-1, 0, 0, -thickness)
+    end
+    if bottomLine.Position.X.Scale <= -1 then
+        bottomLine.Position = UDim2.new(1, 0, 1, 0)
     end
 end)
 
