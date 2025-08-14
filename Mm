@@ -806,18 +806,126 @@ RunService.RenderStepped:Connect(function(delta)
         else
             greenLine.Size = UDim2.new(0, 50, 0, thickness)
         end
-    elseif direction == "up" then
-        posY = posY - speed * delta
-        if posY <= 0 then
-            posY = 0
-            direction = "right"
-            greenLine.Size = UDim2.new(0, 50, 0, thickness)
-        else
-            greenLine.Size = UDim2.new(0, thickness, 0, 50)
-        end
-    end
+if WindowConfig.IntroEnabled then
+    LoadSequence()
+end
 
-    greenLine.Position = UDim2.new(0, posX, 0, posY)
+local thickness = 4 -- سماكة الحواف
+local interval = 0.02
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
+
+-- إنشاء إطار واحد حول MainWindow
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = MainWindow.ZIndex + 1
+borderFrame.Parent = MainWindow
+
+-- إضافة UICorner للإطار
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- إضافة UIStroke للإطار
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255,255,255)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- إضافة UIGradient للإطار
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
+}
+gradient.Rotation = 0 -- نتركه 0، سنعدل الـ Offset
+gradient.Parent = stroke
+
+-- تحريك التدرج حول الإطار بشكل مربع
+task.spawn(function()
+    local offsetX, offsetY = 0, 0
+    local speed = 0.01
+    local direction = "right"
+
+    while true do
+        if direction == "right" then
+if WindowConfig.IntroEnabled then
+    LoadSequence()
+end
+
+local thickness = 4 -- سماكة الحواف
+local interval = 0.02
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
+
+-- إنشاء إطار واحد حول MainWindow
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = MainWindow.ZIndex + 1
+borderFrame.Parent = MainWindow
+
+-- إضافة UICorner للإطار
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- إضافة UIStroke للإطار
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255,255,255)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- إضافة UIGradient للإطار
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
+}
+gradient.Rotation = 0 -- نتركه 0، سنعدل الـ Offset
+gradient.Parent = stroke
+
+-- تحريك التدرج حول الإطار بشكل مربع
+task.spawn(function()
+    local offsetX, offsetY = 0, 0
+    local speed = 0.01
+    local direction = "right"
+
+    while true do
+        if direction == "right" then
+            offsetX = offsetX + speed
+            if offsetX >= 1 then
+                offsetX = 1
+                direction = "down"
+            end
+        elseif direction == "down" then
+            offsetY = offsetY + speed
+            if offsetY >= 1 then
+                offsetY = 1
+                direction = "left"
+            end
+        elseif direction == "left" then
+            offsetX = offsetX - speed
+            if offsetX <= 0 then
+                offsetX = 0
+                direction = "up"
+            end
+        elseif direction == "up" then
+            offsetY = offsetY - speed
+            if offsetY <= 0 then
+                offsetY = 0
+                direction = "right"
+            end
+        end
+
+        gradient.Offset = Vector2.new(offsetX, offsetY)
+        task.wait(interval)
+    end
 end)
 
 local TabFunction = {}
