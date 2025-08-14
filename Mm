@@ -729,13 +729,18 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-if WindowConfig.IntroEnabled then LoadSequence() end
+
+if WindowConfig.IntroEnabled then
+LoadSequence()
+end
 
 local thickness = 4 -- سماكة الحواف
 local interval = 0.02
-local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
+local cornerRadius = UDim.new(0, 8)
+local moveSpeed = 100 -- سرعة الحركة بالبكسل بالثانية
+local lineColor = Color3.fromRGB(0, 255, 0) -- الأخضر
 
--- إنشاء إطار واحد حول MainWindow
+-- ===== الإطار الأحمر =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -743,45 +748,116 @@ borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
--- إضافة UICorner للإطار
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- إضافة UIStroke للإطار
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255,255,255)
+stroke.Color = Color3.fromRGB(255, 255, 255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- إضافة UIGradient
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- فوك أحمر
-ColorSequenceKeypoint.new(1, Color3.fromRGB(0,255,0))    -- جوه أخضر
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
 }
-gradient.Rotation = 90 -- رأسي
+gradient.Rotation = 90
 gradient.Parent = stroke
 
--- تحريك الفوك والجوه بالعكس
+-- تحريك الجريدينت الأحمر
 task.spawn(function()
 local offset = 0
 local direction = 1
 while true do
 offset = offset + 0.01 * direction
+if offset >= 1 then direction = -1
+elseif offset <= 0 then direction = 1 end
+gradient.Offset = Vector2.new(0, offset)
+task.wait(interval)
+end
+end)
 
-if offset >= 1 then  
-        direction = -1  
-    elseif offset <= 0 then  
-        direction = 1  
-    end  
+-- ===== دالة لإنشاء خط أخضر =====
+local function createMovingLine()
+local line = Instance.new("Frame")
+line.Size = UDim2.new(0, 50, 0, thickness)
+line.BackgroundTransparency = 1
+line.ZIndex = MainWindow.ZIndex + 2
+line.Parent = MainWindow
 
-    gradient.Offset = Vector2.new(0, offset)  
-    task.wait(interval)  
+local corner = Instance.new("UICorner")  
+corner.CornerRadius = UDim.new(0, 4)  
+corner.Parent = line  
+
+local stroke = Instance.new("UIStroke")  
+stroke.Thickness = 2  
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border  
+stroke.Parent = line  
+
+local grad = Instance.new("UIGradient")  
+grad.Color = ColorSequence.new{  
+    ColorSequenceKeypoint.new(0, lineColor),  
+    ColorSequenceKeypoint.new(1, lineColor)  
+}  
+grad.Rotation = 0  
+grad.Parent = stroke  
+
+return line
+
 end
 
+-- إنشاء خطين
+local line1 = createMovingLine()
+local line2 = createMovingLine()
+
+-- طول الحواف الأربعة
+local function getPerimeter()
+local w = MainWindow.AbsoluteSize.X
+local h = MainWindow.AbsoluteSize.Y
+return (w + h) * 2
+end
+
+-- تحديث موقع الخط على طول الحواف
+local function setLinePosition(line, dist)
+local w = MainWindow.AbsoluteSize.X
+local h = MainWindow.AbsoluteSize.Y
+
+dist = dist % getPerimeter()  
+
+if dist < w then  
+    -- أعلى  
+    line.Size = UDim2.new(0, 50, 0, thickness)  
+    line.Position = UDim2.new(0, dist, 0, -thickness)  
+elseif dist < w + h then  
+    -- يمين  
+    line.Size = UDim2.new(0, thickness, 0, 50)  
+    line.Position = UDim2.new(1, 0, 0, dist - w)  
+elseif dist < w + h + w then  
+    -- أسفل  
+    line.Size = UDim2.new(0, 50, 0, thickness)  
+    line.Position = UDim2.new(1, -(dist - (w + h)), 1, 0)  
+else  
+    -- يسار  
+    line.Size = UDim2.new(0, thickness, 0, 50)  
+    line.Position = UDim2.new(0, -thickness, 1, -(dist - (w + h + w)))  
+end
+
+end
+
+-- تحريك الخطين
+local dist1 = 0
+local dist2 = getPerimeter() / 2 -- عكس الثاني
+
+game:GetService("RunService").RenderStepped:Connect(function(dt)
+dist1 = dist1 + moveSpeed * dt
+dist2 = dist2 - moveSpeed * dt
+setLinePosition(line1, dist1)
+setLinePosition(line2, dist2)
 end)
+
+
 
 
 local TabFunction = {}
