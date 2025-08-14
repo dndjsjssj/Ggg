@@ -733,26 +733,39 @@ function OrionLib:MakeWindow(WindowConfig)
     LoadSequence() 
 end
 
--- إنشاء إطار متحرك حول MainWindow
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 1, 6) -- سماكة الإطار 3px لكل جانب
-borderFrame.Position = UDim2.new(0, -3, 0, -3) -- لتغطية الحواف
-borderFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- البداية أحمر
-borderFrame.BorderSizePixel = 0
-borderFrame.ZIndex = 999
-borderFrame.Parent = MainWindow
+local thickness = 3 -- سماكة الإطار
+local interval = 0.02 -- سرعة التدرج
+local MainSize = MainWindow.AbsoluteSize
 
--- تحريك اللون الأحمر والأخضر
+-- دوال لإنشاء إطار جانبي
+local function createBorder(position, size)
+    local frame = Instance.new("Frame")
+    frame.Size = size
+    frame.Position = position
+    frame.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    frame.BorderSizePixel = 0
+    frame.ZIndex = 999
+    frame.Parent = MainWindow
+    return frame
+end
+
+-- إنشاء 4 حواف
+local topBorder = createBorder(UDim2.new(0,0,0,0), UDim2.new(1,0,0,thickness))
+local bottomBorder = createBorder(UDim2.new(0,0,1,-thickness), UDim2.new(1,0,0,thickness))
+local leftBorder = createBorder(UDim2.new(0,0,0,0), UDim2.new(0,thickness,1,0))
+local rightBorder = createBorder(UDim2.new(1,-thickness,0,0), UDim2.new(0,thickness,1,0))
+
+-- تحريك الألوان بالتناوب بين الأحمر والأخضر
 task.spawn(function()
     local toggle = true
-    while borderFrame and borderFrame.Parent do
-        if toggle then
-            borderFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- أخضر
-        else
-            borderFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- أحمر
-        end
+    while topBorder and topBorder.Parent do
+        local color = toggle and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
+        topBorder.BackgroundColor3 = color
+        bottomBorder.BackgroundColor3 = color
+        leftBorder.BackgroundColor3 = color
+        rightBorder.BackgroundColor3 = color
         toggle = not toggle
-        task.wait(0.5) -- سرعة التغيير، قلل الرقم لتسريع الحركة
+        task.wait(interval)
     end
 end)
 
