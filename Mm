@@ -737,7 +737,7 @@ end
 local thickness = 4 -- سماكة الحواف
 local interval = 0.02
 local cornerRadius = UDim.new(0, 8)
-local moveSpeed = 100 -- سرعة الحركة بالبكسل بالثانية
+local moveSpeed = 150 -- سرعة حركة اللون حول الإطار بالبكسل بالثانية
 
 -- ===== الإطار الأحمر =====
 local borderFrame = Instance.new("Frame")
@@ -757,26 +757,28 @@ stroke.Color = Color3.fromRGB(255, 255, 255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
+-- ===== إعداد الجريدينت الأحمر-الأخضر =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(0,255,0)) -- أحمر إلى أخضر
 }
-gradient.Rotation = 90
+gradient.Rotation = 0
 gradient.Parent = stroke
 
--- تحريك الجريدينت الأحمر-الأخضر
-task.spawn(function()
-    local offset = 0
-    local direction = 1
-    while true do
-        offset = offset + 0.01 * direction
-        if offset >= 1 then direction = -1
-        elseif offset <= 0 then direction = 1 end
-        gradient.Offset = Vector2.new(0, offset)
-        task.wait(interval)
-    end
-end)
+-- ===== دالة لحساب تحريك اللون حول الإطار =====
+local function moveGradientAroundFrame(dt)
+    local offset = gradient.Offset or Vector2.new(0,0)
+    -- نزيد قيمة X و Y بالتدرج لتحريك اللون بشكل دائري
+    local speed = 0.5 -- سرعة التدوير
+    local time = tick() * speed
+    local x = 0.5 + 0.5 * math.cos(time)
+    local y = 0.5 + 0.5 * math.sin(time)
+    gradient.Offset = Vector2.new(x, y)
+end
+
+-- ===== تحريك الجريدينت كل فريم =====
+game:GetService("RunService").RenderStepped:Connect(moveGradientAroundFrame)
 
 local TabFunction = {}
     
