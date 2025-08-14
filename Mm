@@ -731,65 +731,69 @@ function OrionLib:MakeWindow(WindowConfig)
 
 
 if WindowConfig.IntroEnabled then
+if WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
-local thickness = 4 -- سماكة الحواف
+local thickness = 4
 local interval = 0.02
-local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
+local cornerRadius = UDim.new(0, 8)
 
--- إنشاء إطار واحد حول MainWindow
+-- إطار حول MainWindow
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.Size = UDim2.new(1,0,1,0)
+borderFrame.Position = UDim2.new(0,0,0,0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
--- إضافة UICorner للإطار
+-- UICorner
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- إضافة UIStroke للإطار
+-- UIStroke
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255,255,255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- إضافة UIGradient للإطار
+-- UIGradient
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- حركة التدرج على شكل مربع متعرج (رأسياً مع انعكاس)
+-- حركة متزامنة: فوك يمين+نزول، جوه يسار+صعود
 task.spawn(function()
-    local x = 0
-    local y = 0
-    local dirY = 1 -- 1: ينزل، -1: يصعد
-    local dirX = 1 -- 1: يمين، -1: يسار
+    local xTop, yTop = 0, 0       -- إحداثيات فوك
+    local xBottom, yBottom = 1, 1 -- إحداثيات جوه
+    local speed = 0.01
+    local dir = 1 -- اتجاه الحركة: 1 للنزول، -1 للصعود
 
     while true do
-        -- تحديث الإحداثيات
-        x = x + 0.01 * dirX
-        y = y + 0.01 * dirY
+        -- تحديث إحداثيات فوك
+        xTop = xTop + speed * dir
+        yTop = yTop + speed * dir
 
-        -- عكس الاتجاه عند الوصول لأعلى أو أسفل
-        if y >= 1 then
-            dirY = -1
-            dirX = -1 -- عكس أفقي عند الصعود
-        elseif y <= 0 then
-            dirY = 1
-            dirX = 1 -- عكس أفقي عند النزول
+        -- تحديث إحداثيات جوه (معكوس)
+        xBottom = xBottom - speed * dir
+        yBottom = yBottom - speed * dir
+
+        -- تطبيق Offset على Gradient
+        gradient.Offset = Vector2.new(xTop, yTop) -- الفوك
+        -- إذا أردت جوه يكون Gradient ثاني، يمكن تضيف Gradient آخر وتخلي Offset = Vector2.new(xBottom, yBottom)
+
+        -- عكس الاتجاه عند الوصول للأعلى أو الأسفل
+        if yTop >= 1 or yTop <= 0 then
+            dir = -dir
         end
 
-        gradient.Offset = Vector2.new(x, y)
         task.wait(interval)
     end
 end)
