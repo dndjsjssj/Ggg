@@ -733,38 +733,55 @@ function OrionLib:MakeWindow(WindowConfig)
     LoadSequence() 
 end
 
--- ===== إضافة إطار متحرك بين الأحمر والأخضر =====
+-- ===== إنشاء إطار شفاف فوق MainWindow =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.ZIndex = 999
+borderFrame.Parent = MainWindow
+
+-- ===== إضافة UIStroke =====
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(255, 0, 0) -- لون ابتدائي
+stroke.Thickness = 5 -- سمك أكبر للإطار
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = MainWindow
+stroke.Parent = borderFrame
 
-local TweenService = game:GetService("TweenService")
-
-local colors = {
-    Color3.fromRGB(255, 0, 0), -- أحمر
-    Color3.fromRGB(0, 255, 0)  -- أخضر
+-- ===== إضافة UIGradient للألوان =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- أخضر
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)) -- أحمر مرة ثانية
 }
+gradient.Rotation = 0
+gradient.Parent = stroke
 
-local index = 1
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
-
+-- ===== تحريك الألوان + تكبير الإطار =====
 task.spawn(function()
+    local grow = true
     while MainWindow and MainWindow.Parent do
-        -- اللون التالي
-        local nextColor = colors[index]
-
-        -- عمل أنميشن سلس للون
-        local tween = TweenService:Create(stroke, tweenInfo, {Color = nextColor})
-        tween:Play()
-        tween.Completed:Wait()
-
-        -- تحديث الفهرس
-        index = (index % #colors) + 1
+        -- دوران الألوان
+        for i = 0, 360, 2 do
+            gradient.Rotation = i
+            
+            -- تغيير السمك لعمل تأثير تكبير/تصغير بسيط
+            if grow then
+                stroke.Thickness = stroke.Thickness + 0.05
+                if stroke.Thickness >= 7 then
+                    grow = false
+                end
+            else
+                stroke.Thickness = stroke.Thickness - 0.05
+                if stroke.Thickness <= 5 then
+                    grow = true
+                end
+            end
+            
+            task.wait(0.02)
+        end
     end
 end)
--- ================================================
 
 local TabFunction = {}
 
