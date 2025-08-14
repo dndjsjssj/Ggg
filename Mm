@@ -737,7 +737,8 @@ end
 -- ===== الإعدادات =====
 local thickness = 4                   -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)   -- نصف قطر الزوايا
-local rotationSpeed = 5               -- سرعة دوران أبطأ لتجنب التقطيع
+local rotationSpeed = 5               -- سرعة دوران
+local smoothness = 0.25               -- كل ما زاد، صارت الحركة أبطأ و أنعم
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -755,41 +756,40 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 0, 0) -- افتراضي، يتغير بالـ Gradient
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
 -- ===== التدرج اللوني =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    -- أحمر
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 0, 0)),
 
-    -- أسود أعلى المنتصف
     ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
 
-    -- أحمر بين الأسودين
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),
 
-    -- أسود أسفل المنتصف
     ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
     ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 0, 0)),
 
-    -- أحمر
     ColorSequenceKeypoint.new(0.7, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
-game:GetService("RunService").Heartbeat:Connect(function(dt)
-    gradient.Rotation = (gradient.Rotation + rotationSpeed * dt) % 360
-end)
+-- ===== تحريك التدرج بسلاسة =====
+local currentRotation = 0
+local targetRotation = 0
 
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    targetRotation = (targetRotation + rotationSpeed * dt) % 360
+    currentRotation = currentRotation + (targetRotation - currentRotation) * smoothness
+    gradient.Rotation = currentRotation
+end)
 
 local TabFunction = {}
     
