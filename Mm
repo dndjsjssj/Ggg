@@ -768,15 +768,26 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0 -- أفقي
 gradient.Parent = stroke
 
--- تحريك التدرج بشكل أفقي مستمر
+-- تحريك التدرج بشكل أفقي وعمودي معكوس
 task.spawn(function()
-    local offset = 0
+    local offsetX = 0
+    local offsetY = 0
+    local direction = 1
     while true do
-        offset = (offset + 0.01) % 1
-        gradient.Offset = Vector2.new(offset, 0)
+        -- تحرك أفقي + عمودي
+        offsetX = (offsetX + 0.01 * direction) % 1
+        offsetY = (offsetY + 0.01 * direction) % 1
+        gradient.Offset = Vector2.new(offsetX, offsetY)
+
+        -- إذا وصلنا الحد الأعلى أو الأدنى نغير الاتجاه
+        if offsetY >= 1 or offsetY <= 0 then
+            direction = -direction
+        end
+
         task.wait(interval)
     end
 end)
+
 
 local TabFunction = {}
     
