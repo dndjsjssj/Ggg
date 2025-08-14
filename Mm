@@ -732,9 +732,9 @@ function OrionLib:MakeWindow(WindowConfig)
 
 if WindowConfig.IntroEnabled then LoadSequence() end
 
-local thickness = 4
+local thickness = 4 -- سماكة الحواف
 local interval = 0.02
-local cornerRadius = UDim.new(0, 8)
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
 
 -- إنشاء إطار واحد حول MainWindow
 local borderFrame = Instance.new("Frame")
@@ -756,36 +756,29 @@ stroke.Color = Color3.fromRGB(255,255,255)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- إضافة UIGradient لفوك
-local topGradient = Instance.new("UIGradient")
-topGradient.Color = ColorSequence.new(Color3.fromRGB(255,0,0)) -- لون ثابت للفوك
-topGradient.Rotation = 0
-topGradient.Parent = stroke
+-- إضافة UIGradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- فوك أحمر
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0,255,0))    -- جوه أخضر
+}
+gradient.Rotation = 90 -- رأسي
+gradient.Parent = stroke
 
--- إضافة UIGradient للجوه (معكوس)
-local bottomGradient = Instance.new("UIGradient")
-bottomGradient.Color = ColorSequence.new(Color3.fromRGB(0,255,0)) -- لون ثابت للجوه
-bottomGradient.Rotation = 0
-bottomGradient.Parent = stroke
-
--- حركة متعاكسة
+-- تحريك الفوك والجوه بالعكس
 task.spawn(function()
-    local offsetTop = 0
-    local offsetBottom = 1
-    local dir = 1
-
+    local offset = 0
+    local direction = 1
     while true do
-        -- تحديث الإحداثيات
-        offsetTop = offsetTop + 0.01 * dir
-        offsetBottom = offsetBottom - 0.01 * dir
+        offset = offset + 0.01 * direction
 
-        topGradient.Offset = Vector2.new(0, offsetTop)
-        bottomGradient.Offset = Vector2.new(0, offsetBottom)
-
-        if offsetTop >= 1 or offsetTop <= 0 then
-            dir = -dir
+        if offset >= 1 then
+            direction = -1
+        elseif offset <= 0 then
+            direction = 1
         end
 
+        gradient.Offset = Vector2.new(0, offset)
         task.wait(interval)
     end
 end)
