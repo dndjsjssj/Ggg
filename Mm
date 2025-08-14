@@ -773,7 +773,7 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)),
 
     -- أسود أسفل المنتصف
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 255, 0)),
 
     -- أحمر
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
