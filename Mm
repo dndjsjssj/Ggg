@@ -737,7 +737,7 @@ end
 -- ===== الإعدادات =====
 local thickness = 4 -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
-local rotationSpeed = 60 -- سرعة دوران الألوان
+local rotationSpeed = 20 -- سرعة دوران أبطأ
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -763,8 +763,8 @@ stroke.Parent = borderFrame
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     -- أخضر قصير في الأعلى
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 255, 0)),
-    ColorSequenceKeypoint.new(0.05, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.05, Color3.fromRGB(0, 0, 0)),
 
     -- أحمر بين الأعلى والأسفل
     ColorSequenceKeypoint.new(0.05, Color3.fromRGB(255, 0, 0)),
