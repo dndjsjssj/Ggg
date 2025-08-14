@@ -729,14 +729,15 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-	if WindowConfig.IntroEnabled then 
-    LoadSequence() 
+	if WindowConfig.IntroEnabled then
+    LoadSequence()
 end
 
 local thickness = 4 -- سماكة الحواف
 local interval = 0.02
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
 
--- دالة لإنشاء حافة مع UIGradient
+-- دالة لإنشاء حافة مع UIGradient و UICorner
 local function createEdge(position, size)
     local edge = Instance.new("Frame")
     edge.Size = size
@@ -746,44 +747,50 @@ local function createEdge(position, size)
     edge.ZIndex = MainWindow.ZIndex + 1
     edge.Parent = MainWindow
 
+    -- إضافة UICorner للإطار
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = cornerRadius
+    corner.Parent = edge
+
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = thickness
     stroke.Color = Color3.fromRGB(255,255,255)
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = edge
+    stroke.Parent = edge -- لاحظ وضعه على edge وليس على gradient
 
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر مرة ثانية
     }
-    gradient.Rotation = 0
+    gradient.Rotation = 0 -- أفقي
     gradient.Parent = stroke
 
     return gradient
 end
 
--- إنشاء الحواف الأربعة
+-- إنشاء الحواف الأربعة (مربع حول السكربت)
 local topGrad = createEdge(UDim2.new(0,0,0,0), UDim2.new(1,0,0,thickness))
 local bottomGrad = createEdge(UDim2.new(0,0,1,-thickness), UDim2.new(1,0,0,thickness))
 local leftGrad = createEdge(UDim2.new(0,0,0,0), UDim2.new(0,thickness,1,0))
 local rightGrad = createEdge(UDim2.new(1,-thickness,0,0), UDim2.new(0,thickness,1,0))
 
--- تحريك التدرج بشكل دائري
+-- تحريك التدرج حول الحواف بشكل أفقي مستمر
 task.spawn(function()
+    local offset = 0
     while true do
-        for i = 0, 360, 1 do
-            topGrad.Rotation = i
-            bottomGrad.Rotation = i
-            leftGrad.Rotation = i
-            rightGrad.Rotation = i
-            task.wait(interval)
-        end
+        offset = (offset + 0.01) % 1
+        topGrad.Offset = Vector2.new(offset,0)
+        bottomGrad.Offset = Vector2.new(offset,0)
+        leftGrad.Offset = Vector2.new(offset,0)
+        rightGrad.Offset = Vector2.new(offset,0)
+        task.wait(interval)
     end
 end)
 
 local TabFunction = {}
+
 
 	local TabFunction = {}
 	function TabFunction:MakeTab(TabConfig)
