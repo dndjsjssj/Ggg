@@ -729,7 +729,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-بس باع هسه هاذ سكربتي شلون اسوي خط اخضر فوك و خط اخضر جوه if WindowConfig.IntroEnabled then LoadSequence() end
+if WindowConfig.IntroEnabled then LoadSequence() end
 
 local thickness = 4 -- سماكة الحواف
 local interval = 0.02
