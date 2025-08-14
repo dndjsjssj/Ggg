@@ -734,6 +734,7 @@ function OrionLib:MakeWindow(WindowConfig)
 end
 
 local thickness = 4 -- سماكة الحواف
+local greenThickness = 4 -- سمك الخط الأخضر المتحرك
 local interval = 0.02
 local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
 
@@ -750,34 +751,79 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- إضافة UIStroke للإطار
+-- إضافة UIStroke للإطار (أحمر دائم)
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255,255,255)
+stroke.Color = Color3.fromRGB(255,0,0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- إضافة UIGradient للإطار
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), -- أخضر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))    -- أحمر
-}
-gradient.Rotation = 0 -- أفقي
-gradient.Parent = stroke
+-- إنشاء الخط الأخضر المتحرك
+local greenLine = Instance.new("Frame")
+greenLine.Size = UDim2.new(0, 50, 0, greenThickness) -- طول الخط الأخضر الابتدائي
+greenLine.BackgroundColor3 = Color3.fromRGB(0,255,0)
+greenLine.BorderSizePixel = 0
+greenLine.ZIndex = stroke.ZIndex + 1
+greenLine.Parent = borderFrame
 
--- تحريك التدرج بشكل أفقي مستمر
-task.spawn(function()
-    local offset = 0
-    while true do
-        offset = (offset + 0.01) % 1
-        gradient.Offset = Vector2.new(offset, 0)
-        task.wait(interval)
+-- إعداد الحركة على شكل مربع
+local RunService = game:GetService("RunService")
+local posX, posY = 0,0
+local width = borderFrame.AbsoluteSize.X
+local height = borderFrame.AbsoluteSize.Y
+local speed = 200 -- بكسل/ثانية
+local direction = "right"
+
+-- تأكد من تحديث قياسات الإطار عند تغييره
+borderFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+    width = borderFrame.AbsoluteSize.X
+    height = borderFrame.AbsoluteSize.Y
+end)
+
+RunService.RenderStepped:Connect(function(delta)
+    if direction == "right" then
+        posX = posX + speed * delta
+        if posX >= width - greenLine.AbsoluteSize.X then
+            posX = width - greenLine.AbsoluteSize.X
+            direction = "down"
+            greenLine.Size = UDim2.new(0, greenThickness,0,50)
+        else
+            greenLine.Size = UDim2.new(0,50,0,greenThickness)
+        end
+    elseif direction == "down" then
+        posY = posY + speed * delta
+        if posY >= height - greenLine.AbsoluteSize.X then
+            posY = height - greenLine.AbsoluteSize.X
+            direction = "left"
+            greenLine.Size = UDim2.new(0,50,0,greenThickness)
+        else
+            greenLine.Size = UDim2.new(0,greenThickness,0,50)
+        end
+    elseif direction == "left" then
+        posX = posX - speed * delta
+        if posX <= 0 then
+            posX = 0
+            direction = "up"
+            greenLine.Size = UDim2.new(0,greenThickness,0,50)
+        else
+            greenLine.Size = UDim2.new(0,50,0,greenThickness)
+        end
+    elseif direction == "up" then
+        posY = posY - speed * delta
+        if posY <= 0 then
+            posY = 0
+            direction = "right"
+            greenLine.Size = UDim2.new(0,50,0,greenThickness)
+        else
+            greenLine.Size = UDim2.new(0,greenThickness,0,50)
+        end
     end
+
+    greenLine.Position = UDim2.new(0, posX, 0, posY)
 end)
 
 local TabFunction = {}
+    
 
 
 	local TabFunction = {}
