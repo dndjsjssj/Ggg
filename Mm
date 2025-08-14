@@ -729,7 +729,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-
 -- ===== التحقق من إعدادات الواجهة =====
 if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
@@ -738,7 +737,7 @@ end
 -- ===== الإعدادات =====
 local thickness = 4                   -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)   -- نصف قطر الزوايا
-local moveSpeed = 0.2                 -- سرعة حركة التدرج
+local rotationSpeed = 5               -- سرعة دوران أبطأ لتجنب التقطيع
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -756,42 +755,39 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 255, 255) -- اللون الأبيض
+stroke.Color = Color3.fromRGB(255, 0, 0) -- افتراضي، يتغير بالـ Gradient
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني مع خطين أسود =====
+-- ===== التدرج اللوني =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    -- أحمر ثابت
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.30, Color3.fromRGB(255, 0, 0)),
+    -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 0, 0)),
 
-    -- خط أسود فوق المنتصف
-    ColorSequenceKeypoint.new(0.30, Color3.fromRGB(0, 0, 0)),
+    -- أسود أعلى المنتصف
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
 
-    -- أحمر بين الخطين
+    -- أحمر بين الأسودين
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),
 
-    -- خط أسود في المنتصف
+    -- أسود أسفل المنتصف
     ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.70, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 0, 0)),
 
-    -- أحمر ثابت بعد الأسود
-    ColorSequenceKeypoint.new(0.70, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
+    -- أحمر
+    ColorSequenceKeypoint.new(0.7, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
-gradient.Offset = Vector2.new(0, 0)
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج اللوني =====
-local offset = 0
-game:GetService("RunService").RenderStepped:Connect(function(dt)
-    offset = (offset + dt * moveSpeed) % 1
-    gradient.Offset = Vector2.new(offset, 0)
+-- ===== تحريك التدرج =====
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    gradient.Rotation = (gradient.Rotation + rotationSpeed * dt) % 360
 end)
 
 
