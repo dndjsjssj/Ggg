@@ -738,15 +738,16 @@ local greenThickness = 4
 local interval = 0.02
 local MainWindow = script.Parent
 
--- تحديد الفراغات الشفافة
-local topGap = 50     -- الفراغ العلوي (فوك)
-local middleGap = 50  -- الفراغ الأوسط (جوّه)
+-- تحديد الفراغات (تصير الآن سوداء)
+local topGap = 50     -- الفراغ العلوي
+local middleGap = 50  -- الفراغ الأوسط
 
 -- الإطار الأحمر الأساسي
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1,0,1,0)
 borderFrame.Position = UDim2.new(0,0,0,0)
-borderFrame.BackgroundTransparency = 1
+borderFrame.BackgroundColor3 = Color3.fromRGB(0,0,0) -- لون الخلفية الأسود
+borderFrame.BackgroundTransparency = 0
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
@@ -764,7 +765,7 @@ greenLine.BorderSizePixel = 0
 greenLine.ZIndex = stroke.ZIndex + 1
 greenLine.Parent = borderFrame
 
--- حركة الخط الأخضر داخل الفراغين فقط
+-- حركة الخط الأخضر داخل المسار
 local RunService = game:GetService("RunService")
 local width = borderFrame.AbsoluteSize.X
 local height = borderFrame.AbsoluteSize.Y
@@ -808,7 +809,8 @@ RunService.RenderStepped:Connect(function(delta)
 
     greenLine.Position = UDim2.new(0, posX, 0, posY)
 end)
-        
+
+
             
 local TabFunction = {}
     
