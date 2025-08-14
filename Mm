@@ -731,75 +731,58 @@ function OrionLib:MakeWindow(WindowConfig)
 
 if WindowConfig.IntroEnabled then LoadSequence() end
 
--- دالة لإنشاء خط أخضر يتحرك فوق الإطار الأحمر
-local function createOverlayGreenLine(color, reverse)
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, 50, 0, 4) -- سماكة الخط
-    line.BackgroundTransparency = 1
-    line.ZIndex = borderFrame.ZIndex + 5 -- فوق الأحمر
-    line.Parent = MainWindow -- فوق الإطار الأحمر مباشرة
+local thickness = 4 -- سماكة الحواف
+local interval = 0.02
+local cornerRadius = UDim.new(0, 8) -- نصف قطر الزوايا
 
-    -- UIStroke أبيض
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 2
-    stroke.Color = Color3.fromRGB(255,255,255)
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = line
+-- إنشاء إطار واحد حول MainWindow
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = MainWindow.ZIndex + 1
+borderFrame.Parent = MainWindow
 
-    -- UIGradient أخضر متحرك
-    local grad = Instance.new("UIGradient")
-    grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, color),
-        ColorSequenceKeypoint.new(1, color)
-    }
-    grad.Rotation = 0
-    grad.Offset = Vector2.new(0,0)
-    grad.Parent = stroke
+-- إضافة UICorner للإطار
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
 
-    -- طول الإطار
-    local function getPerimeter()
-        local w = borderFrame.AbsoluteSize.X
-        local h = borderFrame.AbsoluteSize.Y
-        return (w+h)*2
-    end
+-- إضافة UIStroke للإطار
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255,255,255)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
 
-    -- تعيين موقع الخط حول الإطار بسلاسة
-    local function setLinePosition(line, dist)
-        local w = borderFrame.AbsoluteSize.X
-        local h = borderFrame.AbsoluteSize.Y
-        dist = dist % getPerimeter()
+-- إضافة UIGradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- فوك أحمر
+ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0))    -- جوه أخضر
+}
+gradient.Rotation = 90 -- رأسي
+gradient.Parent = stroke
 
-        if dist < w then
-            line.Size = UDim2.new(0, 50, 0, 4)
-            line.Position = UDim2.new(0, dist, 0, 0)
-        elseif dist < w+h then
-            line.Size = UDim2.new(0, 4, 0, 50)
-            line.Position = UDim2.new(1, -4, 0, dist - w)
-        elseif dist < w+h+w then
-            line.Size = UDim2.new(0, 50, 0, 4)
-            line.Position = UDim2.new(1, -(dist-(w+h)+50), 1, -4)
-        else
-            line.Size = UDim2.new(0, 4, 0, 50)
-            line.Position = UDim2.new(0, 0, 1, -(dist-(w+h+w)+50))
-        end
-    end
+-- تحريك الفوك والجوه بالعكس
+task.spawn(function()
+local offset = 0
+local direction = 1
+while true do
+offset = offset + 0.01 * direction
 
-    local dist = reverse and getPerimeter()/2 or 0
+if offset >= 1 then  
+        direction = -1  
+    elseif offset <= 0 then  
+        direction = 1  
+    end  
 
-    game:GetService("RunService").RenderStepped:Connect(function(dt)
-        dist = dist + (reverse and -1 or 1) * 100 * dt -- سرعة 100px/s
-        setLinePosition(line, dist)
-
-        -- تحريك التدرج الأخضر
-        local offset = (grad.Offset.X + 0.01) % 1
-        grad.Offset = Vector2.new(offset, 0)
-    end)
+    gradient.Offset = Vector2.new(0, offset)  
+    task.wait(interval)  
 end
 
--- إنشاء الخطين الأخضرين فوق الأحمر
-createOverlayGreenLine(Color3.fromRGB(0,255,0), false)  -- الأول
-createOverlayGreenLine(Color3.fromRGB(0,200,0), true)   -- الثاني عكس الأول
-    
+end)
+
 local TabFunction = {}
     
 
