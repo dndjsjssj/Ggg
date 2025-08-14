@@ -738,6 +738,7 @@ local stroke = Instance.new("UIStroke")
 stroke.Thickness = 3
 stroke.Transparency = 0
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Color = Color3.fromRGB(255, 255, 255) -- مهم حتى يطلع التدرج
 stroke.Parent = MainWindow
 
 local gradient = Instance.new("UIGradient")
