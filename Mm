@@ -738,14 +738,13 @@ end
 -- ===== الإعدادات =====
 local thickness = 4                   -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)   -- نصف قطر الزوايا
-local speed = 0.2                      -- سرعة حركة الخطوط السوداء
+local moveSpeed = 0.2                 -- سرعة حركة التدرج
 
--- ===== إنشاء الإطار الرئيسي =====
+-- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundColor3 = Color3.fromRGB(255,0,0) -- أحمر ثابت
-borderFrame.BorderSizePixel = 0
+borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
@@ -754,53 +753,47 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- ===== الحدود البيضاء =====
+-- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255,255,255)
+stroke.Color = Color3.fromRGB(255, 255, 255) -- اللون الأبيض
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== إنشاء الخطين الأسودين =====
-local blackLineTop = Instance.new("Frame")
-blackLineTop.Size = UDim2.new(1,0,0.03,0) -- ارتفاع قصير
-blackLineTop.Position = UDim2.new(0,0,0.25,0)
-blackLineTop.BackgroundColor3 = Color3.fromRGB(0,0,0)
-blackLineTop.BorderSizePixel = 0
-blackLineTop.ZIndex = borderFrame.ZIndex + 1
-blackLineTop.Parent = borderFrame
+-- ===== التدرج اللوني مع خطين أسود =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    -- أحمر ثابت
+    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.30, Color3.fromRGB(255, 0, 0)),
 
-local blackLineMid = Instance.new("Frame")
-blackLineMid.Size = UDim2.new(1,0,0.03,0)
-blackLineMid.Position = UDim2.new(0,0,0.5,0)
-blackLineMid.BackgroundColor3 = Color3.fromRGB(0,0,0)
-blackLineMid.BorderSizePixel = 0
-blackLineMid.ZIndex = borderFrame.ZIndex + 1
-blackLineMid.Parent = borderFrame
+    -- خط أسود فوق المنتصف
+    ColorSequenceKeypoint.new(0.30, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
 
--- ===== حركة سلسة للأسود =====
-local directionTop = 1
-local directionMid = -1
+    -- أحمر بين الخطين
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),
 
+    -- خط أسود في المنتصف
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.70, Color3.fromRGB(0, 0, 0)),
+
+    -- أحمر ثابت بعد الأسود
+    ColorSequenceKeypoint.new(0.70, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
+}
+gradient.Offset = Vector2.new(0, 0)
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== تحريك التدرج اللوني =====
+local offset = 0
 game:GetService("RunService").RenderStepped:Connect(function(dt)
-    -- تحريك الخط الأعلى
-    local newYTop = blackLineTop.Position.Y.Scale + speed * dt * directionTop
-    if newYTop >= 0.4 then
-        directionTop = -1
-    elseif newYTop <= 0.2 then
-        directionTop = 1
-    end
-    blackLineTop.Position = UDim2.new(0,0,newYTop,0)
-
-    -- تحريك الخط الأوسط
-    local newYMid = blackLineMid.Position.Y.Scale + speed * dt * directionMid
-    if newYMid >= 0.6 then
-        directionMid = -1
-    elseif newYMid <= 0.4 then
-        directionMid = 1
-    end
-    blackLineMid.Position = UDim2.new(0,0,newYMid,0)
+    offset = (offset + dt * moveSpeed) % 1
+    gradient.Offset = Vector2.new(offset, 0)
 end)
+
 
 local TabFunction = {}
     
