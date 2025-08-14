@@ -733,22 +733,30 @@ function OrionLib:MakeWindow(WindowConfig)
     LoadSequence()
 end	
 
--- ===== إضافة إطار متحرك بين الأحمر والأخضر =====
+-- ===== إطار متدرج متحرك =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 2
 stroke.Parent = MainWindow
 
-local colors = { Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0) }
-local index = 1
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),  -- أحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- أخضر
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))   -- أحمر
+})
+gradient.Rotation = 0
+gradient.Parent = stroke
 
+-- حركة الدوران
 task.spawn(function()
     while MainWindow and MainWindow.Parent do
-        stroke.Color = colors[index]
-        index = (index % #colors) + 1
-        task.wait(0.5)
+        for i = 0, 360, 1 do
+            gradient.Rotation = i
+            task.wait(0.02)
+        end
     end
 end)
--- ================================================
+-- ==================================
 
 local TabFunction = {}
 
