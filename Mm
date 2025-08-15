@@ -742,7 +742,7 @@ local thickness = 4                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
 local normalSpeed = 10                 -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 4                  -- مدة التثبيت بالثواني عند البداية
+local slowDuration = 4                 -- مدة التثبيت بالثواني عند البداية
 local transitionTime = 1               -- وقت الانتقال بين السرعتين بالثواني
 
 -- ===== إنشاء الإطار =====
@@ -770,78 +770,88 @@ local gradient = Instance.new("UIGradient")
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- إعدادات طول الخط الأسود الطبيعي والممتد
+-- إعدادات الخط الأسود الطبيعي والممتد تدريجيًا
 local blackStartNormal = 0.45
 local blackEndNormal = 0.55
-local blackStartBig = 0.40
-local blackEndBig = 0.60
+local blackStartMax = 0.40
+local blackEndMax = 0.60
 
--- دالة لتغيير طول الخط الأسود
-local function setBlackSize(big)
-    if big then
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
-            ColorSequenceKeypoint.new(blackStartBig, Color3.fromRGB(255,0,0)),
-            ColorSequenceKeypoint.new(blackStartBig, Color3.fromRGB(0,0,0)),
-            ColorSequenceKeypoint.new(blackEndBig, Color3.fromRGB(0,0,0)),
-            ColorSequenceKeypoint.new(blackEndBig, Color3.fromRGB(255,0,0)),
-            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
-        }
-    else
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
-            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255,0,0)),
-            ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0,0,0)),
-            ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0,0,0)),
-            ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255,0,0)),
-            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
-        }
-    end
+-- الدالة لتعديل طول الخط الأسود تدريجيًا
+local function setBlackProgress(progress)
+    local startPos = blackStartNormal + (blackStartMax - blackStartNormal) * progress
+    local endPos = blackEndNormal + (blackEndMax - blackEndNormal) * progress
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(startPos, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(startPos, Color3.fromRGB(0,0,0)),
+        ColorSequenceKeypoint.new(endPos, Color3.fromRGB(0,0,0)),
+        ColorSequenceKeypoint.new(endPos, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
+    }
 end
 
--- تعيين طول الخط الأسود الطبيعي في البداية
-setBlackSize(false)
+-- تعيين الطول الطبيعي في البداية
+setBlackProgress(0)
 
--- ===== تحريك التدرج مع تباطؤ عند الاقتراب من البداية =====
+-- ===== تحريك التدرج مع تباطؤ وتوسيع عند نقطة البداية =====
 local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
 local slowingDown = false
 local speedChangeStartTime = 0
 local speedFrom = normalSpeed
 local speedTo = slowSpeed
+local expandProgress = 0
+local expanding = false
+local contracting = false
+local expandDuration = 0.5 -- مدة التمدد التدريجي
+local contractDuration = 0.5 -- مدة العودة للطول الطبيعي
 
 RunService.Heartbeat:Connect(function(dt)
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- إذا وصل الخط الأسود لنقطة البداية
+    -- عند الوصول لنقطة البداية
     if not slowingDown and previousRotation > gradient.Rotation then
         slowingDown = true
         speedFrom = normalSpeed
         speedTo = slowSpeed
         speedChangeStartTime = tick()
 
-        -- تكبير الخط الأسود عند التثبيت
-        setBlackSize(true)
+        -- بدء التمدد التدريجي
+        expanding = true
+        expandProgress = 0
 
-        -- بعد مدة التثبيت، إرجاع الحجم الطبيعي واستئناف الحركة
+        -- بعد التثبيت نبدأ التراجع للحجم الطبيعي
         task.delay(slowDuration, function()
-            setBlackSize(false)
-            speedFrom = slowSpeed
-            speedTo = normalSpeed
-            speedChangeStartTime = tick()
-            task.delay(transitionTime, function()
-                slowingDown = false
-            end)
+            contracting = true
+            expanding = false
+            expandProgress = 1
         end)
+    end
+
+    -- التمدد التدريجي
+    if expanding then
+        expandProgress = math.min(expandProgress + dt/expandDuration, 1)
+        setBlackProgress(expandProgress)
+    end
+
+    -- التراجع التدريجي
+    if contracting then
+        expandProgress = math.max(expandProgress - dt/contractDuration, 0)
+        setBlackProgress(expandProgress)
+        if expandProgress <= 0 then
+            contracting = false
+            slowingDown = false
+        end
     end
 
     -- حركة التدرج بين السرعتين
     if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        local t = math.min((tick() - speedChangeStartTime)/transitionTime, 1)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
+
 local TabFunction = {}
     
 
