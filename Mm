@@ -737,13 +737,13 @@ if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-
 -- ===== الإعدادات =====
-local thickness = 4                   -- سماكة الحواف
-local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local rotationSpeed = 10               -- سرعة الدوران الأساسية
+local thickness = 4                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 8)     -- نصف قطر الزوايا
+local normalSpeed = 10                  -- السرعة العادية
+local slowSpeed = 2                     -- السرعة أثناء التباطؤ
+local slowDuration = 5                  -- مدة التباطؤ بالثواني
+local extendAmount = 0.10               -- مقدار التمدد (10% من المسار) تقريباً ×3 طول
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -761,61 +761,97 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني =====
+-- ===== التدرج اللوني (خط أسود واحد) =====
 local gradient = Instance.new("UIGradient")
-local function setShortBlack()
+local function setBlackWidth(width)
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   
-        ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 0, 0)),  
-        ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 0, 0)),    
-        ColorSequenceKeypoint.new(0.52, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(0.35 - width/2, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(0.35 + width, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(0.35 + width + width/2, Color3.fromRGB(255, 0, 0)),
         ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
     }
 end
 
-local function setLongBlack()
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),  
-        ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 0, 0)),    
-        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),  
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
-    }
-end
+setBlackWidth(0.05) -- الطول الطبيعي
 
-setShortBlack()
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
-local currentSpeed = rotationSpeed
-local lastRotation = 0
-local extendInProgress = false
+-- ===== تحريك التدرج + تمدد الأسود =====
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local currentSpeed = normalSpeed
+local slowingDown = false
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
+local transitionTime = 1 -- وقت الانتقال بين السرعتين
+
+local function extendBlack()
+    local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(
+        {Width = 0.05}, -- قيمة وهمية
+        tweenInfo,
+        {Width = 0.05 + extendAmount}
+    )
+    -- ما نقدر نعمل Tween مباشرة على UIGradient، فنسويها يدوي
+    local startWidth = 0.05
+    local targetWidth = 0.05 + extendAmount
+    local startTime = tick()
+
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        local t = math.min((tick() - startTime) / 0.4, 1)
+        local newWidth = startWidth + (targetWidth - startWidth) * t
+        setBlackWidth(newWidth)
+        if t >= 1 then
+            -- رجوع للطول الأصلي
+            local backStart = tick()
+            RunService.Heartbeat:Connect(function(dt)
+                local tb = math.min((tick() - backStart) / 0.4, 1)
+                local bw = targetWidth + (startWidth - targetWidth) * tb
+                setBlackWidth(bw)
+            end)
+            conn:Disconnect()
+        end
+    end)
+end
 
 RunService.Heartbeat:Connect(function(dt)
+    local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- كشف الرجوع للبداية
-    if math.floor(gradient.Rotation) < math.floor(lastRotation) and not extendInProgress then
-        extendInProgress = true
-        setLongBlack()
+    -- إذا رجع الخط الأسود لبداية اللفة
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        extendBlack() -- تمديد الخط الأسود
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
 
-        -- تقليل السرعة مؤقتًا
-        local oldSpeed = currentSpeed
-        currentSpeed = oldSpeed / 2
-
-        -- بعد 0.3 ثانية يرجع الأسود لطوله الطبيعي
-        task.delay(0.3, function()
-            setShortBlack()
-            currentSpeed = oldSpeed
-            extendInProgress = false
+        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
+        task.delay(slowDuration, function()
+            speedFrom = slowSpeed
+            speedTo = normalSpeed
+            speedChangeStartTime = tick()
+            task.delay(transitionTime, function()
+                slowingDown = false
+            end)
         end)
     end
 
-    lastRotation = gradient.Rotation
+    -- حركة التدرج بين السرعتين
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+    end
 end)
 
 local TabFunction = {}
