@@ -731,7 +731,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 
 
-
 -- ===== التحقق من إعدادات الواجهة =====
 if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
@@ -765,14 +764,14 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
+-- ===== التدرج اللوني (خط أسود يغطي نصف الإطار تقريبًا) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.63, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول قليلًا)
-    ColorSequenceKeypoint.new(0.87, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول قليلًا)
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),  -- أحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
@@ -815,7 +814,6 @@ RunService.Heartbeat:Connect(function(dt)
     end
 end)
 
-
 local TabFunction = {}
     
 
@@ -849,18 +847,18 @@ local TabFunction = {}
 
 -- هنا بعد إنشاء TabFrame
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- نقصنا 2 بكسل من كل جانب
-borderFrame.Position = UDim2.new(0, 2, 0, 2)  -- نحرك الإطار شوي للداخل
+borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- أصغر 2 بكسل من كل جانب
+borderFrame.Position = UDim2.new(0, 2, 0, 2) -- نحرك الإطار للداخل
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = TabFrame.ZIndex + 1
 borderFrame.Parent = TabFrame
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 4)  -- صغرنا الزوايا شوي
+corner.CornerRadius = UDim.new(0, 4)  -- زوايا أصغر
 corner.Parent = borderFrame
 
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 1.5  -- صغرنا سماكة الخط
+stroke.Thickness = 1.5  -- سماكة أقل
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
@@ -868,10 +866,10 @@ stroke.Parent = borderFrame
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.63, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.87, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود أطول
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
@@ -910,7 +908,6 @@ RunService.Heartbeat:Connect(function(dt)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
-
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end	
