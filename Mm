@@ -8,7 +8,7 @@ local HttpService = game:GetService("HttpService")
 local OrionLib = {
 	Elements = {},
 	ThemeObjects = {},
-	Connections = {},
+	Connections = {}, 
 	Flags = {},
 	Themes = {
 		Default = {
@@ -769,15 +769,16 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.43, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول قليلًا)
-    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول قليلًا)
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- بداية أحمر
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),   -- استمرار الأسود (أطول)
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)), -- رجوع للأحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية أحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
+
 
 -- ===== تحريك التدرج مع تباطؤ تدريجي =====
 local RunService = game:GetService("RunService")
@@ -869,12 +870,12 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.43, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول قليلًا)
-    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول قليلًا)
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- بداية أحمر
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),   -- استمرار الأسود (أطول)
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)), -- رجوع للأحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية أحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
