@@ -732,7 +732,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 
 
--- ===== التحقق من إعدادات الواجهة =====
+            -- ===== التحقق من إعدادات الواجهة =====
 if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
 end
@@ -766,69 +766,55 @@ stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
 
--- إنشاء التدرج مع لون أسود أطول
+-- ===== التدرج اللوني (الأسود أطول ومائل أكثر لليسار) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- بداية أحمر
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود (أطول)
-    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول)
-    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)), -- بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية الأحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),     -- بداية الأسود (يميل أكثر لليسار)
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),     -- نهاية الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
+gradient.Rotation = 0
+gradient.Parent = stroke
 
--- إعدادات السرعة والتوقف
-local normalSpeed = 10       -- السرعة الطبيعية
-local slowSpeed = 2          -- السرعة البطيئة قبل التوقف
-local transitionTime = 1     -- وقت الانتقال بين السرعتين
-local pauseDuration = 5      -- مدة التوقف بالثواني
-
+-- ===== تحريك التدرج مع تباطؤ تدريجي =====
+local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
 local slowingDown = false
-local paused = false
-local speedFrom, speedTo
 local speedChangeStartTime = 0
-
-local RunService = game:GetService("RunService")
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
 
 RunService.Heartbeat:Connect(function(dt)
-    if not paused then
-        local previousRotation = gradient.Rotation
-        gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-        -- التباطؤ قبل نقطة البداية (20 درجة قبلها)
-        if not slowingDown and ((360 - gradient.Rotation) < 20 or gradient.Rotation < 20) then
-            slowingDown = true
-            speedFrom = normalSpeed
-            speedTo = slowSpeed
+    -- إذا رجع الخط الأسود لبداية اللفة
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+
+        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
+        task.delay(slowDuration, function()
+            speedFrom = slowSpeed
+            speedTo = normalSpeed
             speedChangeStartTime = tick()
-        end
-
-        -- التوقف عند بداية الدورة
-        if slowingDown and previousRotation > gradient.Rotation then
-            paused = true
-            task.delay(pauseDuration, function()
-                paused = false
-                speedFrom = slowSpeed
-                speedTo = normalSpeed
-                speedChangeStartTime = tick()
-                task.delay(transitionTime, function()
-                    slowingDown = false
-                end)
+            task.delay(transitionTime, function()
+                slowingDown = false
             end)
-        end
+        end)
+    end
 
-        -- انتقال السرعة تدريجيًا
-        if slowingDown and not paused then
-            local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-            currentSpeed = speedFrom + (speedTo - speedFrom) * t
-        end
+    -- حركة التدرج بين السرعتين
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
-
--- ملاحظة: تأكد أنك تحط التدرج على الـ UIStroke الخاص بالإطار
--- مثال:
--- gradient.Parent = stroke
 
 
 local TabFunction = {}
@@ -862,6 +848,7 @@ local TabFunction = {}
 			}), "Text")
 		})
 
+
 -- هنا بعد إنشاء TabFrame
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- نقصنا 2 بكسل من كل جانب
@@ -880,66 +867,52 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود أطول في منتصف الإطار) =====
+-- ===== التدرج اللوني (الأسود أطول ومائل أكثر لليسار) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- بداية أحمر
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود (أطول)
-    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول)
-    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)), -- بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),     -- بداية الأسود (يميل أكثر لليسار)
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),     -- نهاية الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== التحريك مع التباطؤ والتوقف =====
-local normalSpeed = 10       -- السرعة الطبيعية
-local slowSpeed = 2          -- السرعة البطيئة قبل التوقف
-local transitionTime = 1     -- وقت الانتقال بين السرعتين
-local pauseDuration = 5      -- مدة التوقف بالثواني
-
-local currentSpeed = normalSpeed
+-- التحريك
+local currentSpeed = 10
+local normalSpeed = 10
+local slowSpeed = 2
 local slowingDown = false
-local paused = false
-local speedFrom, speedTo
 local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
+local transitionTime = 1
+local slowDuration = 5
 
 RunService.Heartbeat:Connect(function(dt)
-    if not paused then
-        local previousRotation = gradient.Rotation
-        gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
-
-        -- التباطؤ قبل نقطة البداية (20 درجة قبلها)
-        if not slowingDown and ((360 - gradient.Rotation) < 20 or gradient.Rotation < 20) then
-            slowingDown = true
-            speedFrom = normalSpeed
-            speedTo = slowSpeed
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+        task.delay(slowDuration, function()
+            speedFrom = slowSpeed
+            speedTo = normalSpeed
             speedChangeStartTime = tick()
-        end
-
-        -- التوقف عند بداية الدورة
-        if slowingDown and previousRotation > gradient.Rotation then
-            paused = true
-            task.delay(pauseDuration, function()
-                paused = false
-                speedFrom = slowSpeed
-                speedTo = normalSpeed
-                speedChangeStartTime = tick()
-                task.delay(transitionTime, function()
-                    slowingDown = false
-                end)
+            task.delay(transitionTime, function()
+                slowingDown = false
             end)
-        end
-
-        -- انتقال السرعة تدريجيًا
-        if slowingDown and not paused then
-            local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-            currentSpeed = speedFrom + (speedTo - speedFrom) * t
-        end
+        end)
+    end
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
-
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end	
