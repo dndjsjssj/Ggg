@@ -737,24 +737,18 @@ if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
--- ===== الإعدادات =====
-local thickness = 4
-local cornerRadius = UDim.new(0, 8)
-local normalSpeed = 12
-local slowSpeed = 6
-local extendAmount = 0.10 -- مقدار التمدد
-local extendTime = 0.5 -- وقت التمدد
-local shrinkTime = 0.5 -- وقت الرجوع
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
--- الإعدادات الافتراضية
-local normalBlackStart = 0.45
-local normalBlackEnd = 0.55
-local blackStart = normalBlackStart
-local blackEnd = normalBlackEnd
+-- ===== الإعدادات =====
+local thickness = 4                   -- سماكة الحواف
+local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
+local rotationSpeed = 10               -- سرعة الدوران الأساسية
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
@@ -770,64 +764,58 @@ stroke.Thickness = thickness
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج =====
+-- ===== التدرج اللوني =====
 local gradient = Instance.new("UIGradient")
-local function updateGradient()
+local function setShortBlack()
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(blackStart - 0.05, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(blackStart, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(blackEnd, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(blackEnd + 0.05, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   
+        ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 0, 0)),    
+        ColorSequenceKeypoint.new(0.52, Color3.fromRGB(255, 0, 0)),  
         ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
     }
 end
-updateGradient()
+
+local function setLongBlack()
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 0, 0)),    
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    }
+end
+
+setShortBlack()
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== الحركة =====
-local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local animating = false
+-- ===== تحريك التدرج =====
+local currentSpeed = rotationSpeed
 local lastRotation = 0
+local extendInProgress = false
 
 RunService.Heartbeat:Connect(function(dt)
-    lastRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- لما يرجع للبداية
-    if not animating and lastRotation > gradient.Rotation then
-        animating = true
-        currentSpeed = slowSpeed
+    -- كشف الرجوع للبداية
+    if math.floor(gradient.Rotation) < math.floor(lastRotation) and not extendInProgress then
+        extendInProgress = true
+        setLongBlack()
 
-        -- تمدد تدريجي
-        local startTime = tick()
-        while tick() - startTime < extendTime do
-            local alpha = (tick() - startTime) / extendTime
-            blackStart = normalBlackStart - extendAmount * alpha
-            blackEnd = normalBlackEnd + extendAmount * alpha
-            updateGradient()
-            RunService.Heartbeat:Wait()
-        end
+        -- تقليل السرعة مؤقتًا
+        local oldSpeed = currentSpeed
+        currentSpeed = oldSpeed / 2
 
-        -- تقلص تدريجي
-        startTime = tick()
-        while tick() - startTime < shrinkTime do
-            local alpha = (tick() - startTime) / shrinkTime
-            blackStart = (normalBlackStart - extendAmount) + extendAmount * alpha
-            blackEnd = (normalBlackEnd + extendAmount) - extendAmount * alpha
-            updateGradient()
-            RunService.Heartbeat:Wait()
-        end
-
-        -- رجوع للوضع الطبيعي
-        blackStart = normalBlackStart
-        blackEnd = normalBlackEnd
-        updateGradient()
-        currentSpeed = normalSpeed
-        animating = false
+        -- بعد 0.3 ثانية يرجع الأسود لطوله الطبيعي
+        task.delay(0.3, function()
+            setShortBlack()
+            currentSpeed = oldSpeed
+            extendInProgress = false
+        end)
     end
+
+    lastRotation = gradient.Rotation
 end)
 
 local TabFunction = {}
