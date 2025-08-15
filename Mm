@@ -771,10 +771,10 @@ stroke.Parent = borderFrame
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود في الوسط
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود في الوسط
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- الأحمر بعد الأسود
+    ColorSequenceKeypoint.new(0.49, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
+    ColorSequenceKeypoint.new(0.49, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
+    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود قريبة جدا من البداية
+    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 0, 0)),  -- الأحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
 gradient.Rotation = 0
@@ -856,7 +856,7 @@ borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- نقصنا 2 بكسل من كل �
 borderFrame.Position = UDim2.new(0, 2, 0, 2)  -- نحرك الإطار شوي للداخل
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = TabFrame.ZIndex + 1
-borderFrame.Parent = TabFrame
+borderFrame.Parent = TabFrame 
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 4)  -- صغرنا الزوايا شوي
@@ -872,10 +872,10 @@ stroke.Parent = borderFrame
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود في الوسط
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود في الوسط
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- الأحمر بعد الأسود
+    ColorSequenceKeypoint.new(0.49, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
+    ColorSequenceKeypoint.new(0.49, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
+    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود قريبة جدا من البداية
+    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 0, 0)),  -- الأحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
 gradient.Rotation = 0
