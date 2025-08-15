@@ -737,7 +737,9 @@ end
 -- ===== الإعدادات =====
 local thickness = 4                   -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local rotationSpeed = 5                -- سرعة دوران أبطأ لتجنب التقطيع
+local normalSpeed = 10                 -- السرعة العادية (أسرع من قبل)
+local slowSpeed = 2                    -- السرعة أثناء التباطؤ
+local slowDuration = 5                 -- مدة التباطؤ بالثواني
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -755,26 +757,41 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 0, 0) -- افتراضي، يتغير بالـ Gradient
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
 -- ===== التدرج اللوني (خط أسود واحد في الوسط وأطول) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر فوق
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول شوي)
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
-game:GetService("RunService").Heartbeat:Connect(function(dt)
-    gradient.Rotation = (gradient.Rotation + rotationSpeed * dt) % 360
+-- ===== تحريك التدرج مع تباطؤ =====
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local slowingDown = false
+
+RunService.Heartbeat:Connect(function(dt)
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+    -- إذا رجع الخط الأسود لبداية اللفة
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        currentSpeed = slowSpeed
+        task.delay(slowDuration, function()
+            currentSpeed = normalSpeed
+            slowingDown = false
+        end)
+    end
 end)
 
 local TabFunction = {}
