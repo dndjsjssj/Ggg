@@ -738,17 +738,14 @@ if WindowConfig and WindowConfig.IntroEnabled then
 end
 
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 -- ===== الإعدادات =====
 local thickness = 4
 local cornerRadius = UDim.new(0, 8)
 local normalSpeed = 10
-local slowSpeed = 2
-local holdTime = 5           -- مدة التثبيت بالثواني
-local extendAmount = 0.15    -- مقدار التمدد ×3 تقريباً
-local extendDuration = 0.5   -- مدة أنيميشن التمدد
-local shrinkDuration = 0.5   -- مدة رجوع الأسود لطوله الطبيعي
+local extendAmount = 0.15   -- مقدار التمدد
+local extendDuration = 0.4  -- مدة تمدد الأسود
+local shrinkDuration = 0.4  -- مدة رجوع الأسود
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -775,46 +772,44 @@ local gradient = Instance.new("UIGradient")
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- دالة لضبط طول الأسود
+-- دالة لضبط الخط الأسود مع إزاحه قليلاً لليمين
+local center = 0.55 -- تحريك الخط شوي يمين
+local normalWidth = 0.05
+
 local function setBlackWidth(width)
     gradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(0.5 - width/2, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(0.6 + width/2, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(0.7 + width/2 + width, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(0.5 + width + width/2, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(center - width/2, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(center - width/2, Color3.fromRGB(0,0,0)),
+        ColorSequenceKeypoint.new(center + width/2, Color3.fromRGB(0,0,0)),
+        ColorSequenceKeypoint.new(center + width/2, Color3.fromRGB(255,0,0)),
         ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
     }
 end
 
-local normalWidth = 0.05
 setBlackWidth(normalWidth)
 
--- ===== تحريك التدرج =====
+-- ===== تحريك التدرج مع تمدد سريع =====
 local currentSpeed = normalSpeed
-local slowingDown = false
-local holdStart = 0
+local lastRotation = 0
+local extending = false
 
 RunService.Heartbeat:Connect(function(dt)
-    local prevRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
     -- كشف رجوع الدوران للبداية
-    if not slowingDown and prevRotation > gradient.Rotation then
-        slowingDown = true
-        holdStart = tick()
-        currentSpeed = slowSpeed
+    if not extending and lastRotation > gradient.Rotation then
+        extending = true
 
-        -- أنيميشن التمدد
+        -- تمدد سريع
+        local startTime = tick()
         spawn(function()
-            -- تمدد تدريجي
-            local startTime = tick()
             while tick() - startTime < extendDuration do
                 local t = (tick() - startTime) / extendDuration
                 setBlackWidth(normalWidth + extendAmount * t)
                 RunService.Heartbeat:Wait()
             end
-            -- رجوع تدريجي
+            -- رجوع سريع
             startTime = tick()
             while tick() - startTime < shrinkDuration do
                 local t = (tick() - startTime) / shrinkDuration
@@ -822,14 +817,11 @@ RunService.Heartbeat:Connect(function(dt)
                 RunService.Heartbeat:Wait()
             end
             setBlackWidth(normalWidth)
-        end)
-
-        -- تثبيت لمدة holdTime
-        task.delay(holdTime, function()
-            currentSpeed = normalSpeed
-            slowingDown = false
+            extending = false
         end)
     end
+
+    lastRotation = gradient.Rotation
 end)
 
 local TabFunction = {}
