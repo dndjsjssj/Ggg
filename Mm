@@ -744,6 +744,8 @@ local normalSpeed = 10                 -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
 local slowDuration = 4                 -- مدة التثبيت بالثواني عند البداية
 local transitionTime = 1               -- وقت الانتقال بين السرعتين بالثواني
+local expandDuration = 0.5             -- مدة التمدد التدريجي
+local contractDuration = 0.5           -- مدة العودة للطول الطبيعي
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -765,52 +767,60 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني =====
+-- ===== التدرج اللوني مع خط أسود في المنتصف =====
 local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)), -- بداية الخط الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)), -- نهاية الخط الأسود
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- إعدادات الخط الأسود الطبيعي والممتد تدريجيًا
+-- ===== إعدادات طول الخط الأسود =====
 local blackStartNormal = 0.45
 local blackEndNormal = 0.55
 local blackStartMax = 0.40
 local blackEndMax = 0.60
 
--- الدالة لتعديل طول الخط الأسود تدريجيًا
-local function setBlackProgress(progress)
-    local startPos = blackStartNormal + (blackStartMax - blackStartNormal) * progress
-    local endPos = blackEndNormal + (blackEndMax - blackEndNormal) * progress
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(startPos, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(startPos, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(endPos, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(endPos, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
-    }
-end
+-- ===== حالة التمدد =====
+local expanding = false
+local contracting = false
+local expandProgress = 0
 
--- تعيين الطول الطبيعي في البداية
-setBlackProgress(0)
-
--- ===== تحريك التدرج مع تباطؤ وتوسيع عند نقطة البداية =====
+-- ===== تحريك التدرج مع التباطؤ وتمدد الخط الأسود =====
 local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
 local slowingDown = false
 local speedChangeStartTime = 0
 local speedFrom = normalSpeed
 local speedTo = slowSpeed
-local expandProgress = 0
-local expanding = false
-local contracting = false
-local expandDuration = 0.5 -- مدة التمدد التدريجي
-local contractDuration = 0.5 -- مدة العودة للطول الطبيعي
+
+local function updateBlackLength(progress)
+    -- تعديل الخط الأسود الموجود فقط
+    local startPos = blackStartNormal + (blackStartMax - blackStartNormal) * progress
+    local endPos = blackEndNormal + (blackEndMax - blackEndNormal) * progress
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(startPos, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(startPos, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(endPos, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(endPos, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    }
+end
+
+-- تعيين الطول الطبيعي في البداية
+updateBlackLength(0)
 
 RunService.Heartbeat:Connect(function(dt)
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- عند الوصول لنقطة البداية
+    -- إذا وصل الخط الأسود لنقطة البداية
     if not slowingDown and previousRotation > gradient.Rotation then
         slowingDown = true
         speedFrom = normalSpeed
@@ -823,8 +833,8 @@ RunService.Heartbeat:Connect(function(dt)
 
         -- بعد التثبيت نبدأ التراجع للحجم الطبيعي
         task.delay(slowDuration, function()
-            contracting = true
             expanding = false
+            contracting = true
             expandProgress = 1
         end)
     end
@@ -832,13 +842,13 @@ RunService.Heartbeat:Connect(function(dt)
     -- التمدد التدريجي
     if expanding then
         expandProgress = math.min(expandProgress + dt/expandDuration, 1)
-        setBlackProgress(expandProgress)
+        updateBlackLength(expandProgress)
     end
 
     -- التراجع التدريجي
     if contracting then
         expandProgress = math.max(expandProgress - dt/contractDuration, 0)
-        setBlackProgress(expandProgress)
+        updateBlackLength(expandProgress)
         if expandProgress <= 0 then
             contracting = false
             slowingDown = false
