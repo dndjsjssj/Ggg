@@ -742,7 +742,7 @@ local thickness = 4                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
 local normalSpeed = 10                 -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 5                 -- مدة التباطؤ بالثواني
+local slowDuration = 4                 -- مدة التثبيت بالثواني
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -766,22 +766,48 @@ stroke.Parent = borderFrame
 
 -- ===== التدرج اللوني (خط أسود في منتصف الإطار) =====
 local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (منتصف)
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (منتصف)
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
-}
+
+-- إعدادات طول الخط الأسود
+local blackStartNormal = 0.45
+local blackEndNormal = 0.55
+local blackStartLong = 0.42   -- يمتد قليلاً عند التثبيت
+local blackEndLong = 0.58
+
+-- دالة لتحديث التدرج بناءً على الطول
+local function setGradientLong(long)
+    if long then
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(blackStartLong, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(blackStartLong, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(blackEndLong, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(blackEndLong, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+        }
+    else
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(blackStartNormal, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(blackStartNormal, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(blackEndNormal, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(blackEndNormal, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+        }
+    end
+end
+
+-- تعيين التدرج الأولي
+setGradientLong(false)
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج مع تباطؤ تدريجي =====
+-- ===== تحريك التدرج مع تباطؤ عند الاقتراب من البداية =====
 local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
 local slowingDown = false
+local pauseAtStart = false
 local transitionTime = 1 -- وقت الانتقال بين السرعتين بالثواني
+
 local speedChangeStartTime = 0
 local speedFrom = normalSpeed
 local speedTo = slowSpeed
@@ -790,28 +816,35 @@ RunService.Heartbeat:Connect(function(dt)
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- إذا رجع الخط الأسود لبداية اللفة
-    if not slowingDown and previousRotation > gradient.Rotation then  
-        slowingDown = true  
-        speedFrom = normalSpeed  
-        speedTo = slowSpeed  
-        speedChangeStartTime = tick()  
+    -- إذا اقتربنا من نقطة البداية (0 درجة)
+    if not slowingDown and not pauseAtStart and gradient.Rotation < 5 then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+    end
 
-        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
-        task.delay(slowDuration, function()  
-            speedFrom = slowSpeed  
-            speedTo = normalSpeed  
-            speedChangeStartTime = tick()  
-            task.delay(transitionTime, function()  
-                slowingDown = false  
-            end)  
-        end)  
-    end  
+    -- تباطؤ تدريجي
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
 
-    -- حركة التدرج بين السرعتين
-    if slowingDown then  
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)  
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t  
+        if t >= 1 then
+            slowingDown = false
+            pauseAtStart = true
+            currentSpeed = 0
+
+            -- تكبير الخط الأسود أثناء التثبيت
+            setGradientLong(true)
+
+            -- تثبيت لمدة slowDuration ثواني
+            task.delay(slowDuration, function()
+                -- بعد التثبيت، إرجاع الطول الطبيعي واستئناف الدوران
+                setGradientLong(false)
+                currentSpeed = normalSpeed
+                pauseAtStart = false
+            end)
+        end
     end
 end)
 
