@@ -770,10 +770,10 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (الأسود ممتد 0.10 يمين ويسار من المنتصف) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- الأحمر البداية
-    ColorSequenceKeypoint.new(0.49, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),     -- نقطة الأسود الوحيدة
-    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 0, 0)),  -- عودة الأحمر مباشرة بعد الأسود
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- بداية الأحمر
+    ColorSequenceKeypoint.new(0.44, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أصبح على يسار)
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
 gradient.Rotation = 0
@@ -870,10 +870,10 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (الأسود في مركزه الطبيعي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- الأحمر البداية
-    ColorSequenceKeypoint.new(0.49, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),     -- نقطة الأسود الوحيدة
-    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(255, 0, 0)),  -- عودة الأحمر مباشرة بعد الأسود
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- بداية الأحمر
+    ColorSequenceKeypoint.new(0.44, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أصبح على يسار)
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
 gradient.Rotation = 0
