@@ -772,8 +772,8 @@ local gradient = Instance.new("UIGradient")
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- دالة لضبط الخط الأسود مع إزاحه قليلاً لليمين
-local center = 0.55 -- تحريك الخط شوي يمين
+-- دالة لضبط الخط الأسود في منتصف الإطار
+local center = 0.5 -- منتصف الإطار
 local normalWidth = 0.05
 
 local function setBlackWidth(width)
@@ -789,7 +789,7 @@ end
 
 setBlackWidth(normalWidth)
 
--- ===== تحريك التدرج مع تمدد سريع =====
+-- ===== تحريك التدرج مع تمدد عند نقطة البداية =====
 local currentSpeed = normalSpeed
 local lastRotation = 0
 local extending = false
