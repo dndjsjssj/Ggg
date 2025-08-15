@@ -737,13 +737,18 @@ if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
 -- ===== الإعدادات =====
-local thickness = 4                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 8)     -- نصف قطر الزوايا
-local normalSpeed = 10                  -- السرعة العادية
-local slowSpeed = 2                     -- السرعة أثناء التباطؤ
-local slowDuration = 5                  -- مدة التباطؤ بالثواني
-local extendAmount = 0.10               -- مقدار التمدد (10% من المسار) تقريباً ×3 طول
+local thickness = 4
+local cornerRadius = UDim.new(0, 8)
+local normalSpeed = 10
+local slowSpeed = 2
+local holdTime = 5           -- مدة التثبيت بالثواني
+local extendAmount = 0.15    -- مقدار التمدد ×3 تقريباً
+local extendDuration = 0.5   -- مدة أنيميشن التمدد
+local shrinkDuration = 0.5   -- مدة رجوع الأسود لطوله الطبيعي
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -765,92 +770,65 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود واحد) =====
+-- ===== التدرج اللوني =====
 local gradient = Instance.new("UIGradient")
-local function setBlackWidth(width)
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(0.35 - width/2, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(0.35 + width, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(0.35 + width + width/2, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
-    }
-end
-
-setBlackWidth(0.05) -- الطول الطبيعي
-
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج + تمدد الأسود =====
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-
-local currentSpeed = normalSpeed
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
-local transitionTime = 1 -- وقت الانتقال بين السرعتين
-
-local function extendBlack()
-    local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(
-        {Width = 0.05}, -- قيمة وهمية
-        tweenInfo,
-        {Width = 0.05 + extendAmount}
-    )
-    -- ما نقدر نعمل Tween مباشرة على UIGradient، فنسويها يدوي
-    local startWidth = 0.05
-    local targetWidth = 0.05 + extendAmount
-    local startTime = tick()
-
-    local conn
-    conn = RunService.Heartbeat:Connect(function()
-        local t = math.min((tick() - startTime) / 0.4, 1)
-        local newWidth = startWidth + (targetWidth - startWidth) * t
-        setBlackWidth(newWidth)
-        if t >= 1 then
-            -- رجوع للطول الأصلي
-            local backStart = tick()
-            RunService.Heartbeat:Connect(function(dt)
-                local tb = math.min((tick() - backStart) / 0.4, 1)
-                local bw = targetWidth + (startWidth - targetWidth) * tb
-                setBlackWidth(bw)
-            end)
-            conn:Disconnect()
-        end
-    end)
+-- دالة لضبط طول الأسود
+local function setBlackWidth(width)
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(0.5 - width/2, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(0.5 + width/2, Color3.fromRGB(0,0,0)),
+        ColorSequenceKeypoint.new(0.5 + width/2 + width, Color3.fromRGB(0,0,0)),
+        ColorSequenceKeypoint.new(0.5 + width + width/2, Color3.fromRGB(255,0,0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
+    }
 end
 
+local normalWidth = 0.05
+setBlackWidth(normalWidth)
+
+-- ===== تحريك التدرج =====
+local currentSpeed = normalSpeed
+local slowingDown = false
+local holdStart = 0
+
 RunService.Heartbeat:Connect(function(dt)
-    local previousRotation = gradient.Rotation
+    local prevRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- إذا رجع الخط الأسود لبداية اللفة
-    if not slowingDown and previousRotation > gradient.Rotation then
+    -- كشف رجوع الدوران للبداية
+    if not slowingDown and prevRotation > gradient.Rotation then
         slowingDown = true
-        extendBlack() -- تمديد الخط الأسود
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
+        holdStart = tick()
+        currentSpeed = slowSpeed
 
-        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
-        task.delay(slowDuration, function()
-            speedFrom = slowSpeed
-            speedTo = normalSpeed
-            speedChangeStartTime = tick()
-            task.delay(transitionTime, function()
-                slowingDown = false
-            end)
+        -- أنيميشن التمدد
+        spawn(function()
+            -- تمدد تدريجي
+            local startTime = tick()
+            while tick() - startTime < extendDuration do
+                local t = (tick() - startTime) / extendDuration
+                setBlackWidth(normalWidth + extendAmount * t)
+                RunService.Heartbeat:Wait()
+            end
+            -- رجوع تدريجي
+            startTime = tick()
+            while tick() - startTime < shrinkDuration do
+                local t = (tick() - startTime) / shrinkDuration
+                setBlackWidth(normalWidth + extendAmount * (1 - t))
+                RunService.Heartbeat:Wait()
+            end
+            setBlackWidth(normalWidth)
         end)
-    end
 
-    -- حركة التدرج بين السرعتين
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        -- تثبيت لمدة holdTime
+        task.delay(holdTime, function()
+            currentSpeed = normalSpeed
+            slowingDown = false
+        end)
     end
 end)
 
