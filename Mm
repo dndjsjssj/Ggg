@@ -732,23 +732,78 @@ function OrionLib:MakeWindow(WindowConfig)
 
 
 
--- إعدادات طول الخط الأسود
+-- ===== التحقق من إعدادات الواجهة =====
+if WindowConfig and WindowConfig.IntroEnabled then
+    LoadSequence()
+end
+
+-- ===== الإعدادات =====
+local thickness = 4
+local cornerRadius = UDim.new(0, 8)
+local normalSpeed = 10
+local slowSpeed = 2
+local slowDuration = 5        -- مدة التباطؤ عند نقطة البداية
+local transitionTime = 1      -- وقت الانتقال بين السرعتين
+local expandDuration = 0.5    -- مدة التمدد التدريجي للخط الأسود
+local contractDuration = 0.5  -- مدة العودة للطول الطبيعي
+local holdDuration = 4         -- مدة بقاء الخط ممتد
+
+-- ===== إنشاء الإطار =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = MainWindow.ZIndex + 1
+borderFrame.Parent = MainWindow
+
+-- ===== الزوايا =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- ===== الحدود =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- ===== التدرج اللوني =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255,0,0)),
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0,0,0)), -- بداية الخط الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0,0,0)), -- نهاية الخط الأسود
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255,0,0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== إعدادات طول الخط الأسود =====
 local blackStartNormal = 0.45
 local blackEndNormal = 0.55
-local blackStartMax = 0.42   -- طول أكبر مؤقت
+local blackStartMax = 0.42
 local blackEndMax = 0.58
 
 local expanding = false
 local contracting = false
 local expandProgress = 0
-local expandDuration = 0.5
-local contractDuration = 0.5
-local holdDuration = 4      -- المدة التي يبقى فيها ممتد
+local blackVisible = false
 
--- تحديث طول الخط الأسود فقط
-local function updateBlackLength(progress)
-    local startPos = blackStartNormal + (blackStartMax - blackStartNormal) * progress
-    local endPos = blackEndNormal + (blackEndMax - blackEndNormal) * progress
+-- ===== تحديث طول الخط الأسود =====
+local function updateBlackLength(progress, visible)
+    local startPos, endPos
+    if visible then
+        startPos = blackStartNormal + (blackStartMax - blackStartNormal) * progress
+        endPos = blackEndNormal + (blackEndMax - blackEndNormal) * progress
+    else
+        -- مخفي: بداية ونهاية الخط متساوية
+        startPos = 0.5
+        endPos = 0.5
+    end
+
     gradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
         ColorSequenceKeypoint.new(startPos, Color3.fromRGB(255,0,0)),
@@ -759,17 +814,34 @@ local function updateBlackLength(progress)
     }
 end
 
-updateBlackLength(0)
+-- افتراضيًا الخط مخفي
+updateBlackLength(0, false)
 
--- مراقبة الدوران أو نقطة البداية
+-- ===== تحريك التدرج وتمديد الخط الأسود =====
 local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local slowingDown = false
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
+
 RunService.Heartbeat:Connect(function(dt)
-    -- افترضنا هنا شرط الوصول لنقطة البداية
-    if not expanding and gradient.Rotation > 359 then
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+    -- عند الوصول للنقطة 0 (نقطة البداية)
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+
+        -- تفعيل الخط الأسود والتمدد
+        blackVisible = true
         expanding = true
         expandProgress = 0
 
-        -- بعد مدة التثبيت يبدأ التراجع
+        -- بعد مدة holdDuration يبدأ التراجع ويختفي الخط الأسود
         task.delay(holdDuration, function()
             expanding = false
             contracting = true
@@ -780,16 +852,24 @@ RunService.Heartbeat:Connect(function(dt)
     -- التمدد التدريجي
     if expanding then
         expandProgress = math.min(expandProgress + dt/expandDuration, 1)
-        updateBlackLength(expandProgress)
+        updateBlackLength(expandProgress, blackVisible)
     end
 
-    -- التراجع التدريجي
+    -- التراجع التدريجي واختفاء الخط
     if contracting then
         expandProgress = math.max(expandProgress - dt/contractDuration, 0)
-        updateBlackLength(expandProgress)
+        updateBlackLength(expandProgress, blackVisible)
         if expandProgress <= 0 then
             contracting = false
+            blackVisible = false
+            slowingDown = false
         end
+    end
+
+    -- حركة التدرج بين السرعتين
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime)/transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
 
