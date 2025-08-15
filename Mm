@@ -847,6 +847,70 @@ local TabFunction = {}
 			}), "Text")
 		})
 
+-- هنا بعد إنشاء TabFrame
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = TabFrame.ZIndex + 1
+borderFrame.Parent = TabFrame
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = borderFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.43, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- التحريك
+local currentSpeed = 10
+local normalSpeed = 10
+local slowSpeed = 2
+local slowingDown = false
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
+local transitionTime = 1
+local slowDuration = 5
+
+RunService.Heartbeat:Connect(function(dt)
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+        task.delay(slowDuration, function()
+            speedFrom = slowSpeed
+            speedTo = normalSpeed
+            speedChangeStartTime = tick()
+            task.delay(transitionTime, function()
+                slowingDown = false
+            end)
+        end)
+    end
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+    end
+end)
+
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end	
