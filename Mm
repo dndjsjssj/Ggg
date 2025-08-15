@@ -729,8 +729,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		LoadSequenceText:Destroy()
 	end 
 
-
-
 -- ===== التحقق من إعدادات الواجهة =====
 if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
@@ -769,9 +767,9 @@ local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
     ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول)
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول + نصف الطول السابق)
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)),  -- أحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
@@ -811,7 +809,6 @@ RunService.Heartbeat:Connect(function(dt)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
-
 
 local TabFunction = {}
     
@@ -866,8 +863,8 @@ local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود أطول
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود أطول
+    ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود أطول
+    ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود أطول
     ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
@@ -907,8 +904,6 @@ RunService.Heartbeat:Connect(function(dt)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
-
-
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end	
