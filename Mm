@@ -737,12 +737,12 @@ if WindowConfig and WindowConfig.IntroEnabled then
 end
 
 -- ===== الإعدادات =====
-local thickness = 4                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local normalSpeed = 10                 -- السرعة العادية
-local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 5                 -- مدة التباطؤ بالثواني
-local transitionTime = 1               -- وقت الانتقال بين السرعتين
+local thickness = 4
+local cornerRadius = UDim.new(0, 8)
+local normalSpeed = 10
+local slowSpeed = 2
+local slowDuration = 5
+local transitionTime = 1
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -764,14 +764,14 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود يغطي نصف الإطار تقريبًا) =====
+-- ===== التدرج اللوني (زيادة طول الخط الأسود فقط) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول)
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),  -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول + نصف الطول السابق)
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
@@ -796,7 +796,6 @@ RunService.Heartbeat:Connect(function(dt)
         speedTo = slowSpeed
         speedChangeStartTime = tick()
 
-        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
         task.delay(slowDuration, function()
             speedFrom = slowSpeed
             speedTo = normalSpeed
@@ -807,12 +806,12 @@ RunService.Heartbeat:Connect(function(dt)
         end)
     end
 
-    -- حركة التدرج بين السرعتين
     if slowingDown then
         local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
+
 
 local TabFunction = {}
     
@@ -847,18 +846,18 @@ local TabFunction = {}
 
 -- هنا بعد إنشاء TabFrame
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- أصغر 2 بكسل من كل جانب
-borderFrame.Position = UDim2.new(0, 2, 0, 2) -- نحرك الإطار للداخل
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = TabFrame.ZIndex + 1
 borderFrame.Parent = TabFrame
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 4)  -- زوايا أصغر
+corner.CornerRadius = UDim.new(0, 6)
 corner.Parent = borderFrame
 
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 1.5  -- سماكة أقل
+stroke.Thickness = 2
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
@@ -866,10 +865,10 @@ stroke.Parent = borderFrame
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود أطول
     ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود أطول
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
@@ -908,6 +907,8 @@ RunService.Heartbeat:Connect(function(dt)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
+
+
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end	
