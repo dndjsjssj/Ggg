@@ -770,11 +770,12 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (الأسود ممتد 0.10 يمين ويسار من المنتصف) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- بداية الأحمر
-    ColorSequenceKeypoint.new(0.44, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أصبح على يسار)
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.63, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول قليلًا)
+    ColorSequenceKeypoint.new(0.87, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول قليلًا)
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
@@ -870,11 +871,12 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (الأسود في مركزه الطبيعي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- بداية الأحمر
-    ColorSequenceKeypoint.new(0.44, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر قبل الأسود
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أصبح على يسار)
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),  -- استمرار الأحمر بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.63, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (أطول قليلًا)
+    ColorSequenceKeypoint.new(0.87, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (أطول قليلًا)
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
