@@ -737,15 +737,12 @@ if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
-local RunService = game:GetService("RunService")
-
 -- ===== الإعدادات =====
-local thickness = 4
-local cornerRadius = UDim.new(0, 8)
-local normalSpeed = 10
-local extendAmount = 0.15   -- مقدار التمدد
-local extendDuration = 0.4  -- مدة تمدد الأسود
-local shrinkDuration = 0.4  -- مدة رجوع الأسود
+local thickness = 4                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
+local normalSpeed = 10                 -- السرعة العادية
+local slowSpeed = 2                    -- السرعة أثناء التباطؤ
+local slowDuration = 5                 -- مدة التباطؤ بالثواني
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
@@ -767,61 +764,55 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني =====
+-- ===== التدرج اللوني (خط أسود في منتصف الإطار) =====
 local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),   -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (منتصف)
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (منتصف)
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),   -- أحمر بعد الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
+}
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- دالة لضبط الخط الأسود في منتصف الإطار
-local center = 0.5 -- منتصف الإطار
-local normalWidth = 0.05
-
-local function setBlackWidth(width)
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(center - width/2, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(center - width/2, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(center + width/2, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(center + width/2, Color3.fromRGB(255,0,0)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))
-    }
-end
-
-setBlackWidth(normalWidth)
-
--- ===== تحريك التدرج مع تمدد عند نقطة البداية =====
+-- ===== تحريك التدرج مع تباطؤ تدريجي =====
+local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
-local lastRotation = 0
-local extending = false
+local slowingDown = false
+local transitionTime = 1 -- وقت الانتقال بين السرعتين بالثواني
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
 
 RunService.Heartbeat:Connect(function(dt)
+    local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- كشف رجوع الدوران للبداية
-    if not extending and lastRotation > gradient.Rotation then
-        extending = true
+    -- إذا رجع الخط الأسود لبداية اللفة
+    if not slowingDown and previousRotation > gradient.Rotation then  
+        slowingDown = true  
+        speedFrom = normalSpeed  
+        speedTo = slowSpeed  
+        speedChangeStartTime = tick()  
 
-        -- تمدد سريع
-        local startTime = tick()
-        spawn(function()
-            while tick() - startTime < extendDuration do
-                local t = (tick() - startTime) / extendDuration
-                setBlackWidth(normalWidth + extendAmount * t)
-                RunService.Heartbeat:Wait()
-            end
-            -- رجوع سريع
-            startTime = tick()
-            while tick() - startTime < shrinkDuration do
-                local t = (tick() - startTime) / shrinkDuration
-                setBlackWidth(normalWidth + extendAmount * (1 - t))
-                RunService.Heartbeat:Wait()
-            end
-            setBlackWidth(normalWidth)
-            extending = false
-        end)
+        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
+        task.delay(slowDuration, function()  
+            speedFrom = slowSpeed  
+            speedTo = normalSpeed  
+            speedChangeStartTime = tick()  
+            task.delay(transitionTime, function()  
+                slowingDown = false  
+            end)  
+        end)  
+    end  
+
+    -- حركة التدرج بين السرعتين
+    if slowingDown then  
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)  
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t  
     end
-
-    lastRotation = gradient.Rotation
 end)
 
 local TabFunction = {}
