@@ -766,56 +766,69 @@ stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
 
--- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
+-- إنشاء التدرج مع لون أسود أطول
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- بداية أحمر
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),   -- استمرار الأسود (أطول)
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)), -- رجوع للأحمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية أحمر
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)), -- بعد الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية الأحمر
 }
-gradient.Rotation = 0
-gradient.Parent = stroke
 
+-- إعدادات السرعة والتوقف
+local normalSpeed = 10       -- السرعة الطبيعية
+local slowSpeed = 2          -- السرعة البطيئة قبل التوقف
+local transitionTime = 1     -- وقت الانتقال بين السرعتين
+local pauseDuration = 5      -- مدة التوقف بالثواني
 
--- ===== تحريك التدرج مع تباطؤ تدريجي =====
-local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
 local slowingDown = false
+local paused = false
+local speedFrom, speedTo
 local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
+
+local RunService = game:GetService("RunService")
 
 RunService.Heartbeat:Connect(function(dt)
-    local previousRotation = gradient.Rotation
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+    if not paused then
+        local previousRotation = gradient.Rotation
+        gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- إذا رجع الخط الأسود لبداية اللفة
-    if not slowingDown and previousRotation > gradient.Rotation then
-        slowingDown = true
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
-
-        -- بعد التباطؤ يرجع يزيد السرعة تدريجياً
-        task.delay(slowDuration, function()
-            speedFrom = slowSpeed
-            speedTo = normalSpeed
+        -- التباطؤ قبل نقطة البداية (20 درجة قبلها)
+        if not slowingDown and ((360 - gradient.Rotation) < 20 or gradient.Rotation < 20) then
+            slowingDown = true
+            speedFrom = normalSpeed
+            speedTo = slowSpeed
             speedChangeStartTime = tick()
-            task.delay(transitionTime, function()
-                slowingDown = false
-            end)
-        end)
-    end
+        end
 
-    -- حركة التدرج بين السرعتين
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        -- التوقف عند بداية الدورة
+        if slowingDown and previousRotation > gradient.Rotation then
+            paused = true
+            task.delay(pauseDuration, function()
+                paused = false
+                speedFrom = slowSpeed
+                speedTo = normalSpeed
+                speedChangeStartTime = tick()
+                task.delay(transitionTime, function()
+                    slowingDown = false
+                end)
+            end)
+        end
+
+        -- انتقال السرعة تدريجيًا
+        if slowingDown and not paused then
+            local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+            currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        end
     end
 end)
+
+-- ملاحظة: تأكد أنك تحط التدرج على الـ UIStroke الخاص بالإطار
+-- مثال:
+-- gradient.Parent = stroke
 
 
 local TabFunction = {}
@@ -867,50 +880,63 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
+-- ===== التدرج اللوني (خط أسود أطول في منتصف الإطار) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- بداية أحمر
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 0, 0)),   -- استمرار الأسود (أطول)
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 0, 0)), -- رجوع للأحمر
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول)
+    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)), -- بعد الأسود
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- نهاية أحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- التحريك
-local currentSpeed = 10
-local normalSpeed = 10
-local slowSpeed = 2
+-- ===== التحريك مع التباطؤ والتوقف =====
+local normalSpeed = 10       -- السرعة الطبيعية
+local slowSpeed = 2          -- السرعة البطيئة قبل التوقف
+local transitionTime = 1     -- وقت الانتقال بين السرعتين
+local pauseDuration = 5      -- مدة التوقف بالثواني
+
+local currentSpeed = normalSpeed
 local slowingDown = false
+local paused = false
+local speedFrom, speedTo
 local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
-local transitionTime = 1
-local slowDuration = 5
 
 RunService.Heartbeat:Connect(function(dt)
-    local previousRotation = gradient.Rotation
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
-    if not slowingDown and previousRotation > gradient.Rotation then
-        slowingDown = true
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
-        task.delay(slowDuration, function()
-            speedFrom = slowSpeed
-            speedTo = normalSpeed
+    if not paused then
+        local previousRotation = gradient.Rotation
+        gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+        -- التباطؤ قبل نقطة البداية (20 درجة قبلها)
+        if not slowingDown and ((360 - gradient.Rotation) < 20 or gradient.Rotation < 20) then
+            slowingDown = true
+            speedFrom = normalSpeed
+            speedTo = slowSpeed
             speedChangeStartTime = tick()
-            task.delay(transitionTime, function()
-                slowingDown = false
+        end
+
+        -- التوقف عند بداية الدورة
+        if slowingDown and previousRotation > gradient.Rotation then
+            paused = true
+            task.delay(pauseDuration, function()
+                paused = false
+                speedFrom = slowSpeed
+                speedTo = normalSpeed
+                speedChangeStartTime = tick()
+                task.delay(transitionTime, function()
+                    slowingDown = false
+                end)
             end)
-        end)
-    end
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        end
+
+        -- انتقال السرعة تدريجيًا
+        if slowingDown and not paused then
+            local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+            currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        end
     end
 end)
 
