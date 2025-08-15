@@ -849,18 +849,18 @@ local TabFunction = {}
 
 -- هنا بعد إنشاء TabFrame
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- نقصنا 2 بكسل من كل جانب
+borderFrame.Position = UDim2.new(0, 2, 0, 2)  -- نحرك الإطار شوي للداخل
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = TabFrame.ZIndex + 1
 borderFrame.Parent = TabFrame
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 6)
+corner.CornerRadius = UDim.new(0, 4)  -- صغرنا الزوايا شوي
 corner.Parent = borderFrame
 
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
+stroke.Thickness = 1.5  -- صغرنا سماكة الخط
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
