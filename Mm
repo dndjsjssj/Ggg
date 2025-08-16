@@ -768,14 +768,14 @@ stroke.Parent = borderFrame
 
 
 
--- ===== التدرج اللوني (خط أسود بالنص بالضبط) =====
+-- ===== التدرج اللوني (خط أسود بالنص مع 9% يمين و 9% يسار) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 0, 0)),  -- لحد قريب النص أحمر
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود بالنص
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود بالنص
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(255, 0, 0)),  -- رجوع للأحمر
+    ColorSequenceKeypoint.new(0.41, Color3.fromRGB(255, 0, 0)),  -- لحد 41% أحمر
+    ColorSequenceKeypoint.new(0.41, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
+    ColorSequenceKeypoint.new(0.59, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود
+    ColorSequenceKeypoint.new(0.59, Color3.fromRGB(255, 0, 0)),  -- رجوع للأحمر
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
 }
 gradient.Rotation = 0
@@ -869,15 +869,15 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود بالنص بالضبط) =====
+-- ===== التدرج اللوني (خط أسود بالنص 9% يسار و 7% يمين) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 0, 0)),  -- لحد قريب النص أحمر
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود بالنص
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود بالنص
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(255, 0, 0)),  -- رجوع للأحمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر
+    ColorSequenceKeypoint.new(0.41, Color3.fromRGB(255, 0, 0)),  -- لحد 41% أحمر
+    ColorSequenceKeypoint.new(0.41, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود (يسار أوسع)
+    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (يمين أقصر)
+    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(255, 0, 0)),  -- رجوع للأحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- استمرار الأحمر للنهاية
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
