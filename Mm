@@ -779,7 +779,7 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
 }
-gradient.Rotation = -50
+gradient.Rotation = 170
 gradient.Parent = stroke
 
 -- ===== تحريك التدرج مع تباطؤ تدريجي =====
@@ -881,7 +881,7 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
 }
-gradient.Rotation = -50
+gradient.Rotation = 10
 gradient.Parent = stroke
 
 
