@@ -1025,12 +1025,12 @@ end)
 Click
 }), "Second")
 
--- ===== الحدود + التدرج =====
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = ButtonFrame
+-- ===== الزوايا =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = ButtonFrame
 
+-- ===== التدرج اللوني للخلفية =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
@@ -1041,18 +1041,17 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
 }
 gradient.Rotation = 0
-gradient.Parent = stroke
+gradient.Parent = ButtonFrame
 
 -- ===== التحريك =====
 local normalSpeed = 40
-local currentSpeed = normalSpeed
 local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
     if not ButtonFrame.Parent then return end
     if paused then return end  
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt
+    gradient.Rotation = gradient.Rotation + normalSpeed * dt
 
     if gradient.Rotation >= 356 then
         gradient.Rotation = 356
@@ -1063,7 +1062,6 @@ RunService.Heartbeat:Connect(function(dt)
         end)
     end
 end)
-
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
