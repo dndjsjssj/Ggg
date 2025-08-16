@@ -779,7 +779,7 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
 }
-gradient.Rotation = 170
+gradient.Rotation = 0
 gradient.Parent = stroke
 
 -- ===== تحريك التدرج مع تباطؤ تدريجي =====
@@ -793,6 +793,13 @@ local speedTo = slowSpeed
 RunService.Heartbeat:Connect(function(dt)
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+    -- ✅ إيقاف عند 350°
+    if gradient.Rotation >= 350 then
+        gradient.Rotation = 350
+        currentSpeed = 0
+        return -- يوقف وما يكمل حسابات ثانية
+    end
 
     -- إذا رجع الخط الأسود لبداية اللفة
     if not slowingDown and previousRotation > gradient.Rotation then
@@ -895,10 +902,19 @@ local speedFrom = normalSpeed
 local speedTo = slowSpeed
 local transitionTime = 1
 local slowDuration = 10
+local stopAngle = 340  -- ✅ مكان التوقف
 
 RunService.Heartbeat:Connect(function(dt)
+    -- إذا وصل للزاوية المطلوبة يوقف
+    if gradient.Rotation >= stopAngle then
+        gradient.Rotation = stopAngle
+        currentSpeed = 0
+        return
+    end
+
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
     if not slowingDown and previousRotation > gradient.Rotation then
         slowingDown = true
         speedFrom = normalSpeed
@@ -913,6 +929,7 @@ RunService.Heartbeat:Connect(function(dt)
             end)
         end)
     end
+
     if slowingDown then
         local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
