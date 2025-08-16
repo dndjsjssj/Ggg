@@ -874,14 +874,14 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)), -- نهاية الأحمر الأول
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود
-    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر بالأعلى
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 0, 0)), -- لحد قريب النص
+    ColorSequenceKeypoint.new(0.46, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
+    ColorSequenceKeypoint.new(0.54, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (بنص القائمة)
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)), -- رجع أحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر للنهاية
 }
-gradient.Rotation = 90
+gradient.Rotation = 90 -- 90 يخلي التدرج عامودي (من فوق لتحت)
 gradient.Parent = stroke
 
 -- التحريك
