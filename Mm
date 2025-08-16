@@ -796,7 +796,7 @@ RunService.Heartbeat:Connect(function(dt)
 
     -- ✅ إيقاف عند 350°
     if gradient.Rotation >= 350 then
-        gradient.Rotation = 350
+        gradient.Rotation = 355
         currentSpeed = 0
         return -- يوقف وما يكمل حسابات ثانية
     end
@@ -902,7 +902,7 @@ local speedFrom = normalSpeed
 local speedTo = slowSpeed
 local transitionTime = 1
 local slowDuration = 10
-local stopAngle = 340  -- ✅ مكان التوقف
+local stopAngle = 360  -- ✅ مكان التوقف
 
 RunService.Heartbeat:Connect(function(dt)
     -- إذا وصل للزاوية المطلوبة يوقف
