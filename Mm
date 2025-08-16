@@ -795,7 +795,7 @@ RunService.Heartbeat:Connect(function(dt)
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
     -- ✅ إيقاف عند 350°
-    if gradient.Rotation >= 350 then
+    if gradient.Rotation >= 355 then
         gradient.Rotation = 355
         currentSpeed = 0
         return -- يوقف وما يكمل حسابات ثانية
@@ -888,7 +888,7 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
 }
-gradient.Rotation = 10
+gradient.Rotation = 0
 gradient.Parent = stroke
 
 
@@ -902,7 +902,7 @@ local speedFrom = normalSpeed
 local speedTo = slowSpeed
 local transitionTime = 1
 local slowDuration = 10
-local stopAngle = 360  -- ✅ مكان التوقف
+local stopAngle = 358  -- ✅ مكان التوقف
 
 RunService.Heartbeat:Connect(function(dt)
     -- إذا وصل للزاوية المطلوبة يوقف
