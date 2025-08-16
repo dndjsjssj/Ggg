@@ -772,15 +772,16 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)),  -- أحمر لحد قبل الأسود
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- بداية أحمر
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)),  -- نهاية الأحمر الأول
     ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
     ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود
     ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)),  -- رجوع أحمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- أحمر للنهاية
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- نهاية أحمر
 }
-gradient.Rotation = 90  -- اتجاه أفقي (غيّره لـ 90 إذا تريده عمودي)
-gradient.Parent = MainWindow  -- أو أي فريم تحط عليه
+
+gradient.Rotation = 90 -- عامودي
+gradient.Parent = stroke
 
 -- ===== تحريك التدرج مع تباطؤ تدريجي =====
 local RunService = game:GetService("RunService")
@@ -874,15 +875,16 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)),  -- أحمر لحد قبل الأسود
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- بداية أحمر
+    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)),  -- نهاية الأحمر الأول
     ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
     ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود
     ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)),  -- رجوع أحمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- أحمر للنهاية
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))    -- نهاية أحمر
 }
-gradient.Rotation = 180  -- اتجاه أفقي (غيّره لـ 90 إذا تريده عمودي)
-gradient.Parent = MainWindow  -- أو أي فريم تحط عليه
+
+gradient.Rotation = 90 -- عامودي
+gradient.Parent = stroke
 
 -- التحريك
 local currentSpeed = 10
