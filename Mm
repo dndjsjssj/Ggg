@@ -740,7 +740,7 @@ end
 -- ===== الإعدادات =====
 local thickness = 4                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local normalSpeed = 10                 -- السرعة العادية
+local normalSpeed = 25                 -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
 local slowDuration = 5                 -- مدة التباطؤ بالثواني
 local transitionTime = 1               -- وقت الانتقال بين السرعتين
@@ -885,9 +885,9 @@ gradient.Rotation = 180
 gradient.Parent = stroke
 
 -- التحريك
-local currentSpeed = 10
-local normalSpeed = 10
-local slowSpeed = 2
+local currentSpeed = 25
+local normalSpeed = 25
+local slowSpeed = 1
 local slowingDown = false
 local speedChangeStartTime = 0
 local speedFrom = normalSpeed
