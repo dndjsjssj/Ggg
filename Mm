@@ -877,8 +877,8 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.43, Color3.fromRGB(0, 0, 0)), -- بداية الأسود
-    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(0, 0, 0)), -- نهاية الأسود
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.59, Color3.fromRGB(0, 0, 0)), -- نهاية الأسود
+    ColorSequenceKeypoint.new(0.57, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 90
