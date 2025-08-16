@@ -765,60 +765,41 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
-
-
-
-
 -- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
-سويه عله هاذ سكربت بدون تغير اي شي local gradient = Instance.new("UIGradient")
+local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
-ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
-ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول بالنص)
-ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
-ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول بالنص)
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
 }
-gradient.Rotation = 356
+gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج مع تباطؤ تدريجي =====
+-- ===== تحريك التدرج =====
 local RunService = game:GetService("RunService")
+
 local currentSpeed = normalSpeed
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
+local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
-local previousRotation = gradient.Rotation
-gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 356
+    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
 
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt)
 
--- إذا رجع الخط الأسود لبداية اللفة  
-if not slowingDown and previousRotation > gradient.Rotation then  
-    slowingDown = true  
-    speedFrom = normalSpeed  
-    speedTo = slowSpeed  
-    speedChangeStartTime = tick()  
+    -- إذا وصل 356 أو تعداها
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
 
-    -- بعد التباطؤ يرجع يزيد السرعة تدريجياً  
-    task.delay(slowDuration, function()  
-        speedFrom = slowSpeed  
-        speedTo = normalSpeed  
-        speedChangeStartTime = tick()  
-        task.delay(transitionTime, function()  
-            slowingDown = false  
-        end)  
-    end)  
-end  
-
--- حركة التدرج بين السرعتين  
-if slowingDown then  
-    local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)  
-    currentSpeed = speedFrom + (speedTo - speedFrom) * t  
-end
-
+        -- يوقف 3 ثواني وبعدين يرجع يتحرك طبيعي
+        task.delay(3, function()
+            gradient.Rotation = 0 -- يرجع من البداية
+            paused = false
+        end)
+    end
 end)
 
 
@@ -863,63 +844,54 @@ borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = TabFrame.ZIndex + 1
 borderFrame.Parent = TabFrame 
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 4)  -- صغرنا الزوايا شوي
-corner.Parent = borderFrame
-
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 1.5  -- صغرنا سماكة الخط
+stroke.Thickness = 1.5
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
-
--- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
+-- ===== التدرج اللوني =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
-ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
-ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول بالنص)
-ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
-ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
 }
-gradient.Rotation = 356
+gradient.Rotation = 0
 gradient.Parent = stroke
 
--- التحريك
-local currentSpeed = 10
-local normalSpeed = 25
-local slowSpeed = 1
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
-local transitionTime = 1
-local slowDuration = 10
+-- ===== الحركة =====
+local speed = 40       -- سرعة الدوران
+local stopPoint = 356  -- النقطة اللي يوقف عندها
+local pauseTime = 3    -- مدة التوقف بالثواني
+
+local running = true
+local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
-local previousRotation = gradient.Rotation
-gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 356
-if not slowingDown and previousRotation > gradient.Rotation then
-slowingDown = true
-speedFrom = normalSpeed
-speedTo = slowSpeed
-speedChangeStartTime = tick()
-task.delay(slowDuration, function()
-speedFrom = slowSpeed
-speedTo = normalSpeed
-speedChangeStartTime = tick()
-task.delay(transitionTime, function()
-slowingDown = false
+    if running and not paused then
+        gradient.Rotation = (gradient.Rotation + speed * dt)
+
+        -- إذا وصل أو تجاوز 356
+        if gradient.Rotation >= stopPoint and gradient.Rotation < 360 then
+            gradient.Rotation = stopPoint
+            paused = true
+
+            -- يوقف شوي وبعدها يكمل من 356 → 360 → 0
+            task.delay(pauseTime, function()
+                paused = false
+            end)
+        end
+
+        -- إذا عدى 360 يرجع للصفر
+        if gradient.Rotation >= 360 then
+            gradient.Rotation = gradient.Rotation % 360
+        end
+    end
 end)
-end)
-end
-if slowingDown then
-local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-currentSpeed = speedFrom + (speedTo - speedFrom) * t
-end
-end) 
 
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
