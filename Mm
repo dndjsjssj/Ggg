@@ -997,6 +997,8 @@ end)
 				return ParagraphFunction
 			end    
 
+local RunService = game:GetService("RunService")
+
 function ElementFunction:AddButton(ButtonConfig)
     ButtonConfig = ButtonConfig or {}
     ButtonConfig.Name = ButtonConfig.Name or "Button"
@@ -1027,53 +1029,48 @@ function ElementFunction:AddButton(ButtonConfig)
         Click
     }), "Second")
 
-    -- ===== الإطار المتدرج حوالين الزر =====
-    local borderFrame = Instance.new("Frame")
-    borderFrame.Size = UDim2.new(1, -4, 1, -4) 
-    borderFrame.Position = UDim2.new(0, 2, 0, 2)
-    borderFrame.BackgroundTransparency = 1
-    borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-    borderFrame.Parent = ButtonFrame
-
+    -- ===== حدود خاصة بكل زر =====
     local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1.5
-    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 2
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = borderFrame
+    stroke.Parent = ButtonFrame
 
+    -- ===== تدرج خاص بكل زر =====
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
     }
     gradient.Rotation = 0
     gradient.Parent = stroke
 
-    -- ===== التحريك =====
+    -- ===== التحريك (مستقل لكل زر) =====
     local normalSpeed = 40
     local stopPoint = 356
     local pauseTime = 1.5
     local paused = false
 
-    RunService.Heartbeat:Connect(function(dt)
-        if not borderFrame or not borderFrame.Parent then return end
-        if paused then return end  
-
-        gradient.Rotation = gradient.Rotation + normalSpeed * dt
-
-        if gradient.Rotation >= stopPoint then
-            gradient.Rotation = stopPoint
-            paused = true
-            task.delay(pauseTime, function()
-                if borderFrame and borderFrame.Parent then
-                    gradient.Rotation = 0
-                    paused = false
+    task.spawn(function()
+        while ButtonFrame.Parent do
+            if not paused then
+                gradient.Rotation = gradient.Rotation + normalSpeed * task.wait()
+                if gradient.Rotation >= stopPoint then
+                    gradient.Rotation = stopPoint
+                    paused = true
+                    task.delay(pauseTime, function()
+                        if ButtonFrame and ButtonFrame.Parent then
+                            gradient.Rotation = 0
+                            paused = false
+                        end
+                    end)
                 end
-            end)
+            else
+                task.wait()
+            end
         end
     end)
 
