@@ -768,7 +768,7 @@ stroke.Parent = borderFrame
 
 
 
-- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
+
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
 ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
@@ -869,7 +869,7 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
-- ===== التدرج اللوني (خط أسود أطول قليلًا في منتصف الإطار) =====
+
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
 ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر البداية
