@@ -1019,12 +1019,50 @@ end)
 						Name = "Content"
 					}), "Text"),
 					AddThemeObject(SetProps(MakeElement("Image", ButtonConfig.Icon), {
-						Size = UDim2.new(0, 20, 0, 20),
-						Position = UDim2.new(1, -30, 0, 7),
-					}), "TextDark"),
-					AddThemeObject(MakeElement("Stroke"), "Stroke"),
-					Click
-				}), "Second")
+    Size = UDim2.new(0, 20, 0, 20),
+    Position = UDim2.new(1, -30, 0, 7),
+}), "TextDark"),
+Click
+}), "Second")
+
+-- ===== الحدود + التدرج =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = ButtonFrame
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== التحريك =====
+local normalSpeed = 40
+local currentSpeed = normalSpeed
+local paused = false
+
+RunService.Heartbeat:Connect(function(dt)
+    if not ButtonFrame.Parent then return end
+    if paused then return end  
+
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt
+
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+        task.delay(1.5, function()
+            gradient.Rotation = 0
+            paused = false
+        end)
+    end
+end)
 
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
