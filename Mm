@@ -772,14 +772,14 @@ stroke.Parent = borderFrame
 -- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),   -- أحمر
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(255, 0, 0)), -- قبل الأسود
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),    -- أحمر
+    ColorSequenceKeypoint.new(0.399, Color3.fromRGB(255, 0, 0)),  -- نهاية الأحمر
 
-    ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (20%)
+    ColorSequenceKeypoint.new(0.401, Color3.fromRGB(0, 0, 0)),    -- بداية الأسود
+    ColorSequenceKeypoint.new(0.599, Color3.fromRGB(0, 0, 0)),    -- نهاية الأسود (20%)
 
-    ColorSequenceKeypoint.new(0.60, Color3.fromRGB(255, 0, 0)), -- بعد الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.601, Color3.fromRGB(255, 0, 0)),  -- رجوع للأحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))     -- أحمر
 }
 gradient.Rotation = 90
 gradient.Parent = stroke
