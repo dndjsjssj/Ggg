@@ -740,7 +740,7 @@ end
 -- ===== الإعدادات =====
 local thickness = 4                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local normalSpeed = 25                 -- السرعة العادية
+local normalSpeed = 40                -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
 local slowDuration = 5                 -- مدة التباطؤ بالثواني
 local transitionTime = 1               -- وقت الانتقال بين السرعتين
