@@ -1032,7 +1032,7 @@ function ElementFunction:AddButton(ButtonConfig)
     -- ===== الإعدادات =====
 local thickness = 2                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
-local normalSpeed = 10                 -- السرعة العادية
+local normalSpeed = 40                 -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
 local slowDuration = 3                 -- مدة التباطؤ بالثواني
 local transitionTime = 1               -- وقت الانتقال بين السرعتين
@@ -1060,12 +1060,12 @@ stroke.Parent = borderFrame
 -- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول بالنص)
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
