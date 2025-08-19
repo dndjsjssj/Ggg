@@ -996,63 +996,70 @@ end)
 				end
 				return ParagraphFunction
 			end    
+-- ===== عناصر المساعدة =====
+local ElementFunction = {}
+local ItemParent = Instance.new("Frame") -- حط هذا الإطار داخل التاب
+ItemParent.Size = UDim2.new(1, 0, 1, 0)
+ItemParent.BackgroundTransparency = 1
+ItemParent.Parent = workspace:WaitForChild("ScreenGui") -- عدل حسب مكانك
 
--- دالة إنشاء تاب جديد
-function ElementFunction:CreateTab(Name)
-    local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(1,0,1,0)
-    TabFrame.BackgroundTransparency = 1
-    TabFrame.Name = Name
-    TabFrame.Parent = TabsHolder -- هذا هو الحاوي الأساسي للتابات
-
-    -- نخلي الأزرار تصف تحت بعض داخل التاب
+-- ===== أضف Layout لترتيب الأزرار =====
+if not ItemParent:FindFirstChildOfClass("UIListLayout") then
     local layout = Instance.new("UIListLayout")
-    layout.Parent = TabFrame
+    layout.Parent = ItemParent
     layout.Padding = UDim.new(0, 5)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    return TabFrame
 end
 
-
--- دالة إضافة زر (تستعملها لكل تاب)
-function ElementFunction:AddButton(TabFrame, ButtonConfig)
+-- ===== دالة إضافة زر =====
+function ElementFunction:AddButton(ButtonConfig)
     ButtonConfig = ButtonConfig or {}
     ButtonConfig.Name = ButtonConfig.Name or "Button"
     ButtonConfig.Callback = ButtonConfig.Callback or function() end
     ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
 
     -- زر كليك
-    local Click = SetProps(MakeElement("Button"), {
-        Size = UDim2.new(1, 0, 1, 0)
-    })
+    local Click = Instance.new("TextButton")
+    Click.Size = UDim2.new(1, 0, 1, 0)
+    Click.BackgroundTransparency = 1
 
     -- الإطار الأساسي للزر
-    local ButtonFrame = AddThemeObject(SetChildren(SetProps(
-        MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-        Size = UDim2.new(1, 0, 0, 33),
-        Parent = TabFrame -- <<< هنا نحط الزر داخل التاب المطلوب
-    }), {
-        AddThemeObject(SetProps(MakeElement("Label", ButtonConfig.Name, 15), {
-            Size = UDim2.new(1, -12, 1, 0),
-            Position = UDim2.new(0, 12, 0, 0),
-            Font = Enum.Font.GothamBold,
-            Name = "Content"
-        }), "Text"),
-        AddThemeObject(SetProps(MakeElement("Image", ButtonConfig.Icon), {
-            Size = UDim2.new(0, 20, 0, 20),
-            Position = UDim2.new(1, -30, 0, 7),
-        }), "TextDark"),
-        Click
-    }), "Second")
+    local ButtonFrame = Instance.new("Frame")
+    ButtonFrame.Size = UDim2.new(1, 0, 0, 33)
+    ButtonFrame.Parent = ItemParent
+    ButtonFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    ButtonFrame.BorderSizePixel = 0
+    ButtonFrame.Name = ButtonConfig.Name
 
-    -- حدود
+    -- نص الزر
+    local Label = Instance.new("TextLabel")
+    Label.Text = ButtonConfig.Name
+    Label.Size = UDim2.new(1, -40, 1, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
+    Label.Font = Enum.Font.GothamBold
+    Label.TextSize = 15
+    Label.BackgroundTransparency = 1
+    Label.TextColor3 = Color3.fromRGB(0,0,0)
+    Label.Parent = ButtonFrame
+
+    -- أيقونة
+    local Icon = Instance.new("ImageLabel")
+    Icon.Image = ButtonConfig.Icon
+    Icon.Size = UDim2.new(0, 20, 0, 20)
+    Icon.Position = UDim2.new(1, -30, 0, 7)
+    Icon.BackgroundTransparency = 1
+    Icon.Parent = ButtonFrame
+
+    -- زر الكليك داخل الإطار
+    Click.Parent = ButtonFrame
+
+    -- حدود للزر
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = ButtonFrame
 
-    -- تدرج
+    -- تدرج لكل زر
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
@@ -1065,7 +1072,7 @@ function ElementFunction:AddButton(TabFrame, ButtonConfig)
     gradient.Rotation = 0
     gradient.Parent = stroke
 
-    -- تحريك مستقل
+    -- تحريك التدرج لكل زر
     local normalSpeed = 40
     local stopPoint = 356
     local pauseTime = 1.5
@@ -1095,6 +1102,16 @@ function ElementFunction:AddButton(TabFrame, ButtonConfig)
     Click.MouseButton1Click:Connect(function()
         ButtonConfig.Callback()
     end)
+end
+
+-- ===== إضافة 5 أزرار كمثال =====
+for i = 1, 5 do
+    ElementFunction:AddButton({
+        Name = "Button "..i,
+        Callback = function()
+            print("ضغط على الزر "..i)
+        end
+    })
 end
 
 				AddConnection(Click.MouseEnter, function()
