@@ -996,83 +996,68 @@ end)
 				end
 				return ParagraphFunction
 			end    
--- ===== عناصر المساعدة =====
-local ElementFunction = {}
-local ItemParent = Instance.new("Frame") -- حط هذا الإطار داخل التاب
-ItemParent.Size = UDim2.new(1, 0, 1, 0)
-ItemParent.BackgroundTransparency = 1
-ItemParent.Parent = workspace:WaitForChild("ScreenGui") -- عدل حسب مكانك
 
--- ===== أضف Layout لترتيب الأزرار =====
-if not ItemParent:FindFirstChildOfClass("UIListLayout") then
-    local layout = Instance.new("UIListLayout")
-    layout.Parent = ItemParent
-    layout.Padding = UDim.new(0, 5)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-end
-
--- ===== دالة إضافة زر =====
 function ElementFunction:AddButton(ButtonConfig)
     ButtonConfig = ButtonConfig or {}
     ButtonConfig.Name = ButtonConfig.Name or "Button"
     ButtonConfig.Callback = ButtonConfig.Callback or function() end
     ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
 
-    -- زر كليك
-    local Click = Instance.new("TextButton")
-    Click.Size = UDim2.new(1, 0, 1, 0)
-    Click.BackgroundTransparency = 1
+    local Button = {}
 
-    -- الإطار الأساسي للزر
-    local ButtonFrame = Instance.new("Frame")
-    ButtonFrame.Size = UDim2.new(1, 0, 0, 33)
-    ButtonFrame.Parent = ItemParent
-    ButtonFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    ButtonFrame.BorderSizePixel = 0
-    ButtonFrame.Name = ButtonConfig.Name
+    local Click = SetProps(MakeElement("Button"), {
+        Size = UDim2.new(1, 0, 1, 0)
+    })
 
-    -- نص الزر
-    local Label = Instance.new("TextLabel")
-    Label.Text = ButtonConfig.Name
-    Label.Size = UDim2.new(1, -40, 1, 0)
-    Label.Position = UDim2.new(0, 12, 0, 0)
-    Label.Font = Enum.Font.GothamBold
-    Label.TextSize = 15
-    Label.BackgroundTransparency = 1
-    Label.TextColor3 = Color3.fromRGB(0,0,0)
-    Label.Parent = ButtonFrame
+    local ButtonFrame = AddThemeObject(SetChildren(SetProps(
+        MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+        Size = UDim2.new(1, 0, 0, 33),
+        Parent = ItemParent
+    }), {
+        AddThemeObject(SetProps(MakeElement("Label", ButtonConfig.Name, 15), {
+            Size = UDim2.new(1, -12, 1, 0),
+            Position = UDim2.new(0, 12, 0, 0),
+            Font = Enum.Font.GothamBold,
+            Name = "Content"
+        }), "Text"),
+        AddThemeObject(SetProps(MakeElement("Image", ButtonConfig.Icon), {
+            Size = UDim2.new(0, 20, 0, 20),
+            Position = UDim2.new(1, -30, 0, 7),
+        }), "TextDark"),
+        Click
+    }), "Second")
 
-    -- أيقونة
-    local Icon = Instance.new("ImageLabel")
-    Icon.Image = ButtonConfig.Icon
-    Icon.Size = UDim2.new(0, 20, 0, 20)
-    Icon.Position = UDim2.new(1, -30, 0, 7)
-    Icon.BackgroundTransparency = 1
-    Icon.Parent = ButtonFrame
+    ----------------------------------------------------------------
+    -- ✨ حدود متدرجة (أحمر + أسود) + حركة دوران
+    ----------------------------------------------------------------
+    local RunService = game:GetService("RunService")
 
-    -- زر الكليك داخل الإطار
-    Click.Parent = ButtonFrame
+    local borderFrame = Instance.new("Frame")
+    borderFrame.Size = UDim2.new(1, -4, 1, -4)
+    borderFrame.Position = UDim2.new(0, 2, 0, 2)
+    borderFrame.BackgroundTransparency = 1
+    borderFrame.ZIndex = ButtonFrame.ZIndex + 1
+    borderFrame.Parent = ButtonFrame
 
-    -- حدود للزر
     local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 2
+    stroke.Thickness = 1.5
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = ButtonFrame
+    stroke.Color = Color3.fromRGB(255, 0, 0) -- يضل أحمر
+    stroke.Parent = borderFrame
 
-    -- تدرج لكل زر
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),-- أحمر أطول
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),-- أحمر ثاني
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))  -- أحمر
     }
     gradient.Rotation = 0
     gradient.Parent = stroke
 
-    -- تحريك التدرج لكل زر
+    -- حركة الدوران
     local normalSpeed = 40
     local stopPoint = 356
     local pauseTime = 1.5
@@ -1097,21 +1082,14 @@ function ElementFunction:AddButton(ButtonConfig)
             end
         end
     end)
+    ----------------------------------------------------------------
 
     -- حدث الكليك
     Click.MouseButton1Click:Connect(function()
         ButtonConfig.Callback()
     end)
-end
 
--- ===== إضافة 5 أزرار كمثال =====
-for i = 1, 5 do
-    ElementFunction:AddButton({
-        Name = "Button "..i,
-        Callback = function()
-            print("ضغط على الزر "..i)
-        end
-    })
+    return Button
 end
 
 				AddConnection(Click.MouseEnter, function()
