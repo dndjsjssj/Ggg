@@ -999,7 +999,26 @@ end)
 
 local RunService = game:GetService("RunService")
 
-function ElementFunction:AddButton(ButtonConfig)
+-- دالة إنشاء تاب جديد
+function ElementFunction:CreateTab(Name)
+    local TabFrame = Instance.new("Frame")
+    TabFrame.Size = UDim2.new(1,0,1,0)
+    TabFrame.BackgroundTransparency = 1
+    TabFrame.Name = Name
+    TabFrame.Parent = TabsHolder -- هذا هو الحاوي الأساسي للتابات
+
+    -- نخلي الأزرار تصف تحت بعض داخل التاب
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = TabFrame
+    layout.Padding = UDim.new(0, 5)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    return TabFrame
+end
+
+
+-- دالة إضافة زر (تستعملها لكل تاب)
+function ElementFunction:AddButton(TabFrame, ButtonConfig)
     ButtonConfig = ButtonConfig or {}
     ButtonConfig.Name = ButtonConfig.Name or "Button"
     ButtonConfig.Callback = ButtonConfig.Callback or function() end
@@ -1014,7 +1033,7 @@ function ElementFunction:AddButton(ButtonConfig)
     local ButtonFrame = AddThemeObject(SetChildren(SetProps(
         MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
         Size = UDim2.new(1, 0, 0, 33),
-        Parent = ItemParent
+        Parent = TabFrame -- <<< هنا نحط الزر داخل التاب المطلوب
     }), {
         AddThemeObject(SetProps(MakeElement("Label", ButtonConfig.Name, 15), {
             Size = UDim2.new(1, -12, 1, 0),
@@ -1029,13 +1048,13 @@ function ElementFunction:AddButton(ButtonConfig)
         Click
     }), "Second")
 
-    -- ===== حدود خاصة بكل زر =====
+    -- حدود
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = ButtonFrame
 
-    -- ===== تدرج خاص بكل زر =====
+    -- تدرج
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
@@ -1048,7 +1067,7 @@ function ElementFunction:AddButton(ButtonConfig)
     gradient.Rotation = 0
     gradient.Parent = stroke
 
-    -- ===== التحريك (مستقل لكل زر) =====
+    -- تحريك مستقل
     local normalSpeed = 40
     local stopPoint = 356
     local pauseTime = 1.5
