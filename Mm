@@ -1029,62 +1029,87 @@ function ElementFunction:AddButton(ButtonConfig)
     }), "Second")
 
     ----------------------------------------------------------------
-    -- ✨ لو تريد زر واحد فقط يطلع ملون
-    ----------------------------------------------------------------
-    if ButtonConfig.Colored then
-        local stroke = Instance.new("UIStroke")
-        stroke.Thickness = 1.5
-        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        stroke.Color = Color3.fromRGB(255, 0, 0)
-        stroke.Parent = ButtonFrame
+    -- ===== الإعدادات =====
+local thickness = 2                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
+local normalSpeed = 10                 -- السرعة العادية
+local slowSpeed = 2                    -- السرعة أثناء التباطؤ
+local slowDuration = 3                 -- مدة التباطؤ بالثواني
+local transitionTime = 1               -- وقت الانتقال بين السرعتين
 
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-            ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-            ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
-        }
-        gradient.Rotation = 0
-        gradient.Parent = stroke
+-- ===== إنشاء إطار للزر =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = ButtonFrame.ZIndex + 1
+borderFrame.Parent = ButtonFrame   -- ✨ ملاحظة: جوه الزر نفسه
 
-        -- حركة التدرج
-        local normalSpeed = 40
-        local stopPoint = 356
-        local pauseTime = 1.5
-        local paused = false
+-- ===== زوايا الإطار =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
 
-        task.spawn(function()
-            while ButtonFrame.Parent do
-                if not paused then
-                    gradient.Rotation = gradient.Rotation + normalSpeed * task.wait()
-                    if gradient.Rotation >= stopPoint then
-                        gradient.Rotation = stopPoint
-                        paused = true
-                        task.delay(pauseTime, function()
-                            if ButtonFrame and ButtonFrame.Parent then
-                                gradient.Rotation = 0
-                                paused = false
-                            end
-                        end)
-                    end
-                else
-                    task.wait()
-                end
+-- ===== الحدود =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- ===== التدرج الأحمر/الأسود =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== تحريك التدرج =====
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local slowingDown = false
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
+
+RunService.Heartbeat:Connect(function(dt)
+    if not borderFrame.Parent then return end -- حماية من الأخطاء
+
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+    -- إذا خلصت الدورة يصير تباطؤ
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+
+        -- يرجع للسرعة الطبيعية بعد فترة
+        task.delay(slowDuration, function()
+            if borderFrame.Parent then
+                speedFrom = slowSpeed
+                speedTo = normalSpeed
+                speedChangeStartTime = tick()
+                task.delay(transitionTime, function()
+                    slowingDown = false
+                end)
             end
         end)
     end
-    ----------------------------------------------------------------
 
-    -- حدث الكليك
-    Click.MouseButton1Click:Connect(function()
-        ButtonConfig.Callback()
-    end)
-
-    return Button
-end
+    -- حركة السرعة التدريجية
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+    end
+end)
 
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
@@ -1159,6 +1184,88 @@ end
 					ToggleBox,
 					Click
 				}), "Second")
+
+-- ===== الإعدادات =====
+local thickness = 2                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
+local normalSpeed = 10                 -- السرعة العادية
+local slowSpeed = 2                    -- السرعة أثناء التباطؤ
+local slowDuration = 3                 -- مدة التباطؤ بالثواني
+local transitionTime = 1               -- وقت الانتقال بين السرعتين
+
+-- ===== إنشاء إطار للزر =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = ButtonFrame.ZIndex + 1
+borderFrame.Parent = ButtonFrame   -- ✨ ملاحظة: جوه الزر نفسه
+
+-- ===== زوايا الإطار =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- ===== الحدود =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- ===== التدرج الأحمر/الأسود =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== تحريك التدرج =====
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local slowingDown = false
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
+
+RunService.Heartbeat:Connect(function(dt)
+    if not borderFrame.Parent then return end -- حماية من الأخطاء
+
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+    -- إذا خلصت الدورة يصير تباطؤ
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+
+        -- يرجع للسرعة الطبيعية بعد فترة
+        task.delay(slowDuration, function()
+            if borderFrame.Parent then
+                speedFrom = slowSpeed
+                speedTo = normalSpeed
+                speedChangeStartTime = tick()
+                task.delay(transitionTime, function()
+                    slowingDown = false
+                end)
+            end
+        end)
+    end
+
+    -- حركة السرعة التدريجية
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+    end
+end)
 
 				function Toggle:Set(Value)
 					Toggle.Value = Value
