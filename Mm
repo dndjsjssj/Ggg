@@ -1024,64 +1024,58 @@ function ElementFunction:AddButton(ButtonConfig)
             Size = UDim2.new(0, 20, 0, 20),
             Position = UDim2.new(1, -30, 0, 7),
         }), "TextDark"),
+        AddThemeObject(MakeElement("Stroke"), "Stroke"),
         Click
     }), "Second")
 
     ----------------------------------------------------------------
-    -- ✨ حدود متدرجة (أحمر + أسود) + حركة دوران
+    -- ✨ لو تريد زر واحد فقط يطلع ملون
     ----------------------------------------------------------------
-    local RunService = game:GetService("RunService")
+    if ButtonConfig.Colored then
+        local stroke = Instance.new("UIStroke")
+        stroke.Thickness = 1.5
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.Color = Color3.fromRGB(255, 0, 0)
+        stroke.Parent = ButtonFrame
 
-    local borderFrame = Instance.new("Frame")
-    borderFrame.Size = UDim2.new(1, -4, 1, -4)
-    borderFrame.Position = UDim2.new(0, 2, 0, 2)
-    borderFrame.BackgroundTransparency = 1
-    borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-    borderFrame.Parent = ButtonFrame
+        local gradient = Instance.new("UIGradient")
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+        }
+        gradient.Rotation = 0
+        gradient.Parent = stroke
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1.5
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Color = Color3.fromRGB(255, 0, 0) -- يضل أحمر
-    stroke.Parent = borderFrame
+        -- حركة التدرج
+        local normalSpeed = 40
+        local stopPoint = 356
+        local pauseTime = 1.5
+        local paused = false
 
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),-- أحمر أطول
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),  -- بداية الأسود
-        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),  -- نهاية الأسود
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),-- أحمر ثاني
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))  -- أحمر
-    }
-    gradient.Rotation = 0
-    gradient.Parent = stroke
-
-    -- حركة الدوران
-    local normalSpeed = 40
-    local stopPoint = 356
-    local pauseTime = 1.5
-    local paused = false
-
-    task.spawn(function()
-        while ButtonFrame.Parent do
-            if not paused then
-                gradient.Rotation = gradient.Rotation + normalSpeed * task.wait()
-                if gradient.Rotation >= stopPoint then
-                    gradient.Rotation = stopPoint
-                    paused = true
-                    task.delay(pauseTime, function()
-                        if ButtonFrame and ButtonFrame.Parent then
-                            gradient.Rotation = 0
-                            paused = false
-                        end
-                    end)
+        task.spawn(function()
+            while ButtonFrame.Parent do
+                if not paused then
+                    gradient.Rotation = gradient.Rotation + normalSpeed * task.wait()
+                    if gradient.Rotation >= stopPoint then
+                        gradient.Rotation = stopPoint
+                        paused = true
+                        task.delay(pauseTime, function()
+                            if ButtonFrame and ButtonFrame.Parent then
+                                gradient.Rotation = 0
+                                paused = false
+                            end
+                        end)
+                    end
+                else
+                    task.wait()
                 end
-            else
-                task.wait()
             end
-        end
-    end)
+        end)
+    end
     ----------------------------------------------------------------
 
     -- حدث الكليك
