@@ -997,7 +997,26 @@ end)
 				return ParagraphFunction
 			end    
 
-function ElementFunction:AddButton(ButtonConfig)
+-- دالة إنشاء تاب جديد
+function ElementFunction:CreateTab(Name)
+    local TabFrame = Instance.new("Frame")
+    TabFrame.Size = UDim2.new(1,0,1,0)
+    TabFrame.BackgroundTransparency = 1
+    TabFrame.Name = Name
+    TabFrame.Parent = TabsHolder -- هذا هو الحاوي الأساسي للتابات
+
+    -- نخلي الأزرار تصف تحت بعض داخل التاب
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = TabFrame
+    layout.Padding = UDim.new(0, 5)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    return TabFrame
+end
+
+
+-- دالة إضافة زر (تستعملها لكل تاب)
+function ElementFunction:AddButton(TabFrame, ButtonConfig)
     ButtonConfig = ButtonConfig or {}
     ButtonConfig.Name = ButtonConfig.Name or "Button"
     ButtonConfig.Callback = ButtonConfig.Callback or function() end
@@ -1012,7 +1031,7 @@ function ElementFunction:AddButton(ButtonConfig)
     local ButtonFrame = AddThemeObject(SetChildren(SetProps(
         MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
         Size = UDim2.new(1, 0, 0, 33),
-        Parent = ItemParent
+        Parent = TabFrame -- <<< هنا نحط الزر داخل التاب المطلوب
     }), {
         AddThemeObject(SetProps(MakeElement("Label", ButtonConfig.Name, 15), {
             Size = UDim2.new(1, -12, 1, 0),
@@ -1027,59 +1046,56 @@ function ElementFunction:AddButton(ButtonConfig)
         Click
     }), "Second")
 
-    -- ===== إنشاء الإطار حوالين الزر =====
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- نقص 2 بكسل من كل طرف حتى يبين حلو
-borderFrame.Position = UDim2.new(0, 2, 0, 2)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-borderFrame.Parent = ButtonFrame
+    -- حدود
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 2
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = ButtonFrame
 
--- ===== الحدود =====
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 1.5
-stroke.Color = Color3.fromRGB(255, 0, 0)
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
+    -- تدرج
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    }
+    gradient.Rotation = 0
+    gradient.Parent = stroke
 
--- ===== التدرج اللوني =====
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
+    -- تحريك مستقل
+    local normalSpeed = 40
+    local stopPoint = 356
+    local pauseTime = 1.5
+    local paused = false
 
--- ===== التحريك =====
-local RunService = game:GetService("RunService")
-
-local normalSpeed = 40      -- سرعة الدوران
-local stopPoint = 356       -- النقطة اللي يوقف عندها
-local pauseTime = 1.5       -- مدة التوقف بالثواني
-local paused = false
-
-RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame or not borderFrame.Parent then return end
-    if paused then return end  
-
-    gradient.Rotation = gradient.Rotation + normalSpeed * dt
-
-    if gradient.Rotation >= stopPoint then
-        gradient.Rotation = stopPoint
-        paused = true
-        task.delay(pauseTime, function()
-            if borderFrame and borderFrame.Parent then
-                gradient.Rotation = 0
-                paused = false
+    task.spawn(function()
+        while ButtonFrame.Parent do
+            if not paused then
+                gradient.Rotation = gradient.Rotation + normalSpeed * task.wait()
+                if gradient.Rotation >= stopPoint then
+                    gradient.Rotation = stopPoint
+                    paused = true
+                    task.delay(pauseTime, function()
+                        if ButtonFrame and ButtonFrame.Parent then
+                            gradient.Rotation = 0
+                            paused = false
+                        end
+                    end)
+                end
+            else
+                task.wait()
             end
-        end)
-    end
-end)
+        end
+    end)
+
+    -- حدث الكليك
+    Click.MouseButton1Click:Connect(function()
+        ButtonConfig.Callback()
+    end)
+end
 
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
