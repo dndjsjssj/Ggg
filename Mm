@@ -1483,66 +1483,107 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
-local thickness = 2
-local cornerRadius = UDim.new(0, 5)
-local normalSpeed = 40
+local thickness = 2                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
+local normalSpeed = 40                 -- السرعة العادية
+local slowSpeed = 2                    -- السرعة أثناء التباطؤ
+local slowDuration = 3                 -- مدة التباطؤ بالثواني
+local transitionTime = 1               -- وقت الانتقال بين السرعتين
 
--- ===== إنشاء إطار للدروب داون =====
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = DropdownFrame.ZIndex + 1
-borderFrame.Parent = DropdownFrame   -- ✨ جوه الدروب داون نفسه
-
--- ===== زوايا الإطار =====
-local corner = Instance.new("UICorner")
-corner.CornerRadius = cornerRadius
-corner.Parent = borderFrame
-
--- ===== الحدود =====
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 0, 0)
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
-
--- ===== التدرج الأحمر/الأسود =====
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
-
--- ===== التحريك مع التوقف عند 356 =====
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
 
-RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
-    if not borderFrame.Parent then return end  -- حماية
+-- 🔥 دالة تسوي إطار متحرك لأي عنصر (زر/فريم)
+local function ApplyAnimatedBorder(frame)
+    local borderFrame = Instance.new("Frame")
+    borderFrame.Size = UDim2.new(1, 0, 1, 0)
+    borderFrame.Position = UDim2.new(0, 0, 0, 0)
+    borderFrame.BackgroundTransparency = 1
+    borderFrame.ZIndex = frame.ZIndex + 1
+    borderFrame.Parent = frame
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = cornerRadius
+    corner.Parent = borderFrame
 
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = borderFrame
 
-        task.delay(1.5, function()
-            if borderFrame.Parent then
-                gradient.Rotation = 0
-                paused = false
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    }
+    gradient.Rotation = 0
+    gradient.Parent = stroke
+
+    -- الحركة
+    local currentSpeed = normalSpeed
+    local slowingDown = false
+    local speedChangeStartTime = 0
+    local speedFrom = normalSpeed
+    local speedTo = slowSpeed
+
+    RunService.Heartbeat:Connect(function(dt)
+        if not borderFrame.Parent then return end
+
+        local previousRotation = gradient.Rotation
+        gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+        if not slowingDown and previousRotation > gradient.Rotation then
+            slowingDown = true
+            speedFrom = normalSpeed
+            speedTo = slowSpeed
+            speedChangeStartTime = tick()
+
+            task.delay(slowDuration, function()
+                if borderFrame.Parent then
+                    speedFrom = slowSpeed
+                    speedTo = normalSpeed
+                    speedChangeStartTime = tick()
+                    task.delay(transitionTime, function()
+                        slowingDown = false
+                    end)
+                end
+            end)
+        end
+
+        if slowingDown then
+            local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+            currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        end
+    end)
+end
+
+-- 🟥 استخدامه مع الدروب داون
+local F = DropdownFrame:FindFirstChild("F")
+if F then
+    -- المستطيل الرئيسي
+    ApplyAnimatedBorder(F)
+
+    -- الخيارات الداخلية (الأزرار/الكلمات)
+    local OptionList = DropdownFrame:FindFirstChild("OptionList")
+    if OptionList then
+        for _, option in ipairs(OptionList:GetChildren()) do
+            if option:IsA("TextButton") then
+                ApplyAnimatedBorder(option)
+            end
+        end
+
+        -- في حال انضاف خيار جديد بعدين
+        OptionList.ChildAdded:Connect(function(child)
+            if child:IsA("TextButton") then
+                ApplyAnimatedBorder(child)
             end
         end)
     end
-end)
+end
 
 				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
