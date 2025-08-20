@@ -1316,6 +1316,67 @@ end)
 					SliderBar
 				}), "Second")
 
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
+
+-- ===== إنشاء إطار للسلايدر =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = SliderFrame.ZIndex + 1
+borderFrame.Parent = SliderFrame   -- ✨ جوه السلايدر نفسه
+
+-- ===== زوايا الإطار =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- ===== الحدود =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- ===== التدرج الأحمر/الأسود =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== التحريك مع التوقف عند 356 =====
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local paused = false
+
+RunService.Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not borderFrame.Parent then return end  -- حماية
+
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+
+        task.delay(1.5, function()
+            if borderFrame.Parent then
+                gradient.Rotation = 0
+                paused = false
+            end
+        end)
+    end
+end)
+
 				SliderBar.InputBegan:Connect(function(Input)
 					if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then 
 						Dragging = true 
@@ -1421,6 +1482,67 @@ end)
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					MakeElement("Corner")
 				}), "Second")
+
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
+
+-- ===== إنشاء إطار للدروب داون =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = DropdownFrame.ZIndex + 1
+borderFrame.Parent = DropdownFrame   -- ✨ جوه الدروب داون نفسه
+
+-- ===== زوايا الإطار =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- ===== الحدود =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- ===== التدرج الأحمر/الأسود =====
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== التحريك مع التوقف عند 356 =====
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local paused = false
+
+RunService.Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not borderFrame.Parent then return end  -- حماية
+
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+
+        task.delay(1.5, function()
+            if borderFrame.Parent then
+                gradient.Rotation = 0
+                paused = false
+            end
+        end)
+    end
+end)
 
 				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
@@ -1660,19 +1782,76 @@ end)
 
 
 				local TextboxFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 38),
-					Parent = ItemParent
-				}), {
-					AddThemeObject(SetProps(MakeElement("Label", TextboxConfig.Name, 15), {
-						Size = UDim2.new(1, -12, 1, 0),
-						Position = UDim2.new(0, 12, 0, 0),
-						Font = Enum.Font.GothamBold,
-						Name = "Content"
-					}), "Text"),
-					AddThemeObject(MakeElement("Stroke"), "Stroke"),
-					TextContainer,
-					Click
-				}), "Second")
+    Size = UDim2.new(1, 0, 0, 38),
+    Parent = ItemParent
+}), {
+    AddThemeObject(SetProps(MakeElement("Label", TextboxConfig.Name, 15), {
+        Size = UDim2.new(1, -12, 1, 0),
+        Position = UDim2.new(0, 12, 0, 0),
+        Font = Enum.Font.GothamBold,
+        Name = "Content"
+    }), "Text"),
+    AddThemeObject(MakeElement("Stroke"), "Stroke"),
+    TextContainer,
+    Click
+}), "Second")
+
+-- ===== الإطار الأحمر/الأسود للتكست بوكس =====
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
+
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = TextboxFrame.ZIndex + 1
+borderFrame.Parent = TextboxFrame
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local paused = false
+
+RunService.Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not borderFrame.Parent then return end
+
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+
+        task.delay(1.5, function()
+            if borderFrame.Parent then
+                gradient.Rotation = 0
+                paused = false
+            end
+        end)
+    end
+end)
 
 				AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
 					--TextContainer.Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)
