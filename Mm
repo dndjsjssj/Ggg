@@ -1483,48 +1483,91 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
--- نجيب المستطيل الرئيسي
+-- ===== الإعدادات =====
+local thickness = 2                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
+local normalSpeed = 40                 -- السرعة العادية
+local slowSpeed = 2                    -- السرعة أثناء التباطؤ
+local slowDuration = 3                 -- مدة التباطؤ بالثواني
+local transitionTime = 1               -- وقت الانتقال بين السرعتين
+
+-- نحصل على Frame "F" من داخل الدروب داون
 local F = DropdownFrame:WaitForChild("F")
 
--- نصنع Frame جديد يكون الخلفية (أكبر بشوية)
+-- ===== إنشاء إطار حوالين "F" =====
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 4, 1, 4)  -- أكبر 4 بيكسل من كل جهة
-borderFrame.Position = UDim2.new(0, -2, 0, -2) -- يحركه للخلف
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = F.ZIndex - 1  -- يكون خلف F
-borderFrame.Parent = DropdownFrame
+borderFrame.ZIndex = F.ZIndex + 1
+borderFrame.Parent = F
 
--- زوايا ناعمة
+-- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 6)
+corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- الإطار
+-- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- التدرج الأحمر/الأسود
+-- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
 }
+gradient.Rotation = 0
 gradient.Parent = stroke
 
--- حركة التدرج
+-- ===== تحريك التدرج =====
 local RunService = game:GetService("RunService")
-local speed = 40
+local currentSpeed = normalSpeed
+local slowingDown = false
+local speedChangeStartTime = 0
+local speedFrom = normalSpeed
+local speedTo = slowSpeed
 
 RunService.Heartbeat:Connect(function(dt)
-    if not gradient.Parent then return end
-    gradient.Rotation = (gradient.Rotation + speed * dt) % 360
+    if not borderFrame.Parent then return end -- حماية من الأخطاء
+
+    local previousRotation = gradient.Rotation
+    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+
+    -- إذا خلصت الدورة يصير تباطؤ
+    if not slowingDown and previousRotation > gradient.Rotation then
+        slowingDown = true
+        speedFrom = normalSpeed
+        speedTo = slowSpeed
+        speedChangeStartTime = tick()
+
+        -- يرجع للسرعة الطبيعية بعد فترة
+        task.delay(slowDuration, function()
+            if borderFrame.Parent then
+                speedFrom = slowSpeed
+                speedTo = normalSpeed
+                speedChangeStartTime = tick()
+                task.delay(transitionTime, function()
+                    slowingDown = false
+                end)
+            end
+        end)
+    end
+
+    -- حركة السرعة التدريجية
+    if slowingDown then
+        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+        currentSpeed = speedFrom + (speedTo - speedFrom) * t
+    end
 end)
+
 
 				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
