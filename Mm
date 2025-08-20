@@ -1442,54 +1442,54 @@ end)
 				})
 
 				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 38),
-					Parent = ItemParent,
-					ClipsDescendants = true
-				}), {
-					DropdownContainer,
-					SetProps(SetChildren(MakeElement("TFrame"), {
-						AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
-							Size = UDim2.new(1, -12, 1, 0),
-							Position = UDim2.new(0, 12, 0, 0),
-							Font = Enum.Font.GothamBold,
-							Name = "Content"
-						}), "Text"),
-						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
-							Size = UDim2.new(0, 20, 0, 20),
-							AnchorPoint = Vector2.new(0, 0.5),
-							Position = UDim2.new(1, -30, 0.5, 0),
-							ImageColor3 = Color3.fromRGB(240, 240, 240),
-							Name = "Ico"
-						}), "TextDark"),
-						AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
-							Size = UDim2.new(1, -40, 1, 0),
-							Font = Enum.Font.Gotham,
-							Name = "Selected",
-							TextXAlignment = Enum.TextXAlignment.Right
-						}), "TextDark"),
-						AddThemeObject(SetProps(MakeElement("Frame"), {
-							Size = UDim2.new(1, 0, 0, 1),
-							Position = UDim2.new(0, 0, 1, -1),
-							Name = "Line",
-							Visible = false
-						}), "Stroke"), 
-						Click
-					}), {
-						Size = UDim2.new(1, 0, 0, 38),
-						ClipsDescendants = true,
-						Name = "F"
-					}),
-					AddThemeObject(MakeElement("Stroke"), "Stroke"),
-					MakeElement("Corner")
-				}), "Second")
+				-- إنشاء الـ DropdownFrame
+local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+    Size = UDim2.new(1, 0, 0, 38),
+    Parent = ItemParent,
+    ClipsDescendants = true
+}), {
+    DropdownContainer,
+    SetProps(SetChildren(MakeElement("TFrame"), {
+        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
+            Size = UDim2.new(1, -12, 1, 0),
+            Position = UDim2.new(0, 12, 0, 0),
+            Font = Enum.Font.GothamBold,
+            Name = "Content"
+        }), "Text"),
+        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
+            Size = UDim2.new(0, 20, 0, 20),
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(1, -30, 0.5, 0),
+            ImageColor3 = Color3.fromRGB(240, 240, 240),
+            Name = "Ico"
+        }), "TextDark"),
+        AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
+            Size = UDim2.new(1, -40, 1, 0),
+            Font = Enum.Font.Gotham,
+            Name = "Selected",
+            TextXAlignment = Enum.TextXAlignment.Right
+        }), "TextDark"),
+        AddThemeObject(SetProps(MakeElement("Frame"), {
+            Size = UDim2.new(1, 0, 0, 1),
+            Position = UDim2.new(0, 0, 1, -1),
+            Name = "Line",
+            Visible = false
+        }), "Stroke"), 
+        Click
+    }), {
+        Size = UDim2.new(1, 0, 0, 38),
+        ClipsDescendants = true,
+        Name = "F"
+    })
+}), "Second")
 
 -- ===== الإعدادات =====
-local thickness = 2                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
-local normalSpeed = 40                 -- السرعة العادية
-local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 3                 -- مدة التباطؤ بالثواني
-local transitionTime = 1               -- وقت الانتقال بين السرعتين
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
+local slowSpeed = 2
+local slowDuration = 3
+local transitionTime = 1
 
 -- نحصل على Frame "F" من داخل الدروب داون
 local F = DropdownFrame:WaitForChild("F")
@@ -1536,19 +1536,17 @@ local speedFrom = normalSpeed
 local speedTo = slowSpeed
 
 RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end -- حماية من الأخطاء
+    if not borderFrame.Parent then return end
 
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- إذا خلصت الدورة يصير تباطؤ
     if not slowingDown and previousRotation > gradient.Rotation then
         slowingDown = true
         speedFrom = normalSpeed
         speedTo = slowSpeed
         speedChangeStartTime = tick()
 
-        -- يرجع للسرعة الطبيعية بعد فترة
         task.delay(slowDuration, function()
             if borderFrame.Parent then
                 speedFrom = slowSpeed
@@ -1561,18 +1559,11 @@ RunService.Heartbeat:Connect(function(dt)
         end)
     end
 
-    -- حركة السرعة التدريجية
     if slowingDown then
         local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
-
-
-				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
-				end)  
-
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
