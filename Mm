@@ -1442,46 +1442,46 @@ end)
 				})
 
 				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-				-- إنشاء الـ DropdownFrame
-local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-    Size = UDim2.new(1, 0, 0, 38),
-    Parent = ItemParent,
-    ClipsDescendants = true
-}), {
-    DropdownContainer,
-    SetProps(SetChildren(MakeElement("TFrame"), {
-        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
-            Size = UDim2.new(1, -12, 1, 0),
-            Position = UDim2.new(0, 12, 0, 0),
-            Font = Enum.Font.GothamBold,
-            Name = "Content"
-        }), "Text"),
-        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
-            Size = UDim2.new(0, 20, 0, 20),
-            AnchorPoint = Vector2.new(0, 0.5),
-            Position = UDim2.new(1, -30, 0.5, 0),
-            ImageColor3 = Color3.fromRGB(240, 240, 240),
-            Name = "Ico"
-        }), "TextDark"),
-        AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
-            Size = UDim2.new(1, -40, 1, 0),
-            Font = Enum.Font.Gotham,
-            Name = "Selected",
-            TextXAlignment = Enum.TextXAlignment.Right
-        }), "TextDark"),
-        AddThemeObject(SetProps(MakeElement("Frame"), {
-            Size = UDim2.new(1, 0, 0, 1),
-            Position = UDim2.new(0, 0, 1, -1),
-            Name = "Line",
-            Visible = false
-        }), "Stroke"), 
-        Click
-    }), {
-        Size = UDim2.new(1, 0, 0, 38),
-        ClipsDescendants = true,
-        Name = "F"
-    })
-}), "Second")
+					Size = UDim2.new(1, 0, 0, 38),
+					Parent = ItemParent,
+					ClipsDescendants = true
+				}), {
+					DropdownContainer,
+					SetProps(SetChildren(MakeElement("TFrame"), {
+						AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
+							Size = UDim2.new(1, -12, 1, 0),
+							Position = UDim2.new(0, 12, 0, 0),
+							Font = Enum.Font.GothamBold,
+							Name = "Content"
+						}), "Text"),
+						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
+							Size = UDim2.new(0, 20, 0, 20),
+							AnchorPoint = Vector2.new(0, 0.5),
+							Position = UDim2.new(1, -30, 0.5, 0),
+							ImageColor3 = Color3.fromRGB(240, 240, 240),
+							Name = "Ico"
+						}), "TextDark"),
+						AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
+							Size = UDim2.new(1, -40, 1, 0),
+							Font = Enum.Font.Gotham,
+							Name = "Selected",
+							TextXAlignment = Enum.TextXAlignment.Right
+						}), "TextDark"),
+						AddThemeObject(SetProps(MakeElement("Frame"), {
+							Size = UDim2.new(1, 0, 0, 1),
+							Position = UDim2.new(0, 0, 1, -1),
+							Name = "Line",
+							Visible = false
+						}), "Stroke"), 
+						Click
+					}), {
+						Size = UDim2.new(1, 0, 0, 38),
+						ClipsDescendants = true,
+						Name = "F"
+					}),
+					AddThemeObject(MakeElement("Stroke"), "Stroke"),
+					MakeElement("Corner")
+				}), "Second")
 
 -- ===== الإعدادات =====
 local thickness = 2
@@ -1491,16 +1491,16 @@ local slowSpeed = 2
 local slowDuration = 3
 local transitionTime = 1
 
--- نحصل على Frame "F" من داخل الدروب داون
+-- الحصول على F من داخل Dropdown
 local F = DropdownFrame:WaitForChild("F")
 
--- ===== إنشاء إطار حوالين "F" =====
+-- ===== إنشاء إطار خارجي حوالين F =====
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.Size = UDim2.new(1, 8, 1, 8)          -- أكبر من F
+borderFrame.Position = UDim2.new(0, -4, 0, -4)    -- للخارج
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = F.ZIndex + 1
-borderFrame.Parent = F
+borderFrame.ZIndex = F.ZIndex - 1                 -- يخليه ورا F (إذا تريد قدام غيرها لـ +1)
+borderFrame.Parent = DropdownFrame
 
 -- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
@@ -1510,19 +1510,18 @@ corner.Parent = borderFrame
 -- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
 -- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
@@ -1564,6 +1563,7 @@ RunService.Heartbeat:Connect(function(dt)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
+
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
