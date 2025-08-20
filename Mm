@@ -1163,18 +1163,17 @@ end)
 					Click
 				}), "Second")
 
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
 
-local thickness = 2                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
-local normalSpeed = 40                 -- السرعة العادية
-
--- ===== إنشاء إطار للزر =====
+-- ===== إنشاء إطار للتلجوري =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-borderFrame.Parent = ButtonFrame   -- ✨ جوه الزر نفسه
+borderFrame.ZIndex = ToggleFrame.ZIndex + 1
+borderFrame.Parent = ToggleFrame   -- ✨ جوه التلجوري نفسه
 
 -- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
@@ -1207,16 +1206,14 @@ local currentSpeed = normalSpeed
 local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
+    if paused then return end
 
     gradient.Rotation = gradient.Rotation + currentSpeed * dt  
 
-    -- إذا وصل 356 أو أكثر
     if gradient.Rotation >= 356 then
         gradient.Rotation = 356
         paused = true
 
-        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
         task.delay(1.5, function()
             gradient.Rotation = 0
             paused = false
