@@ -1483,23 +1483,29 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
-                -- نجيب المستطيل الرئيسي F
+-- نجيب المستطيل الرئيسي
 local F = DropdownFrame:WaitForChild("F")
 
--- ===== إعدادات =====
-local thickness = 2
-local normalSpeed = 40
-local slowSpeed = 2
-local slowDuration = 3
-local transitionTime = 1
+-- نصنع Frame جديد يكون الخلفية (أكبر بشوية)
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 4, 1, 4)  -- أكبر 4 بيكسل من كل جهة
+borderFrame.Position = UDim2.new(0, -2, 0, -2) -- يحركه للخلف
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = F.ZIndex - 1  -- يكون خلف F
+borderFrame.Parent = DropdownFrame
 
--- ===== الحدود =====
+-- زوايا ناعمة
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = borderFrame
+
+-- الإطار
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = thickness
+stroke.Thickness = 2
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = F
+stroke.Parent = borderFrame
 
--- ===== التدرج الأحمر/الأسود =====
+-- التدرج الأحمر/الأسود
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
@@ -1509,45 +1515,15 @@ gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
-gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
+-- حركة التدرج
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
+local speed = 40
 
 RunService.Heartbeat:Connect(function(dt)
-    if not stroke.Parent then return end
-
-    local previousRotation = gradient.Rotation
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
-
-    if not slowingDown and previousRotation > gradient.Rotation then
-        slowingDown = true
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
-
-        task.delay(slowDuration, function()
-            if stroke.Parent then
-                speedFrom = slowSpeed
-                speedTo = normalSpeed
-                speedChangeStartTime = tick()
-                task.delay(transitionTime, function()
-                    slowingDown = false
-                end)
-            end
-        end)
-    end
-
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
-    end
+    if not gradient.Parent then return end
+    gradient.Rotation = (gradient.Rotation + speed * dt) % 360
 end)
 
 				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
