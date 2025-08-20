@@ -1029,13 +1029,9 @@ function ElementFunction:AddButton(ButtonConfig)
     }), "Second")
 
     ----------------------------------------------------------------
-    -- ===== الإعدادات =====
-local thickness = 2                    -- سماكة الحواف
+    local thickness = 2                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
 local normalSpeed = 40                 -- السرعة العادية
-local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 3                 -- مدة التباطؤ بالثواني
-local transitionTime = 1               -- وقت الانتقال بين السرعتين
 
 -- ===== إنشاء إطار للزر =====
 local borderFrame = Instance.new("Frame")
@@ -1043,7 +1039,7 @@ borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-borderFrame.Parent = ButtonFrame   -- ✨ ملاحظة: جوه الزر نفسه
+borderFrame.Parent = ButtonFrame   -- ✨ جوه الزر نفسه
 
 -- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
@@ -1060,54 +1056,36 @@ stroke.Parent = borderFrame
 -- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول بالنص)
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
+-- ===== التحريك مع التوقف عند 356 =====
 local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
+local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end -- حماية من الأخطاء
+    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
 
-    local previousRotation = gradient.Rotation
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
 
-    -- إذا خلصت الدورة يصير تباطؤ
-    if not slowingDown and previousRotation > gradient.Rotation then
-        slowingDown = true
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
+    -- إذا وصل 356 أو أكثر
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
 
-        -- يرجع للسرعة الطبيعية بعد فترة
-        task.delay(slowDuration, function()
-            if borderFrame.Parent then
-                speedFrom = slowSpeed
-                speedTo = normalSpeed
-                speedChangeStartTime = tick()
-                task.delay(transitionTime, function()
-                    slowingDown = false
-                end)
-            end
+        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
+        task.delay(1.5, function()
+            gradient.Rotation = 0
+            paused = false
         end)
-    end
-
-    -- حركة السرعة التدريجية
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
 
@@ -1185,13 +1163,10 @@ end)
 					Click
 				}), "Second")
 
--- ===== الإعدادات =====
+
 local thickness = 2                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
-local normalSpeed = 10                 -- السرعة العادية
-local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 3                 -- مدة التباطؤ بالثواني
-local transitionTime = 1               -- وقت الانتقال بين السرعتين
+local normalSpeed = 40                 -- السرعة العادية
 
 -- ===== إنشاء إطار للزر =====
 local borderFrame = Instance.new("Frame")
@@ -1199,7 +1174,7 @@ borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-borderFrame.Parent = ButtonFrame   -- ✨ ملاحظة: جوه الزر نفسه
+borderFrame.Parent = ButtonFrame   -- ✨ جوه الزر نفسه
 
 -- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
@@ -1216,54 +1191,36 @@ stroke.Parent = borderFrame
 -- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
+-- ===== التحريك مع التوقف عند 356 =====
 local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
+local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end -- حماية من الأخطاء
+    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
 
-    local previousRotation = gradient.Rotation
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
 
-    -- إذا خلصت الدورة يصير تباطؤ
-    if not slowingDown and previousRotation > gradient.Rotation then
-        slowingDown = true
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
+    -- إذا وصل 356 أو أكثر
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
 
-        -- يرجع للسرعة الطبيعية بعد فترة
-        task.delay(slowDuration, function()
-            if borderFrame.Parent then
-                speedFrom = slowSpeed
-                speedTo = normalSpeed
-                speedChangeStartTime = tick()
-                task.delay(transitionTime, function()
-                    slowingDown = false
-                end)
-            end
+        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
+        task.delay(1.5, function()
+            gradient.Rotation = 0
+            paused = false
         end)
-    end
-
-    -- حركة السرعة التدريجية
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
     end
 end)
 
