@@ -1483,16 +1483,17 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
-    local thickness = 2                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
-local normalSpeed = 40                 -- السرعة العادية
-local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 3                 -- مدة التباطؤ بالثواني
-local transitionTime = 1               -- وقت الانتقال بين السرعتين
+    
+    local previousRotation = gradient.Rotation
+    local thickness = 2                    
+local cornerRadius = UDim.new(0, 5)    
+local normalSpeed = 40                 
+local slowSpeed = 2                    
+local slowDuration = 3                 
+local transitionTime = 1               
 
--- ===== نجيب المستطيل الرئيسي للدروب داون =====
-local F = DropdownFrame:FindFirstChild("F")
-if not F then return end  -- إذا ما لكاه، يوقف
+-- ننتظر لحد ما يطلع المستطيل الرئيسي (F) جوه الدروب داون
+local F = DropdownFrame:WaitForChild("F")
 
 -- ===== إنشاء إطار للدروب داون =====
 local borderFrame = Instance.new("Frame")
@@ -1517,12 +1518,12 @@ stroke.Parent = borderFrame
 -- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- أحمر ثاني
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
@@ -1536,19 +1537,17 @@ local speedFrom = normalSpeed
 local speedTo = slowSpeed
 
 RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end -- حماية من الأخطاء
+    if not borderFrame.Parent then return end 
 
     local previousRotation = gradient.Rotation
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    -- إذا خلصت الدورة يصير تباطؤ
     if not slowingDown and previousRotation > gradient.Rotation then
         slowingDown = true
         speedFrom = normalSpeed
         speedTo = slowSpeed
         speedChangeStartTime = tick()
 
-        -- يرجع للسرعة الطبيعية بعد فترة
         task.delay(slowDuration, function()
             if borderFrame.Parent then
                 speedFrom = slowSpeed
@@ -1561,7 +1560,6 @@ RunService.Heartbeat:Connect(function(dt)
         end)
     end
 
-    -- حركة السرعة التدريجية
     if slowingDown then
         local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
         currentSpeed = speedFrom + (speedTo - speedFrom) * t
