@@ -1,0 +1,693 @@
+-- Script de Admin Completo para Brookhaven (Roblox) - 30 Funções, Sem Restrição de Admin
+-- Compatível com Krnl, otimizado para mobile, com GUI neon
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Prefix = "!" -- Prefixo para comandos no chat
+
+-- Função para notificações
+local function notify(message)
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Admin Menu",
+            Text = message,
+            Duration = 5
+        })
+    end)
+end
+
+-- Variáveis para funções específicas
+local flying = false
+local noclip = false
+local espEnabled = false
+local espConnections = {}
+
+-- Criar GUI com visual neon
+local function createGUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "AdminGUIBrookhaven"
+    ScreenGui.Parent = game.CoreGui
+    ScreenGui.ResetOnSpawn = false
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 350, 0, 500)
+    MainFrame.Position = UDim2.new(0.5, -175, 0.5, -250)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Parent = ScreenGui
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+
+    local NeonBorder = Instance.new("UIStroke")
+    NeonBorder.Color = Color3.fromRGB(0, 255, 255)
+    NeonBorder.Thickness = 3
+    NeonBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    NeonBorder.Parent = MainFrame
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 50)
+    Title.Position = UDim2.new(0, 0, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = "Admin Menu - Brookhaven (30 Funções)"
+    Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+    Title.TextScaled = true
+    Title.Font = Enum.Font.Arcade
+    Title.Parent = MainFrame
+
+    local ScrollingFrame = Instance.new("ScrollingFrame")
+    ScrollingFrame.Size = UDim2.new(0.9, 0, 0.8, 0)
+    ScrollingFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+    ScrollingFrame.BackgroundTransparency = 1
+    ScrollingFrame.ScrollBarThickness = 5
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 1200)
+    ScrollingFrame.Parent = MainFrame
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Padding = UDim.new(0, 5)
+    UIListLayout.Parent = ScrollingFrame
+
+    local PlayerInput = Instance.new("TextBox")
+    PlayerInput.Size = UDim2.new(0.8, 0, 0, 40)
+    PlayerInput.Position = UDim2.new(0.1, 0, 0.05, 0)
+    PlayerInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    PlayerInput.Text = "Nome do Jogador"
+    PlayerInput.TextColor3 = Color3.fromRGB(0, 255, 255)
+    PlayerInput.TextScaled = true
+    PlayerInput.Font = Enum.Font.Arcade
+    PlayerInput.Parent = MainFrame
+
+    local InputCorner = Instance.new("UICorner")
+    InputCorner.CornerRadius = UDim.new(0, 8)
+    InputCorner.Parent = PlayerInput
+
+    local InputStroke = Instance.new("UIStroke")
+    InputStroke.Color = Color3.fromRGB(0, 255, 255)
+    InputStroke.Thickness = 2
+    InputStroke.Parent = PlayerInput
+
+    -- Função para criar botões
+    local function createButton(name, callback)
+        local Button = Instance.new("TextButton")
+        Button.Size = UDim2.new(0.9, 0, 0, 40)
+        Button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        Button.Text = name
+        Button.TextColor3 = Color3.fromRGB(0, 255, 255)
+        Button.TextScaled = true
+        Button.Font = Enum.Font.Arcade
+        Button.Parent = ScrollingFrame
+
+        local ButtonCorner = Instance.new("UICorner")
+        ButtonCorner.CornerRadius = UDim.new(0, 8)
+        ButtonCorner.Parent = Button
+
+        local ButtonStroke = Instance.new("UIStroke")
+        ButtonStroke.Color = Color3.fromRGB(0, 255, 255)
+        ButtonStroke.Thickness = 2
+        ButtonStroke.Parent = Button
+
+        Button.MouseButton1Click:Connect(callback)
+    end
+
+    -- 30 Funções
+    createButton("1. Kick Player", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target then
+            pcall(function()
+                target:Kick("Kickado pelo admin.")
+                notify("Jogador " .. targetName .. " kickado.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado.")
+        end
+    end)
+
+    createButton("2. Teleport to Player", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and LocalPlayer.Character and target.Character then
+            pcall(function()
+                LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+                notify("Teleportado para " .. targetName .. ".")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("3. Set Speed (50)", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character.Humanoid.WalkSpeed = 50
+                notify("Velocidade de " .. targetName .. " definida para 50.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("4. Fly (Toggle)", function()
+        if LocalPlayer.Character then
+            flying = not flying
+            if flying then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = LocalPlayer.Character.HumanoidRootPart
+
+                local bodyGyro = Instance.new("BodyGyro")
+                bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                bodyGyro.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+                bodyGyro.Parent = LocalPlayer.Character.HumanoidRootPart
+
+                RunService:BindToRenderStep("Fly", Enum.RenderPriority.Input.Value, function()
+                    local cam = workspace.CurrentCamera
+                    local moveDir = Vector3.new(0, 0, 0)
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                        moveDir = moveDir + cam.CFrame.LookVector
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                        moveDir = moveDir - cam.CFrame.LookVector
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                        moveDir = moveDir - cam.CFrame.RightVector
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                        moveDir = moveDir + cam.CFrame.RightVector
+                    end
+                    bodyVelocity.Velocity = moveDir * 50
+                    bodyGyro.CFrame = cam.CFrame
+                end)
+                notify("Fly ativado!")
+            else
+                RunService:UnbindFromRenderStep("Fly")
+                if LocalPlayer.Character then
+                    for _, obj in pairs(LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
+                        if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") then
+                            obj:Destroy()
+                        end
+                    end
+                end
+                notify("Fly desativado!")
+            end
+        end
+    end)
+
+    createButton("5. Noclip (Toggle)", function()
+        noclip = not noclip
+        if noclip then
+            RunService:BindToRenderStep("Noclip", Enum.RenderPriority.Character.Value, function()
+                if LocalPlayer.Character then
+                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+            notify("Noclip ativado!")
+        else
+            RunService:UnbindFromRenderStep("Noclip")
+            if LocalPlayer.Character then
+                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+            notify("Noclip desativado!")
+        end
+    end)
+
+    createButton("6. ESP (Toggle)", function()
+        espEnabled = not espEnabled
+        if espEnabled then
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    pcall(function()
+                        local highlight = Instance.new("Highlight")
+                        highlight.FillColor = Color3.fromRGB(0, 255, 255)
+                        highlight.OutlineColor = Color3.fromRGB(0, 255, 255)
+                        highlight.Parent = player.Character
+                        espConnections[player] = player.CharacterAdded:Connect(function(char)
+                            local newHighlight = Instance.new("Highlight")
+                            newHighlight.FillColor = Color3.fromRGB(0, 255, 255)
+                            newHighlight.OutlineColor = Color3.fromRGB(0, 255, 255)
+                            newHighlight.Parent = char
+                        end)
+                    end)
+                end
+            end
+            notify("ESP ativado!")
+        else
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.Character then
+                    for _, obj in pairs(player.Character:GetDescendants()) do
+                        if obj:IsA("Highlight") then
+                            obj:Destroy()
+                        end
+                    end
+                end
+                if espConnections[player] then
+                    espConnections[player]:Disconnect()
+                end
+            end
+            espConnections = {}
+            notify("ESP desativado!")
+        end
+    end)
+
+    createButton("7. Kill Player", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character:BreakJoints()
+                notify("Jogador " .. targetName .. " eliminado.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("8. God Mode (Toggle)", function()
+        if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.MaxHealth = math.huge
+                humanoid.Health = math.huge
+                notify("God Mode ativado!")
+            end
+        end
+    end)
+
+    createButton("9. Invisible (Toggle)", function()
+        if LocalPlayer.Character then
+            local isInvisible = LocalPlayer.Character:FindFirstChild("Head").Transparency == 1
+            pcall(function()
+                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                        part.Transparency = isInvisible and 0 or 1
+                    end
+                end
+                notify(isInvisible and "Invisibilidade desativada!" or "Invisibilidade ativada!")
+            end)
+        end
+    end)
+
+    createButton("10. Teleport to House", function()
+        if LocalPlayer.Character then
+            pcall(function()
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-50, 10, -50) -- Ajuste as coordenadas
+                notify("Teleportado para uma casa!")
+            end)
+        end
+    end)
+
+    createButton("11. Teleport to Bank", function()
+        if LocalPlayer.Character then
+            pcall(function()
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(300, 10, 300) -- Ajuste as coordenadas
+                notify("Teleportado para o banco!")
+            end)
+        end
+    end)
+
+    createButton("12. Teleport to Police Station", function()
+        if LocalPlayer.Character then
+            pcall(function()
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(100, 10, 100) -- Ajuste as coordenadas
+                notify("Teleportado para a delegacia!")
+            end)
+        end
+    end)
+
+    createButton("13. Set Jump Power (100)", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character.Humanoid.JumpPower = 100
+                notify("Pulo de " .. targetName .. " definido para 100.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("14. Give Tool (Gun)", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                local tool = Instance.new("Tool")
+                tool.Name = "Gun"
+                tool.Parent = target.Backpack
+                notify("Arma dada para " .. targetName .. ".")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("15. Remove Tools", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Backpack:ClearAllChildren()
+                for _, tool in pairs(target.Character:GetChildren()) do
+                    if tool:IsA("Tool") then
+                        tool:Destroy()
+                    end
+                end
+                notify("Ferramentas de " .. targetName .. " removidas.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("16. Freeze Player", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character.HumanoidRootPart.Anchored = true
+                notify("Jogador " .. targetName .. " congelado.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("17. Unfreeze Player", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character.HumanoidRootPart.Anchored = false
+                notify("Jogador " .. targetName .. " descongelado.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("18. Explode Player", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                local explosion = Instance.new("Explosion")
+                explosion.Position = target.Character.HumanoidRootPart.Position
+                explosion.Parent = workspace
+                notify("Explosão criada em " .. targetName .. ".")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("19. Give Cash (1000)", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target then
+            pcall(function()
+                -- Brookhaven usa sistemas próprios para dinheiro, isso pode não funcionar
+                notify("Tentativa de dar 1000 de dinheiro para " .. targetName .. " (pode não funcionar).")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado.")
+        end
+    end)
+
+    createButton("20. Reset Character", function()
+        local targetName = PlayerInput.Text
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character:BreakJoints()
+                target:LoadCharacter()
+                notify("Personagem de " .. targetName .. " resetado.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    end)
+
+    createButton("21. Teleport All to Me", function()
+        if LocalPlayer.Character then
+            pcall(function()
+                for _, player in pairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        player.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+                    end
+                end
+                notify("Todos os jogadores teleportados para você!")
+            end)
+        end
+    end)
+
+    createButton("22. Invisible All", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                            part.Transparency = 1
+                        end
+                    end
+                end
+            end
+            notify("Todos os jogadores estão invisíveis!")
+        end)
+    end)
+
+    createButton("23. Visible All", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                            part.Transparency = 0
+                        end
+                    end
+                end
+            end
+            notify("Todos os jogadores estão visíveis!")
+        end)
+    end)
+
+    createButton("24. Speed All (50)", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.Character then
+                    player.Character.Humanoid.WalkSpeed = 50
+                end
+            end
+            notify("Velocidade de todos definida para 50!")
+        end)
+    end)
+
+    createButton("25. Jump Power All (100)", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.Character then
+                    player.Character.Humanoid.JumpPower = 100
+                end
+            end
+            notify("Pulo de todos definido para 100!")
+        end)
+    end)
+
+    createButton("26. Kill All", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    player.Character:BreakJoints()
+                end
+            end
+            notify("Todos os jogadores eliminados!")
+        end)
+    end)
+
+    createButton("27. Freeze All", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    player.Character.HumanoidRootPart.Anchored = true
+                end
+            end
+            notify("Todos os jogadores congelados!")
+        end)
+    end)
+
+    createButton("28. Unfreeze All", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    player.Character.HumanoidRootPart.Anchored = false
+                end
+            end
+            notify("Todos os jogadores descongelados!")
+        end)
+    end)
+
+    createButton("29. Shutdown Server", function()
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    player:Kick("Servidor encerrado pelo admin.")
+                end
+            end
+            notify("Servidor encerrado!")
+        end)
+    end)
+
+    createButton("30. Close GUI", function()
+        ScreenGui:Destroy()
+        if flying then
+            RunService:UnbindFromRenderStep("Fly")
+            if LocalPlayer.Character then
+                for _, obj in pairs(LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
+                    if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") then
+                        obj:Destroy()
+                    end
+                end
+            end
+        end
+        if noclip then
+            RunService:UnbindFromRenderStep("Noclip")
+            if LocalPlayer.Character then
+                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+        if espEnabled then
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.Character then
+                    for _, obj in pairs(player.Character:GetDescendants()) do
+                        if obj:IsA("Highlight") then
+                            obj:Destroy()
+                        end
+                    end
+                end
+                if espConnections[player] then
+                    espConnections[player]:Disconnect()
+                end
+            end
+        end
+        notify("GUI fechada e funções desativadas.")
+    end)
+end
+
+-- Processar comandos no chat
+local function onChatted(message, player)
+    local args = string.split(message, " ")
+    local command = args[1]:lower()
+
+    if command == Prefix .. "kick" then
+        local targetName = args[2]
+        local target = Players:FindFirstChild(targetName)
+        if target then
+            pcall(function()
+                target:Kick("Kickado pelo admin.")
+                notify("Jogador " .. targetName .. " kickado.")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado.")
+        end
+    elseif command == Prefix .. "tp" then
+        local targetName = args[2]
+        local target = Players:FindFirstChild(targetName)
+        if target and player.Character and target.Character then
+            pcall(function()
+                player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+                notify("Teleportado para " .. targetName .. ".")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    elseif command == Prefix .. "speed" then
+        local targetName = args[2]
+        local speed = tonumber(args[3]) or 50
+        local target = Players:FindFirstChild(targetName)
+        if target and target.Character then
+            pcall(function()
+                target.Character.Humanoid.WalkSpeed = speed
+                notify("Velocidade de " .. targetName .. " definida para " .. speed .. ".")
+            end)
+        else
+            notify("Jogador " .. targetName .. " não encontrado ou sem personagem.")
+        end
+    elseif command == Prefix .. "fly" then
+        if player.Character then
+            flying = not flying
+            if flying then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = player.Character.HumanoidRootPart
+
+                local bodyGyro = Instance.new("BodyGyro")
+                bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                bodyGyro.CFrame = player.Character.HumanoidRootPart.CFrame
+                bodyGyro.Parent = player.Character.HumanoidRootPart
+
+                RunService:BindToRenderStep("Fly", Enum.RenderPriority.Input.Value, function()
+                    local cam = workspace.CurrentCamera
+                    local moveDir = Vector3.new(0, 0, 0)
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                        moveDir = moveDir + cam.CFrame.LookVector
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                        moveDir = moveDir - cam.CFrame.LookVector
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                        moveDir = moveDir - cam.CFrame.RightVector
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                        moveDir = moveDir + cam.CFrame.RightVector
+                    end
+                    bodyVelocity.Velocity = moveDir * 50
+                    bodyGyro.CFrame = cam.CFrame
+                end)
+                notify("Fly ativado!")
+            else
+                RunService:UnbindFromRenderStep("Fly")
+                for _, obj in pairs(player.Character.HumanoidRootPart:GetChildren()) do
+                    if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") then
+                        obj:Destroy()
+                    end
+                end
+                notify("Fly desativado!")
+            end
+        end
+    end
+end
+
+-- Conectar eventos
+pcall(function()
+    LocalPlayer.Chatted:Connect(function(message)
+        onChatted(message, LocalPlayer)
+    end)
+end)
+
+-- Iniciar script
+createGUI()
+notify("Script de Admin com 30 funções carregado! Use a GUI ou comandos com prefixo " .. Prefix)
+print("Script de Admin iniciado!")
