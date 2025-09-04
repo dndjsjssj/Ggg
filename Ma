@@ -1,0 +1,586 @@
+-- Carregar bibliotecas
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/V5/Source.lua"))()
+local brookhavenTool = loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/brookhaven-tool/refs/heads/main/src/main.luau"))()
+
+workspace.FallenPartsDestroyHeight = -math.huge
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local workspace = game:GetService("Workspace")
+
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+if shared.connectCharacter then shared.connectCharacter:Disconnect() end
+shared.connectCharacter = LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    HumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
+end)
+
+local loadingDone = false
+
+-- Tela de carregamento estilizada com boas-vindas
+local function showLoadingWithWelcome()
+	local LoadingGui = Instance.new("ScreenGui")
+	LoadingGui.Name = "FuriaLoadingGui"
+	LoadingGui.ResetOnSpawn = false
+	LoadingGui.Parent = game:GetService("CoreGui")
+
+	-- Borda externa (preta)
+	local blackBorder = Instance.new("Frame")
+	blackBorder.Size = UDim2.new(0, 600, 0, 270)
+	blackBorder.Position = UDim2.new(0.5, 0, 0.5, 0)
+	blackBorder.AnchorPoint = Vector2.new(0.5, 0.5)
+	blackBorder.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	blackBorder.BorderSizePixel = 0
+	blackBorder.Parent = LoadingGui
+
+	local blackCorner = Instance.new("UICorner")
+	blackCorner.CornerRadius = UDim.new(0, 25)
+	blackCorner.Parent = blackBorder
+
+	-- Painel cinza escuro
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 590, 0, 260)
+	frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
+	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	frame.BorderSizePixel = 0
+	frame.Parent = blackBorder
+
+	local frameCorner = Instance.new("UICorner")
+	frameCorner.CornerRadius = UDim.new(0, 22)
+	frameCorner.Parent = frame
+
+	-- Camada distorcida (textura glitch)
+	local glitchLayer = Instance.new("ImageLabel")
+	glitchLayer.Size = UDim2.new(1, 0, 1, 0)
+	glitchLayer.Position = UDim2.new(0, 0, 0, 0)
+	glitchLayer.BackgroundTransparency = 1
+	glitchLayer.Image = "rbxassetid://139081384849988"
+	glitchLayer.ImageTransparency = 0.85
+	glitchLayer.Parent = frame
+
+	-- Animação simples de deslocamento para simular distorção
+	spawn(function()
+		while glitchLayer.Parent do
+			for i = 1, 5 do
+				glitchLayer.Position = UDim2.new(0, math.random(-3, 3), 0, math.random(-3, 3))
+				task.wait(0.05)
+			end
+			glitchLayer.Position = UDim2.new(0, 0, 0, 0)
+			task.wait(0.2)
+		end
+	end)
+
+	-- Logo principal (imagem dentro)
+	local image = Instance.new("ImageLabel")
+	image.Size = UDim2.new(0, 260, 0, 110)
+	image.Position = UDim2.new(0.5, 0, 0.35, 0)
+	image.AnchorPoint = Vector2.new(0.5, 0.5)
+	image.BackgroundTransparency = 1
+	image.Image = "rbxassetid://123765453975226"
+	image.ScaleType = Enum.ScaleType.Fit
+	image.Parent = frame
+
+	-- Texto de boas-vindas
+	local welcomeText = Instance.new("TextLabel")
+	welcomeText.Size = UDim2.new(1, -80, 0, 70)
+	welcomeText.Position = UDim2.new(0.5, 0, 0.8, 0)
+	welcomeText.AnchorPoint = Vector2.new(0.5, 0.5)
+	welcomeText.BackgroundTransparency = 1
+	welcomeText.Text = "BEM-VINDO AO FURIA-HUB"
+	welcomeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	welcomeText.TextScaled = true
+	welcomeText.Font = Enum.Font.Arcade
+	welcomeText.Parent = frame
+
+	wait(2)
+
+	welcomeText:Destroy()
+
+	-- Barra de progresso
+	local progressBarBackground = Instance.new("Frame")
+	progressBarBackground.Size = UDim2.new(0, 520, 0, 35)
+	progressBarBackground.Position = UDim2.new(0.5, 0, 0.77, 0)
+	progressBarBackground.AnchorPoint = Vector2.new(0.5, 0.5)
+	progressBarBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	progressBarBackground.BorderSizePixel = 2
+	progressBarBackground.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	progressBarBackground.Parent = frame
+
+	local backgroundCorner = Instance.new("UICorner")
+	backgroundCorner.CornerRadius = UDim.new(0, 20)
+	backgroundCorner.Parent = progressBarBackground
+
+	local progressBar = Instance.new("Frame")
+	progressBar.Size = UDim2.new(0, 0, 1, 0)
+	progressBar.Position = UDim2.new(0, 0, 0, 0)
+	progressBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	progressBar.BorderSizePixel = 0
+	progressBar.Parent = progressBarBackground
+
+	local progressCorner = Instance.new("UICorner")
+	progressCorner.CornerRadius = UDim.new(0, 20)
+	progressCorner.Parent = progressBar
+
+	local uiGradient = Instance.new("UIGradient")
+	uiGradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(230, 230, 230)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+	}
+	uiGradient.Rotation = 90
+	uiGradient.Parent = progressBar
+
+	progressBar:TweenSize(UDim2.new(1, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 3, true)
+
+	delay(3, function()
+		LoadingGui:Destroy()
+		loadingDone = true
+	end)
+end
+
+showLoadingWithWelcome()
+
+repeat task.wait() until loadingDone
+
+-- Criar janela principal do FURIA HUB
+local Window = redzlib:MakeWindow({
+    Title = "FURIA HUB",
+    SubTitle = "by BSX",
+    SaveFolder = ""
+})
+
+Window:AddMinimizeButton({
+    Button = {
+        Image = redzlib:GetIcon("rbxassetid://111638487184549"),
+        Size = UDim2.fromOffset(40, 40),
+        BackgroundTransparency = 0
+    },
+    Corner = { CornerRadius = UDim.new(0, 6) }
+})
+
+-- 🔥 Definir Nome e cor preta
+task.spawn(function()
+    local args = {
+        "RolePlayName",
+        "USUÁRIO FURIA HUB"
+    }
+
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("RE")
+    pcall(function()
+        remote:WaitForChild("1RPNam1eTex1t"):FireServer(unpack(args))
+        remote:WaitForChild("1RPNam1eColo1r"):FireServer("PickingRPNameColor", Color3.new(0, 0, 0))
+    end)
+end)
+
+-- ✨ Definir Bio e cor branca
+task.spawn(function()
+    local args = {
+        "RolePlayBio",
+        "PAINEL SCRIPT"
+    }
+
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("RE")
+    pcall(function()
+        remote:WaitForChild("1RPNam1eTex1t"):FireServer(unpack(args))
+        remote:WaitForChild("1RPNam1eColo1r"):FireServer("PickingRPBioColor", Color3.new(1, 1, 1))
+    end)
+end)
+
+
+-- Abas
+local TabHouse = Window:MakeTab({"House", "home"})
+local TabAvatar = Window:MakeTab({"Avatar", "shirt"})
+local TabCar = Window:MakeTab({"Carro", "car"})
+local TabTroll = Window:MakeTab({"Troll", "user"})
+local TabCreditos = Window:MakeTab({"Créditos", "star"})
+local TabScripts = Window:MakeTab({"Scripts Aleatórios", "code"})
+
+-- ABA HOUSE
+do
+    TabHouse:AddSection({"Remover o seu banimento da casa"})
+    TabHouse:AddButton({"Remover o ban da casa", function()
+        brookhavenTool:removeBanHouses()
+    end})
+    TabHouse:AddToggle({
+        Name = "Auto remover ban",
+        Flag = "AutoRemoverBan",
+        Callback = function(value)
+            brookhavenTool:autoRemoveBanHouses(value)
+        end
+    })
+
+    -- Locais para teleporte
+    local locations = {
+        ["1"] = {pos = Vector3.new(265, 4, 222), name = "Quarto 1"},
+        ["2"] = {pos = Vector3.new(222, 4, 230), name = "Quarto 2"},
+        ["3"] = {pos = Vector3.new(258, 21, 222), name = "Quarto 3"},
+        ["4"] = {pos = Vector3.new(222, 21, 225), name = "Quarto 4"},
+        ["5"] = {pos = Vector3.new(158, 21, 225), name = "Quarto 5"},
+        ["6"] = {pos = Vector3.new(-35, 19, -119), name = "Apartamento 6"},
+        ["7"] = {pos = Vector3.new(-38, 35, -119), name = "Apartamento 7 (VIP)"},
+        ["11"] = {pos = Vector3.new(-20, 34, 398), name = "Casa 11"},
+        ["12"] = {pos = Vector3.new(152, 34, 398), name = "Casa 12"},
+        ["13"] = {pos = Vector3.new(256, 34, 398), name = "Casa 13"},
+        ["14"] = {pos = Vector3.new(252, 34, 426), name = "Casa 14"},
+        ["15"] = {pos = Vector3.new(148, 34, 426), name = "Casa 15"},
+        ["16"] = {pos = Vector3.new(-24, 34, 426), name = "Casa 16"},
+        ["17"] = {pos = Vector3.new(-189, 34, -284), name = "Casa 17"},
+        ["18"] = {pos = Vector3.new(-349, 34, -284), name = "Casa 18"},
+        ["19"] = {pos = Vector3.new(-453, 34, -284), name = "Casa 19"},
+        ["20"] = {pos = Vector3.new(-457, 34, -256), name = "Casa 20"},
+        ["21"] = {pos = Vector3.new(-353, 34, -256), name = "Casa 21"},
+        ["22"] = {pos = Vector3.new(-193, 34, -256), name = "Casa 22"},
+        ["23"] = {pos = Vector3.new(-373, 66, -443), name = "Casa 23"},
+        ["24"] = {pos = Vector3.new(-349, 66, -458), name = "Casa 24"},
+        ["28"] = {pos = Vector3.new(-101, 3, 1054), name = "Casa 28 (Madeira)"},
+        ["29"] = {pos = Vector3.new(-733, 3, 778), name = "Casa 29 (Madeira)"},
+        ["30"] = {pos = Vector3.new(-232, -4, 789), name = "Casa 30"},
+        ["31"] = {pos = Vector3.new(611, 74, -333), name = "Casa 31 (Madeira)"},
+        ["32"] = {pos = Vector3.new(-878, 3, -344), name = "Casa 32 (Madeira)"},
+        ["33"] = {pos = Vector3.new(-144, 66, -417), name = "Casa 33 (Rico)"},
+        ["34"] = {pos = Vector3.new(261, 34, 566), name = "Casa 34 (Rico)"},
+        ["35"] = {pos = Vector3.new(-30, 1, 2207), name = "Casa 35"},
+        ["36"] = {pos = Vector3.new(249, 23, -2295), name = "Casa 36 (Madeira)"},
+        ["37"] = {pos = Vector3.new(-1919, 19, 328), name = "Casa 37 (Rico)"},
+    }
+
+    local selectedKey = nil
+
+    local dropdownOptions = {}
+    for key, info in pairs(locations) do
+        table.insert(dropdownOptions, key .. " - " .. info.name)
+    end
+
+    -- Ordenar numericamente
+    table.sort(dropdownOptions, function(a, b)
+        local numA = tonumber(a:match("^(%d+)"))
+        local numB = tonumber(b:match("^(%d+)"))
+        return numA < numB
+    end)
+
+    local dropdownLocation = TabHouse:AddDropdown({
+        Name = "Locais (Número - Nome)",
+        Options = dropdownOptions,
+        Default = "",
+        Callback = function(value)
+            selectedKey = value:match("^(%d+)")
+        end
+    })
+
+    TabHouse:AddButton({"Teleportar", function()
+        if selectedKey and locations[selectedKey] then
+            Character:PivotTo(CFrame.new(locations[selectedKey].pos))
+            redzlib:Notify("Teleportado!", "Você foi teleportado para: "..selectedKey.." - "..locations[selectedKey].name)
+        else
+            redzlib:Notify("Erro", "Selecione um local válido!")
+        end
+    end})
+end
+
+-- Aba "Carro" (atualizada)
+do
+    local vehicles = workspace:WaitForChild("Vehicles")
+    TabCar:AddSection({"Puxar ou Teleporta até os carros dos jogadores"})
+
+    local pullCarValue
+    local dropdownPullCar = TabCar:AddDropdown({
+        Name = "Lista de Carros",
+        Options = {},
+        Default = "",
+        Flag = "player_car_list",
+        Callback = function(value)
+            pullCarValue = value
+        end
+    })
+
+    local function updatePullCars()
+        local TabCars = {}
+        for _, car in ipairs(vehicles:GetChildren()) do
+            table.insert(TabCars, car.Name)
+        end
+        dropdownPullCar:Set(TabCars)
+    end
+
+    updatePullCars()
+
+    TabCar:AddButton({"Atualizar lista", updatePullCars})
+
+    -- Removido: Botão "Puxar o carro"
+    -- Removido: Botão "Destruir todos os carros"
+
+    TabCar:AddButton({"Teleporta até o carro", function()
+        if not pullCarValue or pullCarValue == "" then
+            warn("Nenhum carro selecionado.")
+            return
+        end
+
+        local car = vehicles:FindFirstChild(pullCarValue)
+        if car and car.PrimaryPart then
+            Character:PivotTo(car.PrimaryPart.CFrame * CFrame.new(0, 0, 5))
+            print("Você foi teleportado até o carro: " .. pullCarValue)
+        else
+            warn("Carro não encontrado ou sem PrimaryPart.")
+        end
+    end})
+end
+
+-- ABA TROLL
+do
+    TabTroll:AddSection({"Trolls com jogadores"})
+
+    local selectedPlayer
+    local dropdownPlayersTroll = TabTroll:AddDropdown({
+        Name = "Lista de Jogadores",
+        Options = {},
+        Default = "",
+        Callback = function(value)
+            selectedPlayer = value
+        end
+    })
+
+    local function updatePlayersTroll()
+        local list = {}
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                table.insert(list, player.Name)
+            end
+        end
+        dropdownPlayersTroll:Set(list)
+    end
+
+    updatePlayersTroll()
+
+    TabTroll:AddButton({"Atualizar lista", updatePlayersTroll})
+
+    TabTroll:AddButton({"Teleportar até jogador", function()
+        if selectedPlayer then
+            local target = Players:FindFirstChild(selectedPlayer)
+            if target and target.Character then
+                Character:PivotTo(target.Character:GetPivot())
+            else
+                warn("Jogador inválido ou sem personagem.")
+            end
+        else
+            warn("Nenhum jogador selecionado.")
+        end
+    end})
+
+    TabTroll:AddToggle({
+        Name = "Assistir jogador (Spectate)",
+        Flag = "SpectarJogador",
+        Callback = function(value)
+            if selectedPlayer then
+                brookhavenTool:spectatePlayer({value, selectedPlayer})
+            else
+                warn("Nenhum jogador selecionado.")
+            end
+        end
+    })
+end
+
+-- ABA AVATAR
+do
+    TabAvatar:AddSection({"Copiar acessório dos jogadores"})
+
+    local avatarPlayerValue
+    local dropdownAvatarPlayers = TabAvatar:AddDropdown({
+        Name = "Players List",
+        Options = {},
+        Default = "",
+        Callback = function(value)
+            avatarPlayerValue = value
+        end
+    })
+
+    local function uptadePlayerAvatar()
+        local list = {}
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Name ~= LocalPlayer.Name then
+                table.insert(list, player.Name)
+            end
+        end
+        dropdownAvatarPlayers:Set(list)
+    end
+
+    uptadePlayerAvatar()
+
+    TabAvatar:AddButton({"Atualizar lista", uptadePlayerAvatar})
+
+    TabAvatar:AddButton({"Copiar acessório", function()
+        if not avatarPlayerValue or avatarPlayerValue == "" then
+            redzlib:Notify("Erro", "Nenhum jogador selecionado para copiar.", 3)
+            return
+        end
+
+        local tabLocalPlayerAcessories = brookhavenTool:getIdAccessoriesPlayer(LocalPlayer.Name, "brookhaven")
+        local tabTargetPlayerBodyIds = brookhavenTool:getIdsBodyPlayer(avatarPlayerValue, "brookhaven")
+        local tabTargetPlayerClothesIds = brookhavenTool:getIdsClothesPlayer(avatarPlayerValue, "brookhaven")
+        local targetPlayerColor = brookhavenTool:getColorPlayer(avatarPlayerValue, "brookhaven")
+
+        for _, id in pairs(tabLocalPlayerAcessories) do
+            remoteAvatar:InvokeServer(id)
+            task.wait(0.2)
+        end
+
+        task.wait(0.5)
+
+        local tabTargetPlayerAcessories = brookhavenTool:getIdAccessoriesPlayer(avatarPlayerValue, "brookhaven")
+        for _, id in pairs(tabTargetPlayerAcessories) do
+            remoteAvatar:InvokeServer(id)
+            task.wait(0.2)
+        end
+
+        changeCharacterBody:InvokeServer(tabTargetPlayerBodyIds)
+        wearShirt:InvokeServer(tabTargetPlayerClothesIds[1])
+        wearPants:InvokeServer(tabTargetPlayerClothesIds[2])
+        changeBodyColor:FireServer(targetPlayerColor)
+
+        redzlib:Notify("Sucesso", "Acessórios copiados de "..avatarPlayerValue)
+    end})
+
+    -- 🌈 Nome RGB (Tag)
+    local runningRGBName = false
+    local rgbCoroutineName
+
+    local nameColors = {
+        Color3.new(1, 0.215, 0.223),
+        Color3.new(1, 0.419, 0.267),
+        Color3.new(1, 0.681, 0.129),
+        Color3.new(0.867, 1, 0.304),
+        Color3.new(0.612, 1, 0.273),
+        Color3.new(0.229, 1, 0.530),
+        Color3.new(0.116, 0.754, 1),
+        Color3.new(0, 0.078, 1),
+        Color3.new(0.424, 0, 1),
+        Color3.new(1, 0, 0.149),
+    }
+
+    local remoteNameColor = game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1RPNam1eColo1r")
+
+    TabAvatar:AddToggle({
+        Name = "Nome RGB (Tag)",
+        Flag = "RGBNameToggle",
+        Callback = function(state)
+            runningRGBName = state
+            if state then
+                rgbCoroutineName = task.spawn(function()
+                    while runningRGBName do
+                        for _, color in ipairs(nameColors) do
+                            if not runningRGBName then break end
+                            remoteNameColor:FireServer("PickingRPNameColor", color)
+                            task.wait(0.2)
+                        end
+                    end
+                end)
+            else
+                if rgbCoroutineName then
+                    task.cancel(rgbCoroutineName)
+                end
+            end
+        end
+    })
+
+    -- 🌈 Bio RGB
+    local runningRGBBio = false
+    local rgbCoroutineBio
+
+    local bioColors = {
+        Color3.new(1, 0.292, 0.129),
+        Color3.new(1, 0.498, 0.053),
+        Color3.new(1, 0.995, 0.249),
+        Color3.new(0.051, 1, 0.159),
+        Color3.new(0.111, 0.809, 1),
+        Color3.new(0.074, 0.044, 1),
+        Color3.new(0.556, 0.123, 1),
+        Color3.new(1, 0.002, 0.802),
+        Color3.new(1, 0.029, 0.027),
+    }
+
+    TabAvatar:AddToggle({
+        Name = "Bio RGB (Tag)",
+        Flag = "RGBBioToggle",
+        Callback = function(state)
+            runningRGBBio = state
+            if state then
+                rgbCoroutineBio = task.spawn(function()
+                    while runningRGBBio do
+                        for _, color in ipairs(bioColors) do
+                            if not runningRGBBio then break end
+                            remoteNameColor:FireServer("PickingRPBioColor", color)
+                            task.wait(0.2)
+                        end
+                    end
+                end)
+            else
+                if rgbCoroutineBio then
+                    task.cancel(rgbCoroutineBio)
+                end
+            end
+        end
+    })
+end
+
+-- ABA CRÉDITOS (com verificador de executor corrigido)
+do
+	TabCreditos:AddSection({"Informações do FURIA HUB"})
+	TabCreditos:AddParagraph({"Owner / Developer:", "BSX"})
+	TabCreditos:AddParagraph({"Colaborações:", "RH XABLAU & RAEL"})
+	TabCreditos:AddParagraph({"Você está usando:", "FURIA HUB Brookhaven"})
+
+	local executorName = "Desconhecido"
+	pcall(function()
+		if identifyexecutor then
+			executorName = identifyexecutor()
+		elseif syn and syn.get_executor_name then
+			executorName = syn.get_executor_name()
+		elseif getexecutorname then
+			executorName = getexecutorname()
+		end
+	end)
+
+	TabCreditos:AddParagraph({"Executor:", executorName})
+
+	TabCreditos:AddSection({"Rejoin"})
+	TabCreditos:AddButton({
+		Name = "Reentrar no mesmo servidor",
+		Callback = function()
+			game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+		end
+	})
+	TabCreditos:AddButton({
+		Name = "Reentrar em outro servidor",
+		Callback = function()
+			game:GetService("TeleportService"):Teleport(game.PlaceId)
+		end
+	})
+
+	-- 🌟 NOVA SEÇÃO: Script do Rael
+	TabCreditos:AddSection({"Script do Rael"})
+	TabCreditos:AddButton({
+		Name = "Abrir Rael Hub",
+		Callback = function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
+		end
+	})
+end
+
+
+-- ABA SCRIPTS ALEATÓRIOS
+do
+    TabScripts:AddSection({"Scripts variados para executar rapidamente"})
+
+    TabScripts:AddButton({"Infinite Yield", function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source', true))()
+    end})
+end
+
+-- Remotes usados no avatar
+remoteAvatar = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear")
+changeCharacterBody = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody")
+wearShirt = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("WearShirt")
+wearPants = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("WearPants")
+changeBodyColor = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ChangeBodyColor")
