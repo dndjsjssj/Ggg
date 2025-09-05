@@ -1448,8 +1448,8 @@ SetProps(
 SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), { DropdownList }),
 {
 Parent = ItemParent,
-Position = UDim2.new(0, 0, 0, 38),
-Size = UDim2.new(1, 0, 1, -38),
+Position = UDim2.new(0, 0, 0, 40),
+Size = UDim2.new(1, 0, 1, -40),
 ClipsDescendants = true
 }
 ),
