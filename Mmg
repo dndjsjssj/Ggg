@@ -1509,60 +1509,24 @@ MakeElement("Corner")
 "Second"
 )
 
--- 🔥 Gradient للإطار الرئيسي
-local RunService = game:GetService("RunService")
-
--- ===== إنشاء الإطار مثل Toggle =====
-local DropdownFrame = Instance.new("Frame")
-DropdownFrame.Size = UDim2.new(1, 0, 0, 60)  -- ارتفاع أكبر مثل Toggle
-DropdownFrame.Position = UDim2.new(0, 0, 0, 0)
-DropdownFrame.BackgroundTransparency = 1
-DropdownFrame.Parent = ItemParent  -- ضع Frame الأب المناسب هنا
-
--- ===== زوايا دائرية =====
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)  -- مثل Toggle
-corner.Parent = DropdownFrame
-
--- ===== Stroke للإطار =====
-local dropdownStroke = Instance.new("UIStroke")
-dropdownStroke.Thickness = 4  -- سماكة أكبر مثل Toggle
-dropdownStroke.Color = Color3.fromRGB(255, 0, 0)
-dropdownStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-dropdownStroke.Parent = DropdownFrame
-
--- ===== Gradient متحرك =====
+local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
+if dropdownStroke then
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = dropdownStroke
 
--- ===== حركة Gradient مثل Toggle =====
-local normalSpeed = 40
-local paused = false
-
-RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
-    gradient.Rotation = gradient.Rotation + normalSpeed * dt
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-        task.delay(1.5, function()
-            gradient.Rotation = 0
-            paused = false
-        end)
-    end
+RunService.RenderStepped:Connect(function()
+if gradient.Parent then
+gradient.Rotation = (gradient.Rotation + 1) % 360
+end
 end)
 
-
-
+end
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
