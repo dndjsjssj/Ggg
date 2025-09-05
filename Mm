@@ -1485,14 +1485,11 @@ end)
 
 
 local borderFrame = Instance.new("Frame")
-local F = DropdownFrame:WaitForChild("F")
-
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 1, 6)
+borderFrame.Size = UDim2.new(1, 6, 0, 44) -- عرض يلف حول الزر (38 + سماكة)
 borderFrame.Position = UDim2.new(0, -3, 0, -3)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = F.ZIndex + 10
-borderFrame.Parent = F -- ✨ يحيط فقط بالمربع العلوي
+borderFrame.ZIndex = DropdownFrame.ZIndex + 10
+borderFrame.Parent = DropdownFrame
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 5)
