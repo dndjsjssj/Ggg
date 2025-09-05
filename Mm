@@ -1484,25 +1484,13 @@ end)
 				}), "Second")
 
 
--- إطار خارجي حوالين Dropdown
-local borderFrame = Instance.new("Frame")
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = DropdownFrame.ZIndex + 10
-borderFrame.Parent = MainWindow -- ✨ صار برّه، بنفس مستوى الدروب داون
-
--- زوايا
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 5)
-corner.Parent = borderFrame
-
--- الحدود
+-- إطار + تدرج على الدروب داون نفسه
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 1.5
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
+stroke.Parent = DropdownFrame
 
--- التدرج
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
@@ -1515,23 +1503,28 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- تحديث الإطار بحيث يتبع الدروب داون
-local function UpdateBorder()
-    borderFrame.Size = DropdownFrame.Size + UDim2.new(0, 6, 0, 6)
-    borderFrame.Position = DropdownFrame.Position - UDim2.new(0, 3, 0, 3)
-end
-
-UpdateBorder()
-DropdownFrame:GetPropertyChangedSignal("Size"):Connect(UpdateBorder)
-DropdownFrame:GetPropertyChangedSignal("Position"):Connect(UpdateBorder)
-
 -- حركة التدرج
 local RunService = game:GetService("RunService")
 local speed = 30
 RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end
+    if not stroke.Parent then return end
     gradient.Rotation = (gradient.Rotation + speed * dt) % 360
 end)
+
+-- === إضافة إطار للأزرار داخل الدروب داون ===
+local function AddOption(optionName)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(1, 0, 0, 20)
+    Btn.Text = optionName
+    Btn.Parent = DropdownFrame -- أو القائمة الداخلية
+
+    -- نفس الإطار على الزر
+    local btnStroke = stroke:Clone()
+    btnStroke.Parent = Btn
+
+    local btnGradient = gradient:Clone()
+    btnGradient.Parent = btnStroke
+end
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
