@@ -1483,7 +1483,6 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
--- ===== الإعدادات =====
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
 local normalSpeed = 40
@@ -1491,78 +1490,73 @@ local slowSpeed = 2
 local slowDuration = 3
 local transitionTime = 1
 
--- الحصول على F من داخل Dropdown
-local F = DropdownFrame:WaitForChild("F")
+local function AddRedBlackBorder(parent, zOffset)
+    local borderFrame = Instance.new("Frame")
+    borderFrame.Size = UDim2.new(1, 8, 1, 8)
+    borderFrame.Position = UDim2.new(0, -4, 0, -4)
+    borderFrame.BackgroundTransparency = 1
+    borderFrame.ZIndex = (parent.ZIndex or 1) + (zOffset or -1)
+    borderFrame.Parent = parent
 
--- ===== إنشاء إطار خارجي حوالين F =====
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 8, 1, 8)          -- أكبر من F
-borderFrame.Position = UDim2.new(0, -4, 0, -4)    -- للخارج
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = F.ZIndex - 1                 -- يخليه ورا F (إذا تريد قدام غيرها لـ +1)
-borderFrame.Parent = DropdownFrame
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = cornerRadius
+    corner.Parent = borderFrame
 
--- ===== زوايا الإطار =====
-local corner = Instance.new("UICorner")
-corner.CornerRadius = cornerRadius
-corner.Parent = borderFrame
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = borderFrame
 
--- ===== الحدود =====
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = thickness
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    }
+    gradient.Rotation = 0
+    gradient.Parent = stroke
 
--- ===== التدرج الأحمر/الأسود =====
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
+    local currentSpeed = normalSpeed
+    local slowingDown = false
+    local speedChangeStartTime = 0
+    local speedFrom = normalSpeed
+    local speedTo = slowSpeed
 
--- ===== تحريك التدرج =====
-local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local slowingDown = false
-local speedChangeStartTime = 0
-local speedFrom = normalSpeed
-local speedTo = slowSpeed
+    RunService.Heartbeat:Connect(function(dt)
+        if not borderFrame.Parent then return end
 
-RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end
+        local prevRotation = gradient.Rotation
+        gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
 
-    local previousRotation = gradient.Rotation
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt) % 360
+        if not slowingDown and prevRotation > gradient.Rotation then
+            slowingDown = true
+            speedFrom = normalSpeed
+            speedTo = slowSpeed
+            speedChangeStartTime = tick()
 
-    if not slowingDown and previousRotation > gradient.Rotation then
-        slowingDown = true
-        speedFrom = normalSpeed
-        speedTo = slowSpeed
-        speedChangeStartTime = tick()
+            task.delay(slowDuration, function()
+                if borderFrame.Parent then
+                    speedFrom = slowSpeed
+                    speedTo = normalSpeed
+                    speedChangeStartTime = tick()
+                    task.delay(transitionTime, function()
+                        slowingDown = false
+                    end)
+                end
+            end)
+        end
 
-        task.delay(slowDuration, function()
-            if borderFrame.Parent then
-                speedFrom = slowSpeed
-                speedTo = normalSpeed
-                speedChangeStartTime = tick()
-                task.delay(transitionTime, function()
-                    slowingDown = false
-                end)
-            end
-        end)
-    end
+        if slowingDown then
+            local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
+            currentSpeed = speedFrom + (speedTo - speedFrom) * t
+        end
+    end)
 
-    if slowingDown then
-        local t = math.min((tick() - speedChangeStartTime) / transitionTime, 1)
-        currentSpeed = speedFrom + (speedTo - speedFrom) * t
-    end
-end)
+    return borderFrame
+end
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
