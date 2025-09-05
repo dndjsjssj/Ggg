@@ -1484,27 +1484,25 @@ end)
 				}), "Second")
 
 
--- ===== إطار حوالين الدروب داون (خارجي) =====
+-- إطار خارجي حوالين Dropdown
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = DropdownFrame.Size + UDim2.new(0, 6, 0, 6) -- أكبر 3 بكسل من كل جهة
-borderFrame.Position = DropdownFrame.Position - UDim2.new(0, 3, 0, 3) -- يلف من الخارج
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = DropdownFrame.ZIndex + 10
-borderFrame.Parent = DropdownFrame.Parent  -- ✨ مو جوه، صار برّه
+borderFrame.Parent = MainWindow -- ✨ صار برّه، بنفس مستوى الدروب داون
 
--- ===== زوايا =====
+-- زوايا
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 5)
 corner.Parent = borderFrame
 
--- ===== الحدود =====
+-- الحدود
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 1.5
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج =====
+-- التدرج
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
@@ -1517,14 +1515,24 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== التحريك =====
+-- تحديث الإطار بحيث يتبع الدروب داون
+local function UpdateBorder()
+    borderFrame.Size = DropdownFrame.Size + UDim2.new(0, 6, 0, 6)
+    borderFrame.Position = DropdownFrame.Position - UDim2.new(0, 3, 0, 3)
+end
+
+UpdateBorder()
+DropdownFrame:GetPropertyChangedSignal("Size"):Connect(UpdateBorder)
+DropdownFrame:GetPropertyChangedSignal("Position"):Connect(UpdateBorder)
+
+-- حركة التدرج
 local RunService = game:GetService("RunService")
 local speed = 30
-
 RunService.Heartbeat:Connect(function(dt)
     if not borderFrame.Parent then return end
     gradient.Rotation = (gradient.Rotation + speed * dt) % 360
 end)
+
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
