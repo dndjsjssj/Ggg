@@ -1411,8 +1411,7 @@ end)
 				return Slider
 			end  
 			
-
-							function ElementFunction:AddDropdown(DropdownConfig)
+function ElementFunction:AddDropdown(DropdownConfig)
     DropdownConfig = DropdownConfig or {}
     DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
     DropdownConfig.Options = DropdownConfig.Options or {}
@@ -1536,7 +1535,9 @@ end)
                             Position = UDim2.new(0, 8, 0, 0),
                             Size = UDim2.new(1, -8, 1, 0),
                             Name = "Title"
-                        }), "Text")
+                        }), "Text"),
+                        -- 🔥 نضيف Stroke لكل زر
+                        MakeElement("Stroke")
                     }),
                     {
                         Parent = DropdownContainer,
@@ -1636,7 +1637,9 @@ end)
     end
 
     return Dropdown
-end
+end	
+                                            end)
+            
 			function ElementFunction:AddBind(BindConfig)
 				BindConfig.Name = BindConfig.Name or "Bind"
 				BindConfig.Default = BindConfig.Default or Enum.KeyCode.Unknown
