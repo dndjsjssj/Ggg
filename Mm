@@ -1485,11 +1485,12 @@ end)
 
 
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 0, 44) -- عرض يلف حول الزر (38 + سماكة)
-borderFrame.Position = UDim2.new(0, -3, 0, -3)
+borderlocal borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(0, DropdownFrame.AbsoluteSize.X + 6, 0, DropdownFrame.AbsoluteSize.Y + 6)
+borderFrame.Position = DropdownFrame.Position - UDim2.new(0, 3, 0, 3)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = DropdownFrame.ZIndex + 10
-borderFrame.Parent = DropdownFrame
+borderFrame.ZIndex = DropdownFrame.ZIndex + 1
+borderFrame.Parent = DropdownFrame.Parent  -- مهم يكون بنفس المستوى مش داخله
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 5)
