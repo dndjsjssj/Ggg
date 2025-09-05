@@ -1411,7 +1411,8 @@ end)
 				return Slider
 			end  
 			
-							function ElementFunction:AddDropdown(DropdownConfig)
+
+function ElementFunction:AddDropdown(DropdownConfig)
     DropdownConfig = DropdownConfig or {}
     DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
     DropdownConfig.Options = DropdownConfig.Options or {}
@@ -1420,109 +1421,123 @@ end)
     DropdownConfig.Flag = DropdownConfig.Flag or nil
     DropdownConfig.Save = DropdownConfig.Save or false
 
-    local Dropdown = {
-        Value = DropdownConfig.Default,
-        Options = DropdownConfig.Options,
-        Buttons = {},
-        Toggled = false,
-        Type = "Dropdown",
-        Save = DropdownConfig.Save
-    }
+    local Dropdown = {  
+        Value = DropdownConfig.Default,  
+        Options = DropdownConfig.Options,  
+        Buttons = {},  
+        Toggled = false,  
+        Type = "Dropdown",  
+        Save = DropdownConfig.Save  
+    }  
 
-    local MaxElements = 5
-    local TweenService = game:GetService("TweenService")
-    local RunService = game:GetService("RunService")
+    local MaxElements = 5  
+    local TweenService = game:GetService("TweenService")  
+    local RunService = game:GetService("RunService")  
+    local normalSpeed = 40 -- نفس سرعة Toggle
+    local paused = false
 
-    if not table.find(Dropdown.Options, Dropdown.Value) then
-        Dropdown.Value = "..."
-    end
+    if not table.find(Dropdown.Options, Dropdown.Value) then  
+        Dropdown.Value = "..."  
+    end  
 
-    local DropdownList = MakeElement("List")
+    local DropdownList = MakeElement("List")  
 
-    local DropdownContainer = AddThemeObject(
-        SetProps(
-            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), { DropdownList }),
-            {
-                Parent = ItemParent,
-                Position = UDim2.new(0, 0, 0, 38),
-                Size = UDim2.new(1, 0, 1, -38),
-                ClipsDescendants = true
-            }
-        ),
-        "Divider"
-    )
+    -- 🎨 الإطار الخارجي أكبر
+    local DropdownContainer = AddThemeObject(  
+        SetProps(  
+            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 6), { DropdownList }), -- زيادة سماكة الإطار
+            {  
+                Parent = ItemParent,  
+                Position = UDim2.new(0, 0, 0, 38),  
+                Size = UDim2.new(1, 0, 1, -36), -- زيادة ارتفاع الإطار الخارجي قليلاً
+                ClipsDescendants = true  
+            }  
+        ),  
+        "Divider"  
+    )  
 
-    local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, 0, 1, 0) })
+    local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, 0, 1, 0) })  
 
-    local DropdownFrame = AddThemeObject(
-        SetChildren(
-            SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-                Size = UDim2.new(1, 0, 0, 38),
-                Parent = ItemParent,
-                ClipsDescendants = true
-            }),
-            {
-                DropdownContainer,
-                SetProps(
-                    SetChildren(MakeElement("TFrame"), {
-                        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
-                            Size = UDim2.new(1, -12, 1, 0),
-                            Position = UDim2.new(0, 12, 0, 0),
-                            Font = Enum.Font.GothamBold,
-                            Name = "Content"
-                        }), "Text"),
-                        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
-                            Size = UDim2.new(0, 20, 0, 20),
-                            AnchorPoint = Vector2.new(0, 0.5),
-                            Position = UDim2.new(1, -30, 0.5, 0),
-                            ImageColor3 = Color3.fromRGB(240, 240, 240),
-                            Name = "Ico"
-                        }), "TextDark"),
-                        AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
-                            Size = UDim2.new(1, -40, 1, 0),
-                            Font = Enum.Font.Gotham,
-                            Name = "Selected",
-                            TextXAlignment = Enum.TextXAlignment.Right
-                        }), "TextDark"),
-                        AddThemeObject(SetProps(MakeElement("Frame"), {
-                            Size = UDim2.new(1, 0, 0, 1),
-                            Position = UDim2.new(0, 0, 1, -1),
-                            Name = "Line",
-                            Visible = false
-                        }), "Stroke"),
-                        Click
-                    }),
-                    {
-                        Size = UDim2.new(1, 0, 0, 38),
-                        ClipsDescendants = true,
-                        Name = "F"
-                    }
-                ),
-                AddThemeObject(MakeElement("Stroke"), "Stroke"),
-                MakeElement("Corner")
-            }
-        ),
-        "Second"
-    )
+    local DropdownFrame = AddThemeObject(  
+        SetChildren(  
+            SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 8), {  -- زيادة cornerRadius
+                Size = UDim2.new(1, 0, 0, 42),  -- زيادة ارتفاع الإطار الخارجي
+                Parent = ItemParent,  
+                ClipsDescendants = true  
+            }),  
+            {  
+                DropdownContainer,  
+                SetProps(  
+                    SetChildren(MakeElement("TFrame"), {  
+                        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {  
+                            Size = UDim2.new(1, -12, 1, 0),  
+                            Position = UDim2.new(0, 12, 0, 0),  
+                            Font = Enum.Font.GothamBold,  
+                            Name = "Content"  
+                        }), "Text"),  
+                        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {  
+                            Size = UDim2.new(0, 20, 0, 20),  
+                            AnchorPoint = Vector2.new(0, 0.5),  
+                            Position = UDim2.new(1, -30, 0.5, 0),  
+                            ImageColor3 = Color3.fromRGB(240, 240, 240),  
+                            Name = "Ico"  
+                        }), "TextDark"),  
+                        AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {  
+                            Size = UDim2.new(1, -40, 1, 0),  
+                            Font = Enum.Font.Gotham,  
+                            Name = "Selected",  
+                            TextXAlignment = Enum.TextXAlignment.Right  
+                        }), "TextDark"),  
+                        AddThemeObject(SetProps(MakeElement("Frame"), {  
+                            Size = UDim2.new(1, 0, 0, 1),  
+                            Position = UDim2.new(0, 0, 1, -1),  
+                            Name = "Line",  
+                            Visible = false  
+                        }), "Stroke"),  
+                        Click  
+                    }),  
+                    {  
+                        Size = UDim2.new(1, 0, 0, 42),  
+                        ClipsDescendants = true,  
+                        Name = "F"  
+                    }  
+                ),  
+                AddThemeObject(MakeElement("Stroke"), "Stroke"),  
+                MakeElement("Corner")  
+            }  
+        ),  
+        "Second"  
+    )  
 
-    -- 🔥 Gradient للإطار الرئيسي
+    -- 🔥 Gradient متحرك مثل Toggle
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
     if dropdownStroke then
         local gradient = Instance.new("UIGradient")
         gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+            ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+            ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+            ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
         }
         gradient.Rotation = 0
         gradient.Parent = dropdownStroke
 
-        RunService.RenderStepped:Connect(function()
-            if gradient.Parent then
-                gradient.Rotation = (gradient.Rotation + 1) % 360
+        RunService.Heartbeat:Connect(function(dt)
+            if paused then return end
+            gradient.Rotation = gradient.Rotation + normalSpeed * dt
+            if gradient.Rotation >= 356 then
+                gradient.Rotation = 356
+                paused = true
+                task.delay(1.5, function()
+                    gradient.Rotation = 0
+                    paused = false
+                end)
             end
         end)
     end
+end
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
