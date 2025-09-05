@@ -1536,8 +1536,8 @@ function ElementFunction:AddDropdown(DropdownConfig)
                             Size = UDim2.new(1, -8, 1, 0),
                             Name = "Title"
                         }), "Text"),
-                        -- 🔥 نضيف Stroke لكل زر
-                        MakeElement("Stroke")
+                        -- 🔥 نضيف Stroke مضبوط
+                        AddThemeObject(MakeElement("Stroke"), "Stroke")
                     }),
                     {
                         Parent = DropdownContainer,
@@ -1637,8 +1637,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     end
 
     return Dropdown
-end	
-                                            end)
+end                                            end)
             
 			function ElementFunction:AddBind(BindConfig)
 				BindConfig.Name = BindConfig.Name or "Bind"
