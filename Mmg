@@ -1507,45 +1507,6 @@ function ElementFunction:AddDropdown(DropdownConfig)
         "Second"
     )
 
-    -- ===== تكبير الحواف وجعلها بارزة =====
-    local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
-    if dropdownStroke then
-        dropdownStroke.Thickness = 4 -- سماكة أكبر للحواف
-
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-        }
-        gradient.Rotation = 0
-        gradient.Parent = dropdownStroke
-
-        local normalSpeed = 40
-        local paused = false
-
-        RunService.Heartbeat:Connect(function(dt)
-            if paused then return end
-            gradient.Rotation = gradient.Rotation + normalSpeed * dt
-            if gradient.Rotation >= 356 then
-                gradient.Rotation = 356
-                paused = true
-                task.delay(1.5, function()
-                    gradient.Rotation = 0
-                    paused = false
-                end)
-            end
-        end)
-    end
-
-    -- ===== تكبير زاوية الإطار =====
-    local dropdownCorner = DropdownFrame:FindFirstChildOfClass("UICorner")
-    if dropdownCorner then
-        dropdownCorner.CornerRadius = UDim.new(0, 8) -- زاوية أكبر
-    end
-end
-
-
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
