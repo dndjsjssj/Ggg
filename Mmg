@@ -1414,6 +1414,7 @@ end)
 
 
 
+
 function ElementFunction:AddDropdown(DropdownConfig)
 DropdownConfig = DropdownConfig or {}
 DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
@@ -1520,13 +1521,17 @@ ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
 gradient.Rotation = 0
 gradient.Parent = dropdownStroke
 
-RunService.RenderStepped:Connect(function()
-if gradient.Parent then
-gradient.Rotation = (gradient.Rotation + 1) % 360
-end
+RunService.RenderStepped:Connect(function()    
+    if gradient.Parent then    
+        gradient.Rotation = (gradient.Rotation + 1) % 360    
+    end    
 end)
 
 end
+
+
+
+
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
