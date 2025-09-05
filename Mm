@@ -1483,21 +1483,21 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
-local F = DropdownFrame:WaitForChild("F")
 
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 1, 6) 
-borderFrame.Position = UDim2.new(0, -3, 0, -3)
+borderFrame.Size = UDim2.new(1, 6, 1, 6)   -- أكبر شوي من الدروب داون
+borderFrame.Position = UDim2.new(0, -3, 0, -3) -- للخارج من كل جهة
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = DropdownFrame.ZIndex - 1
-borderFrame.Parent = DropdownFrame
+borderFrame.ZIndex = DropdownFrame.ZIndex + 10 -- حتى يبين فوق
+borderFrame.Parent = DropdownFrame.Parent      -- ✨ حطيناه ويا الدروب داون مو جوه
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 5)
 corner.Parent = borderFrame
 
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 1 -- أنحف
+stroke.Thickness = 1.5
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
@@ -1514,7 +1514,7 @@ gradient.Rotation = 0
 gradient.Parent = stroke
 
 local RunService = game:GetService("RunService")
-local speed = 30 -- شوي أبطأ حتى يبين ناعم
+local speed = 30
 
 RunService.Heartbeat:Connect(function(dt)
     if not borderFrame.Parent then return end
