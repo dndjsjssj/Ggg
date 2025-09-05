@@ -1517,6 +1517,27 @@ if dropdownCorner then
     dropdownCorner.CornerRadius = UDim.new(0, 8) -- زاوية أكبر
 end
 
+local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
+if dropdownStroke then
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+}
+gradient.Rotation = 0
+gradient.Parent = dropdownStroke
+
+RunService.RenderStepped:Connect(function()
+if gradient.Parent then
+gradient.Rotation = (gradient.Rotation + 1) % 360
+end
+end)
+
+end
+
+
+
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
