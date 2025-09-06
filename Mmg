@@ -1592,15 +1592,16 @@ end
 						}), "Divider")
 
 
+
 -- ===== إعدادات =====
 local thickness = 2                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
+local cornerRadius = UDim.new(0, 3)    -- نصف قطر الزوايا (صغير)
 local normalSpeed = 40                 -- السرعة العادية
 
 -- ===== إنشاء إطار للزر (OptionBtn) =====
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.Size = UDim2.new(0.8, 0, 0.8, 0)       -- 90% من حجم الزر
+borderFrame.Position = UDim2.new(0.05, 0, 0.05, 0) -- مركزي داخل الزر
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = OptionBtn.ZIndex + 1
 borderFrame.Parent = OptionBtn   -- ✨ جوه الزر نفسه
