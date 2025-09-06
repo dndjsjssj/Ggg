@@ -1486,18 +1486,12 @@ function ElementFunction:AddDropdown(DropdownConfig)
 					MakeElement("Corner")
 				}), "Second")
 
-
-local RunService = game:GetService("RunService")
-local F = DropdownFrame:WaitForChild("F")
-
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 1, 6) -- أكبر من F
-borderFrame.Position = UDim2.new(0, -3, 0, -3) -- يتحرك للخارج
+borderFrame.Size = UDim2.new(1, 6, 0, 44) -- عرض يلف حول الزر (38 + سماكة)
+borderFrame.Position = UDim2.new(0, -3, 0, -3)
 borderFrame.BackgroundTransparency = 1
-borderFrame.Active = false
-borderFrame.InputTransparent = true -- يمنع حجب الضغط
-borderFrame.ZIndex = F.ZIndex + 1
-borderFrame.Parent = DropdownFrame -- ✅ صار نفس مستوى F (برّه مو جوه)
+borderFrame.ZIndex = DropdownFrame.ZIndex + 20
+borderFrame.Parent = DropdownFrame
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 5)
@@ -1505,6 +1499,7 @@ corner.Parent = borderFrame
 
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 1.5
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
@@ -1520,11 +1515,14 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
+local RunService = game:GetService("RunService")
 local speed = 30
+
 RunService.Heartbeat:Connect(function(dt)
     if not borderFrame.Parent then return end
     gradient.Rotation = (gradient.Rotation + speed * dt) % 360
 end)
+
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
