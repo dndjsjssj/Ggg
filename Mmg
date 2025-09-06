@@ -1445,7 +1445,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
 				})
 
 				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 38),
+					Size = UDim2.new(2, 0, 0, 38),
 					Parent = ItemParent,
 					ClipsDescendants = true
 				}), {
@@ -1487,17 +1487,68 @@ function ElementFunction:AddDropdown(DropdownConfig)
 				}), "Second")
 
 
--- إضافة زوايا ناعمة
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 5)  -- يمكنك تغيير الرقم لتكبير أو تصغير الاستدارة
-corner.Parent = borderFrame
+local RunService = game:GetService("RunService")
 
--- إضافة حدود (Stroke)
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(255, 0, 0)
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
+
+-- ===== زوايا الدروب داون =====
+local corner = DropdownFrame:FindFirstChildOfClass("UICorner")
+if not corner then
+    corner = Instance.new("UICorner")
+    corner.CornerRadius = cornerRadius
+    corner.Parent = DropdownFrame
+end
+
+-- ===== الإطار (Stroke) =====
+local stroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
+if not stroke then
+    stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = DropdownFrame
+end
+
+-- ===== التدرج الأحمر/الأسود =====
+local gradient = stroke:FindFirstChildOfClass("UIGradient")
+if not gradient then
+    gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    }
+    gradient.Rotation = 0
+    gradient.Parent = stroke
+end
+
+-- ===== التحريك مع التوقف عند 356 =====
+local currentSpeed = normalSpeed
+local paused = false
+
+RunService.Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not DropdownFrame.Parent then return end  -- حماية
+
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+
+        task.delay(1.5, function()
+            if DropdownFrame.Parent then
+                gradient.Rotation = 0
+                paused = false
+            end
+        end)
+    end
+end
 
 
 
