@@ -1488,62 +1488,51 @@ function ElementFunction:AddDropdown(DropdownConfig)
 
 local RunService = game:GetService("RunService")
 
--- إعدادات
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
 local normalSpeed = 40
 
--- ===== إنشاء دروب داون =====
-local DropdownFrame = Instance.new("Frame")
-DropdownFrame.Name = "DropdownFrame"
-DropdownFrame.Size = UDim2.new(0, 200, 0, 40) -- حجم الدروب داون
-DropdownFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-DropdownFrame.BorderSizePixel = 0
-DropdownFrame.Parent = script.Parent -- ✨ غيرها للمكان المناسب
+-- ===== زوايا الدروب داون =====
+local corner = DropdownFrame:FindFirstChildOfClass("UICorner")
+if not corner then
+    corner = Instance.new("UICorner")
+    corner.CornerRadius = cornerRadius
+    corner.Parent = DropdownFrame
+end
 
-local dropdownCorner = Instance.new("UICorner")
-dropdownCorner.CornerRadius = cornerRadius
-dropdownCorner.Parent = DropdownFrame
+-- ===== الإطار (Stroke) =====
+local stroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
+if not stroke then
+    stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = DropdownFrame
+end
 
--- ===== الإطار حوالين الدروب داون =====
-local borderFrame = Instance.new("Frame")
-borderFrame.Name = "DropdownBorder"
-borderFrame.Size = UDim2.new(1, 6, 1, 6)       -- أكبر شويه بالطول والعرض
-borderFrame.Position = UDim2.new(0, -3, 0, -3) -- يتحرك للخارج حتى يبين الإطار
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = DropdownFrame.ZIndex + 1
-borderFrame.Parent = DropdownFrame
+-- ===== التدرج الأحمر/الأسود =====
+local gradient = stroke:FindFirstChildOfClass("UIGradient")
+if not gradient then
+    gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    }
+    gradient.Rotation = 0
+    gradient.Parent = stroke
+end
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = cornerRadius
-corner.Parent = borderFrame
-
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = thickness
-stroke.Color = Color3.fromRGB(255, 0, 0)
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
-
--- ===== التدرج =====
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
-
--- ===== التحريك مع توقف =====
+-- ===== التحريك مع التوقف عند 356 =====
 local currentSpeed = normalSpeed
 local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
     if paused then return end
-    if not borderFrame.Parent then return end
+    if not DropdownFrame.Parent then return end  -- حماية
 
     gradient.Rotation = gradient.Rotation + currentSpeed * dt  
 
@@ -1552,13 +1541,13 @@ RunService.Heartbeat:Connect(function(dt)
         paused = true
 
         task.delay(1.5, function()
-            if borderFrame.Parent then
+            if DropdownFrame.Parent then
                 gradient.Rotation = 0
                 paused = false
             end
         end)
     end
-end)
+end
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
