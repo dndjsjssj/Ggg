@@ -1445,7 +1445,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
 				})
 
 				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 41),
+					Size = UDim2.new(1, 0, 0, 38),
 					Parent = ItemParent,
 					ClipsDescendants = true
 				}), {
@@ -1482,8 +1482,19 @@ function ElementFunction:AddDropdown(DropdownConfig)
 						ClipsDescendants = true,
 						Name = "F"
 					}),
-					AddThemeObject(MakeElement("Stroke"), "Stroke"),
-					MakeElement("Corner")
+					
+-- إنشاء UIStroke مخصص
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 3                  -- سماكة أكبر حسب رغبتك
+stroke.Color = Color3.fromRGB(255, 0, 0)  -- اللون اللي تحبه
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = DropdownFrame         -- يربطه بالدروب داون نفسه
+
+-- إنشاء UICorner مخصص
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)  -- زاوية أكبر
+corner.Parent = DropdownFrame
+
 				}), "Second")
 
 
