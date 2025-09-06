@@ -1508,7 +1508,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
 if dropdownStroke then
-    dropdownStroke.Thickness = 2 
+    dropdownStroke.Thickness = 1
 
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
