@@ -1591,13 +1591,33 @@ end
 							ClipsDescendants = true
 						}), "Divider")
 
--- 🔥 UIStroke (إطار ملون)
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(255, 0, 0) -- غير اللون حسب رغبتك
-stroke.Parent = OptionBtn
 
--- 🔥 UIGradient (تدرج متحرك على الإطار)
+-- ===== إعدادات =====
+local thickness = 2                    -- سماكة الحواف
+local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
+local normalSpeed = 40                 -- السرعة العادية
+
+-- ===== إنشاء إطار للزر (OptionBtn) =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
+borderFrame.Position = UDim2.new(0, 0, 0, 0)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = OptionBtn.ZIndex + 1
+borderFrame.Parent = OptionBtn   -- ✨ جوه الزر نفسه
+
+-- ===== زوايا الإطار =====
+local corner = Instance.new("UICorner")
+corner.CornerRadius = cornerRadius
+corner.Parent = borderFrame
+
+-- ===== الحدود =====
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = thickness
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
@@ -1610,18 +1630,31 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
-local normalSpeed = 40
-game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if stroke.Parent then
-        gradient.Rotation = (gradient.Rotation + normalSpeed * dt) % 360
+-- ===== التحريك مع التوقف عند 356 =====
+local RunService = game:GetService("RunService")
+local currentSpeed = normalSpeed
+local paused = false
+
+RunService.Heartbeat:Connect(function(dt)
+    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
+    if not borderFrame.Parent then return end -- حماية
+
+    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+
+    -- إذا وصل 356 أو أكثر
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+
+        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
+        task.delay(1.5, function()
+            if borderFrame.Parent then
+                gradient.Rotation = 0
+                paused = false
+            end
+        end)
     end
 end)
-
--- 🔥 UICorner (زوايا مدورة)
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 6) -- تكدر تكبر الرقم للزوايا أكثر
-corner.Parent = OptionBtn
-
 
 						AddConnection(OptionBtn.MouseButton1Click, function()
 							Dropdown:Set(Option)
