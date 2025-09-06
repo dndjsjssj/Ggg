@@ -1600,8 +1600,8 @@ local normalSpeed = 40                 -- السرعة العادية
 
 -- ===== إنشاء إطار للزر (OptionBtn) =====
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(0.99, 0, 0.84, 0)       -- 90% من حجم الزر
-borderFrame.Position = UDim2.new(0.005, 0, 0.05, 0) -- مركزي داخل الزر
+borderFrame.Size = UDim2.new(0.98, 0, 0.83, 0)       -- 90% من حجم الزر
+borderFrame.Position = UDim2.new(0.010, 0, 0.05, 0) -- مركزي داخل الزر
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = OptionBtn.ZIndex + 1
 borderFrame.Parent = OptionBtn   -- ✨ جوه الزر نفسه
