@@ -1441,7 +1441,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
 
     local DropdownContainer = AddThemeObject(
         SetProps(
-            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 13), { DropdownList }),
+            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), { DropdownList }),
             {
                 Parent = ItemParent,
                 Position = UDim2.new(0, 0, 0, 38),
@@ -1478,7 +1478,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
                             ImageColor3 = Color3.fromRGB(240, 240, 240),
                             Name = "Ico"
                         }), "TextDark"),
-                        AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
+                        AddThemeObject(SetProps(MakeElement("Label", "Selected", 15), {
                             Size = UDim2.new(1, -40, 1, 0),
                             Font = Enum.Font.Gotham,
                             Name = "Selected",
@@ -1504,6 +1504,43 @@ function ElementFunction:AddDropdown(DropdownConfig)
         ),
         "Second"
     )
+
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 6, 0, 44) -- عرض يلف حول الزر (38 + سماكة)
+borderFrame.Position = UDim2.new(0, -3, 0, -3)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = DropdownFrame.ZIndex + 10
+borderFrame.Parent = DropdownFrame
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 5)
+corner.Parent = borderFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 1.5
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+local RunService = game:GetService("RunService")
+local speed = 30
+
+RunService.Heartbeat:Connect(function(dt)
+    if not borderFrame.Parent then return end
+    gradient.Rotation = (gradient.Rotation + speed * dt) % 360
+end)
 
 
 				local function AddOptions(Options)
