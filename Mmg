@@ -1457,7 +1457,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     local DropdownFrame = AddThemeObject(
         SetChildren(
             SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-                Size = UDim2.new(1, 0, 0, 40),
+                Size = UDim2.new(1, 0, 0, 39),
                 Parent = ItemParent,
                 ClipsDescendants = true
             }),
