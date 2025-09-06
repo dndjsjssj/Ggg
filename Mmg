@@ -1487,23 +1487,31 @@ function ElementFunction:AddDropdown(DropdownConfig)
 				}), "Second")
 
 
+local RunService = game:GetService("RunService")
+
+-- نجيب F من داخل DropdownFrame
+local F = DropdownFrame:WaitForChild("F")
+
+-- إطار حوالين F
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 0, 44) -- عرض يلف حول الزر (38 + سماكة)
+borderFrame.Size = UDim2.new(1, 6, 1, 6) -- أكبر شوي من F
 borderFrame.Position = UDim2.new(0, -3, 0, -3)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = DropdownFrame.ZIndex + 10
-borderFrame.Parent = DropdownFrame
+borderFrame.ZIndex = F.ZIndex + 1 -- فوق F مباشرة
+borderFrame.Parent = F -- ✅ صار مربوط بالـ F
 
+-- زوايا
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 5)
 corner.Parent = borderFrame
 
+-- الحدود
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 1.5
-stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
+-- التدرج الأحمر/الأسود
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
@@ -1516,9 +1524,8 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
-local RunService = game:GetService("RunService")
+-- دوران التدرج
 local speed = 30
-
 RunService.Heartbeat:Connect(function(dt)
     if not borderFrame.Parent then return end
     gradient.Rotation = (gradient.Rotation + speed * dt) % 360
