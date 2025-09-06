@@ -1508,16 +1508,16 @@ MakeElement("Corner")
 
 local RunService = game:GetService("RunService")
 
--- نجيب زر الدروب داون
-local dropdownButton = DropdownFrame:WaitForChild("DropdownButton")
+-- نجيب F من داخل DropdownFrame
+local F = DropdownFrame:WaitForChild("F")
 
--- إطار حوالين الزر
+-- إطار حوالين F
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 6, 1, 6) -- أكبر شوي من الزر
+borderFrame.Size = UDim2.new(1, 6, 1, 6) -- أكبر شوي من F
 borderFrame.Position = UDim2.new(0, -3, 0, -3)
 borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = dropdownButton.ZIndex + 1 -- فوق الزر
-borderFrame.Parent = dropdownButton -- ✅ صار تابع للزر نفسه
+borderFrame.ZIndex = F.ZIndex + 1 -- فوق F مباشرة
+borderFrame.Parent = F -- ✅ صار مربوط بالـ F
 
 -- زوايا
 local corner = Instance.new("UICorner")
