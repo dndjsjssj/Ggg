@@ -1591,11 +1591,13 @@ end
 							ClipsDescendants = true
 						}), "Divider")
 
--- 🔥 هنا نضيف الإطار الملون لكل خيار
+-- 🔥 UIStroke (إطار ملون)
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(255, 0, 0) -- غير اللون حسب رغبتك
 stroke.Parent = OptionBtn
 
+-- 🔥 UIGradient (تدرج متحرك على الإطار)
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
@@ -1608,25 +1610,18 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- حركة الدوران
 local normalSpeed = 40
-local paused = false
 game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if paused then return end
-    if not stroke.Parent then return end
-
-    gradient.Rotation = gradient.Rotation + normalSpeed * dt
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-        task.delay(1.5, function()
-            if stroke.Parent then
-                gradient.Rotation = 0
-                paused = false
-            end
-        end)
+    if stroke.Parent then
+        gradient.Rotation = (gradient.Rotation + normalSpeed * dt) % 360
     end
 end)
+
+-- 🔥 UICorner (زوايا مدورة)
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6) -- تكدر تكبر الرقم للزوايا أكثر
+corner.Parent = OptionBtn
+
 
 						AddConnection(OptionBtn.MouseButton1Click, function()
 							Dropdown:Set(Option)
