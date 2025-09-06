@@ -1577,18 +1577,55 @@ end
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
-							MakeElement("Corner", 0, 6),
-							AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
-								Position = UDim2.new(0, 8, 0, 0),
-								Size = UDim2.new(1, -8, 1, 0),
-								Name = "Title"
-							}), "Text")
-						}), {
-							Parent = DropdownContainer,
-							Size = UDim2.new(1, 0, 0, 28),
-							BackgroundTransparency = 1,
-							ClipsDescendants = true
-						}), "Divider")
+    MakeElement("Corner", 0, 6),
+    AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
+        Position = UDim2.new(0, 8, 0, 0),
+        Size = UDim2.new(1, -8, 1, 0),
+        Name = "Title"
+    }), "Text")
+}), {
+    Parent = DropdownContainer,
+    Size = UDim2.new(1, 0, 0, 28),
+    BackgroundTransparency = 1,
+    ClipsDescendants = true
+}), "Divider")
+
+-- 🔥 هنا نضيف الإطار الملون لكل خيار
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Parent = OptionBtn
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- حركة الدوران
+local normalSpeed = 40
+local paused = false
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not stroke.Parent then return end
+
+    gradient.Rotation = gradient.Rotation + normalSpeed * dt
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
+        paused = true
+        task.delay(1.5, function()
+            if stroke.Parent then
+                gradient.Rotation = 0
+                paused = false
+            end
+        end)
+    end
+end)
 
 						AddConnection(OptionBtn.MouseButton1Click, function()
 							Dropdown:Set(Option)
