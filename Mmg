@@ -1508,7 +1508,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
 if dropdownStroke then
-    dropdownStroke.Thickness = 3
+    dropdownStroke.Thickness = 2
 
     -- 🔥 Gradient متدرج مثل الكود الثاني
     local gradient = Instance.new("UIGradient")
@@ -1524,7 +1524,7 @@ if dropdownStroke then
     gradient.Parent = dropdownStroke
 
     -- ===== التحريك مع توقف عند 356 =====
-    local normalSpeed = 120 -- 🔥 تتحكم بالسرعة هنا (غيّر الرقم)
+    local normalSpeed = 40 -- 🔥 تتحكم بالسرعة هنا (غيّر الرقم)
     local currentSpeed = normalSpeed
     local paused = false
 
