@@ -1457,7 +1457,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     local DropdownFrame = AddThemeObject(
         SetChildren(
             SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-                Size = UDim2.new(1, 0, 0, 38),
+                Size = UDim2.new(1, 10, 0, 38),
                 Parent = ItemParent,
                 ClipsDescendants = true
             }),
@@ -1508,7 +1508,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
 if dropdownStroke then
-    dropdownStroke.Thickness = 3
+    dropdownStroke.Thickness = 2
 
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
