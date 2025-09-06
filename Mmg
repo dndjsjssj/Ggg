@@ -1441,7 +1441,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
 
     local DropdownContainer = AddThemeObject(
         SetProps(
-            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), { DropdownList }),
+            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 13), { DropdownList }),
             {
                 Parent = ItemParent,
                 Position = UDim2.new(0, 0, 0, 38),
@@ -1456,7 +1456,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
 
     local DropdownFrame = AddThemeObject(
         SetChildren(
-            SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 15), {
+            SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
                 Size = UDim2.new(1, 0, 0, 38),
                 Parent = ItemParent,
                 ClipsDescendants = true
@@ -1465,7 +1465,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
                 DropdownContainer,
                 SetProps(
                     SetChildren(MakeElement("TFrame"), {
-                        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 25), {
+                        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
                             Size = UDim2.new(1, -12, 1, 0),
                             Position = UDim2.new(0, 12, 0, 0),
                             Font = Enum.Font.GothamBold,
