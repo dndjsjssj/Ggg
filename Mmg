@@ -1411,80 +1411,100 @@ end)
 				return Slider
 			end  
 			
-
-
 function ElementFunction:AddDropdown(DropdownConfig)
-				DropdownConfig = DropdownConfig or {}
-				DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
-				DropdownConfig.Options = DropdownConfig.Options or {}
-				DropdownConfig.Default = DropdownConfig.Default or ""
-				DropdownConfig.Callback = DropdownConfig.Callback or function() end
-				DropdownConfig.Flag = DropdownConfig.Flag or nil
-				DropdownConfig.Save = DropdownConfig.Save or false
+    DropdownConfig = DropdownConfig or {}
+    DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
+    DropdownConfig.Options = DropdownConfig.Options or {}
+    DropdownConfig.Default = DropdownConfig.Default or ""
+    DropdownConfig.Callback = DropdownConfig.Callback or function() end
+    DropdownConfig.Flag = DropdownConfig.Flag or nil
+    DropdownConfig.Save = DropdownConfig.Save or false
 
-				local Dropdown = {Value = DropdownConfig.Default, Options = DropdownConfig.Options, Buttons = {}, Toggled = false, Type = "Dropdown", Save = DropdownConfig.Save}
-				local MaxElements = 5
+    local Dropdown = {
+        Value = DropdownConfig.Default,
+        Options = DropdownConfig.Options,
+        Buttons = {},
+        Toggled = false,
+        Type = "Dropdown",
+        Save = DropdownConfig.Save
+    }
 
-				if not table.find(Dropdown.Options, Dropdown.Value) then
-					Dropdown.Value = "..."
-				end
+    local MaxElements = 5
+    local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
 
-				local DropdownList = MakeElement("List")
+    if not table.find(Dropdown.Options, Dropdown.Value) then
+        Dropdown.Value = "..."
+    end
 
-				local DropdownContainer = AddThemeObject(SetProps(SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), {
-					DropdownList
-				}), {
-					Parent = ItemParent,
-					Position = UDim2.new(0, 0, 0, 38),
-					Size = UDim2.new(1, 0, 1, -38),
-					ClipsDescendants = true
-				}), "Divider")
+    local DropdownList = MakeElement("List")
 
-				local Click = SetProps(MakeElement("Button"), {
-					Size = UDim2.new(1, 0, 1, 0)
-				})
+    local DropdownContainer = AddThemeObject(
+        SetProps(
+            SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), { DropdownList }),
+            {
+                Parent = ItemParent,
+                Position = UDim2.new(0, 0, 0, 38),
+                Size = UDim2.new(1, 0, 1, -38),
+                ClipsDescendants = true
+            }
+        ),
+        "Divider"
+    )
 
-				local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 38),
-					Parent = ItemParent,
-					ClipsDescendants = true
-				}), {
-					DropdownContainer,
-					SetProps(SetChildren(MakeElement("TFrame"), {
-						AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
-							Size = UDim2.new(1, -12, 1, 0),
-							Position = UDim2.new(0, 12, 0, 0),
-							Font = Enum.Font.GothamBold,
-							Name = "Content"
-						}), "Text"),
-						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
-							Size = UDim2.new(0, 20, 0, 20),
-							AnchorPoint = Vector2.new(0, 0.5),
-							Position = UDim2.new(1, -30, 0.5, 0),
-							ImageColor3 = Color3.fromRGB(240, 240, 240),
-							Name = "Ico"
-						}), "TextDark"),
-						AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
-							Size = UDim2.new(1, -40, 1, 0),
-							Font = Enum.Font.Gotham,
-							Name = "Selected",
-							TextXAlignment = Enum.TextXAlignment.Right
-						}), "TextDark"),
-						AddThemeObject(SetProps(MakeElement("Frame"), {
-							Size = UDim2.new(1, 0, 0, 1),
-							Position = UDim2.new(0, 0, 1, -1),
-							Name = "Line",
-							Visible = false
-						}), "Stroke"), 
-						Click
-					}), {
-						Size = UDim2.new(1, 0, 0, 38),
-						ClipsDescendants = true,
-						Name = "F"
-					}),
-					AddThemeObject(MakeElement("Stroke"), "Stroke"),
-MakeElement("Corner")
-				}), "Second")
+    local Click = SetProps(MakeElement("Button"), { Size = UDim2.new(1, 0, 1, 0) })
+
+    local DropdownFrame = AddThemeObject(
+        SetChildren(
+            SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+                Size = UDim2.new(1, 0, 0, 38),
+                Parent = ItemParent,
+                ClipsDescendants = true
+            }),
+            {
+                DropdownContainer,
+                SetProps(
+                    SetChildren(MakeElement("TFrame"), {
+                        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
+                            Size = UDim2.new(1, -12, 1, 0),
+                            Position = UDim2.new(0, 12, 0, 0),
+                            Font = Enum.Font.GothamBold,
+                            Name = "Content"
+                        }), "Text"),
+                        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
+                            Size = UDim2.new(0, 20, 0, 20),
+                            AnchorPoint = Vector2.new(0, 0.5),
+                            Position = UDim2.new(1, -30, 0.5, 0),
+                            ImageColor3 = Color3.fromRGB(240, 240, 240),
+                            Name = "Ico"
+                        }), "TextDark"),
+                        AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
+                            Size = UDim2.new(1, -40, 1, 0),
+                            Font = Enum.Font.Gotham,
+                            Name = "Selected",
+                            TextXAlignment = Enum.TextXAlignment.Right
+                        }), "TextDark"),
+                        AddThemeObject(SetProps(MakeElement("Frame"), {
+                            Size = UDim2.new(2, 0, 0, 2),
+                            Position = UDim2.new(0, 0, 1, -1),
+                            Name = "Line",
+                            Visible = false
+                        }), "Stroke"),
+                        Click
+                    }),
+                    {
+                        Size = UDim2.new(1, 0, 0, 38),
+                        ClipsDescendants = true,
+                        Name = "F"
+                    }
+                ),
+                AddThemeObject(MakeElement("Stroke"), "Stroke"),
+                MakeElement("Corner")
+            }
+        ),
+        "Second"
+    )
+
 
 
 local RunService = game:GetService("RunService")
