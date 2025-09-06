@@ -1486,7 +1486,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
                         }), "TextDark"),
                         AddThemeObject(SetProps(MakeElement("Frame"), {
                             Size = UDim2.new(1, 0, 0, 6),
-                            Position = UDim2.new(0, 0, 1, -6),
+                            Position = UDim2.new(0, 0, 1, -1),
                             Name = "Line",
                             Visible = false
                         }), "Stroke"),
@@ -1508,7 +1508,7 @@ function ElementFunction:AddDropdown(DropdownConfig)
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
     local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
 if dropdownStroke then
-    dropdownStroke.Thickness = 4 -- 🔥 زيد السمك (الافتراضي 1، جرب 3 أو 4 أو أكثر)
+    dropdownStroke.Thickness = 2 
 
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
