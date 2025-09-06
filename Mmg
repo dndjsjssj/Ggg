@@ -1574,21 +1574,22 @@ end
 					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
 				end)  
 
+				
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
 						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
-    MakeElement("Corner", 0, 6),
-    AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
-        Position = UDim2.new(0, 8, 0, 0),
-        Size = UDim2.new(1, -8, 1, 0),
-        Name = "Title"
-    }), "Text")
-}), {
-    Parent = DropdownContainer,
-    Size = UDim2.new(1, 0, 0, 28),
-    BackgroundTransparency = 1,
-    ClipsDescendants = true
-}), "Divider")
+							MakeElement("Corner", 0, 6),
+							AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
+								Position = UDim2.new(0, 8, 0, 0),
+								Size = UDim2.new(1, -8, 1, 0),
+								Name = "Title"
+							}), "Text")
+						}), {
+							Parent = DropdownContainer,
+							Size = UDim2.new(1, 0, 0, 28),
+							BackgroundTransparency = 1,
+							ClipsDescendants = true
+						}), "Divider")
 
 -- 🔥 هنا نضيف الإطار الملون لكل خيار
 local stroke = Instance.new("UIStroke")
