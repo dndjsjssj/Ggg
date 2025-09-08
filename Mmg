@@ -775,7 +775,7 @@ local transitionTime = 1               -- وقت الانتقال بين الس�
 
 -- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1.2, 0, 1.2, 0)
+borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
