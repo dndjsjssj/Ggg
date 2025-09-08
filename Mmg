@@ -646,40 +646,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowStuff
 	}), "Main")
 
-local Minimized = false
-local pressTime = 0
-
-MinimizeBtn.MouseButton1Down:Connect(function()
-    pressTime = tick()
-end)
-
-MinimizeBtn.MouseButton1Up:Connect(function()
-    local releaseTime = tick()
-    local duration = releaseTime - pressTime
-
-    if duration <= 0.3 then
-        if not Minimized then
-            MainWindow:TweenSize(
-                UDim2.new(0, 615, 0, 50),
-                Enum.EasingDirection.Out,
-                Enum.EasingStyle.Quad,
-                0.3,
-                true
-            )
-        else
-            MainWindow:TweenSize(
-                UDim2.new(0, 615, 0, 344),
-                Enum.EasingDirection.Out,
-                Enum.EasingStyle.Quad,
-                0.3,
-                true
-            )
-        end
-        Minimized = not Minimized
-    end
-end)
-
-
 	if WindowConfig.ShowIcon then
 		WindowName.Position = UDim2.new(0, 50, 0, -24)
 		local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
@@ -722,25 +688,39 @@ end)
 		end
 	end)
 
-	AddConnection(MinimizeBtn.MouseButton1Up, function()
-		if Minimized then
-			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
-			MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-			wait(.02)
-			MainWindow.ClipsDescendants = false
-			WindowStuff.Visible = true
-			WindowTopBarLine.Visible = true
-		else
-			MainWindow.ClipsDescendants = true
-			WindowTopBarLine.Visible = false
-			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
+	local pressTime = 0
 
-			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
-			wait(0.1)
-			WindowStuff.Visible = false	
-		end
-		Minimized = not Minimized    
-	end)
+MinimizeBtn.MouseButton1Down:Connect(function()
+    pressTime = tick() -- نسجل وقت بداية الضغط
+end)
+
+MinimizeBtn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    local duration = releaseTime - pressTime
+
+    if duration <= 0.3 then -- ضغط سريع
+        if Minimized then
+            -- تكبير النافذة
+            TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
+            MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
+            wait(0.02)
+            MainWindow.ClipsDescendants = false
+            WindowStuff.Visible = true
+            WindowTopBarLine.Visible = true
+        else
+            -- تصغير النافذة
+            MainWindow.ClipsDescendants = true
+            WindowTopBarLine.Visible = false
+            MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
+            TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
+            wait(0.1)
+            WindowStuff.Visible = false
+        end
+        Minimized = not Minimized
+    else
+        -- ضغطة مطولة: لا تفعل شي
+    end
+end)
 
 	local function LoadSequence()
 		MainWindow.Visible = false
@@ -786,7 +766,7 @@ if WindowConfig and WindowConfig.IntroEnabled then
 end
 
 -- ===== الإعدادات =====
-local thickness = 4                    -- سماكة الحواف
+local thickness = 5                    -- سماكة الحواف
 local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
 local normalSpeed = 40                -- السرعة العادية
 local slowSpeed = 2                    -- السرعة أثناء التباطؤ
@@ -1119,12 +1099,28 @@ function ElementFunction:AddButton(ButtonConfig)
         Click
     }), "Second")
 
-    ----------------------------------------------------------------
-    local thickness = 2                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 5)    -- نصف قطر الزوايا
-local normalSpeed = 40                 -- السرعة العادية
+local pressTime = 0
 
--- ===== إنشاء إطار للزر =====
+Btn.MouseButton1Down:Connect(function()
+    pressTime = tick()
+end)
+
+Btn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    local duration = releaseTime - pressTime
+    if duration <= 0.3 then
+        if Btn.Callback then
+            Btn.Callback()
+        end
+    end
+end)
+
+
+    local thickness = 2                    
+local cornerRadius = UDim.new(0, 5)    
+local normalSpeed = 40                 
+
+
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -1132,19 +1128,19 @@ borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = ButtonFrame.ZIndex + 1
 borderFrame.Parent = ButtonFrame   -- ✨ جوه الزر نفسه
 
--- ===== زوايا الإطار =====
+
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- ===== الحدود =====
+
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج الأحمر/الأسود =====
+
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
@@ -1157,22 +1153,22 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== التحريك مع التوقف عند 356 =====
+
 local RunService = game:GetService("RunService")
 local currentSpeed = normalSpeed
 local paused = false
 
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
+    if paused then return end  
 
     gradient.Rotation = gradient.Rotation + currentSpeed * dt  
 
-    -- إذا وصل 356 أو أكثر
+    
     if gradient.Rotation >= 356 then
         gradient.Rotation = 356
         paused = true
 
-        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
+        
         task.delay(1.5, function()
             gradient.Rotation = 0
             paused = false
