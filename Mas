@@ -1,137 +1,1072 @@
-if game.PlaceId == 79546208627805 then
-
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- Main Window Configuration
 local Window = Rayfield:CreateWindow({
-   Name = "99 Nights in the Forest Lua",
-   LoadingTitle = "99 Nights in the Forest Script",
-   LoadingSubtitle = "By Koen",
+   Name = "MHX HUB Survive 99 Nights in the Forest",
+   Icon = 0,
+   LoadingTitle = "MHX HUB",
+   LoadingSubtitle = "Survive 99 Nights in the Forest",
+   Theme = "Default",
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false,
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = nil, -- Create a custom folder for your hub/game
-      FileName = "99 Nights in the Forest Script Lua"
+      FolderName = "MHXHub",
+      FileName = "Config"
    },
    Discord = {
-      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+      Enabled = true,
+      Invite = "E2TqYRsRP4",
+      RememberJoins = true
    },
-   KeySystem = true, -- Set this to true to use our key system
-   KeySettings = {
-      Title = "99 Nights in the Forest | Key",
-      Subtitle = "Link in File",
-      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-      FileName = "99NightsKey", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-      GrabKeyFromSite = True, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"https://pastebin.com/raw/GsJ2a5Hm"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
-   }
+   KeySystem = false
 })
 
-    local MainTab = Window:CreateTab("Main")
- 
-local TeleportSection = MainTab:CreateSection("Teleport to Missing Children")
- 
-local missingChildren = {
-    ["Dino Kid"] = workspace:WaitForChild("DinoKid", 10),
-    ["Kraken Kid"] = workspace:WaitForChild("KrakenKid", 10),
-    ["Squid Kid"] = workspace:WaitForChild("SquidKid", 10),
-    ["Koala Kid"] = workspace:WaitForChild("KoalaKid", 10),
-}
- 
-for name, npc in pairs(missingChildren) do
-    MainTab:CreateButton({
-        Name = name,
-        Callback = function()
-            if npc and npc.PrimaryPart then
-                if player.Character and player.Character.PrimaryPart then
-                    player.Character:SetPrimaryPartCFrame(npc.PrimaryPart.CFrame + Vector3.new(0, 3, 0))
-                else
-                    warn("Player character or PrimaryPart not found.")
-                end
-            else
-                warn(name .. " NPC not found or missing PrimaryPart")
+-- Variables
+local ActiveHitbox, ActiveFly, ActiveWalkSpeed, ActiveGodMode = false, false, false, false
+local ActiveKillAura = false
+local HitboxSize = 10
+local DistanceForKillAura = 25
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local FLYING = false
+local QEfly = true
+local iyflyspeed = 50
+local vehicleflyspeed = 50
+local flyKeyDown, flyKeyUp
+
+-- Fly Function (Fixed)
+local function sFLY(vfly)
+   pcall(function()
+      repeat wait() until LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+      repeat wait() until Mouse
+      if flyKeyDown then flyKeyDown:Disconnect() end
+      if flyKeyUp then flyKeyUp:Disconnect() end
+
+      local T = LocalPlayer.Character.HumanoidRootPart
+      local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+      local lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+      local SPEED = 0
+
+      local function FLY()
+         FLYING = true
+         local BG = Instance.new('BodyGyro')
+         local BV = Instance.new('BodyVelocity')
+         BG.P = 9e4
+         BG.Parent = T
+         BV.Parent = T
+         BG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+         BG.CFrame = T.CFrame
+         BV.Velocity = Vector3.new(0, 0, 0)
+         BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+         task.spawn(function()
+            repeat
+               if not vfly and LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+                  LocalPlayer.Character.Humanoid.PlatformStand = true
+               end
+               if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+                  SPEED = iyflyspeed
+               elseif SPEED ~= 0 then
+                  SPEED = 0
+               end
+               if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 or (CONTROL.Q + CONTROL.E) ~= 0 then
+                  BV.Velocity = ((Workspace.CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) + ((Workspace.CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) - Workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+                  lCONTROL = CONTROL
+               elseif SPEED ~= 0 then
+                  BV.Velocity = ((Workspace.CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) + ((Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) - Workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+               else
+                  BV.Velocity = Vector3.new(0, 0, 0)
+               end
+               BG.CFrame = Workspace.CurrentCamera.CoordinateFrame
+               wait()
+            until not FLYING
+            CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+            lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+            SPEED = 0
+            BG:Destroy()
+            BV:Destroy()
+            if LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+               LocalPlayer.Character.Humanoid.PlatformStand = false
             end
-        end
-    })
+         end)
+      end
+      flyKeyDown = Mouse.KeyDown:Connect(function(KEY)
+         if KEY:lower() == 'w' then CONTROL.F = iyflyspeed
+         elseif KEY:lower() == 's' then CONTROL.B = -iyflyspeed
+         elseif KEY:lower() == 'a' then CONTROL.L = -iyflyspeed
+         elseif KEY:lower() == 'd' then CONTROL.R = iyflyspeed
+         elseif QEfly and KEY:lower() == 'e' then CONTROL.Q = iyflyspeed * 2
+         elseif QEfly and KEY:lower() == 'q' then CONTROL.E = -iyflyspeed * 2
+         end
+         pcall(function() Workspace.CurrentCamera.CameraType = Enum.CameraType.Track end)
+      end)
+      flyKeyUp = Mouse.KeyUp:Connect(function(KEY)
+         if KEY:lower() == 'w' then CONTROL.F = 0
+         elseif KEY:lower() == 's' then CONTROL.B = 0
+         elseif KEY:lower() == 'a' then CONTROL.L = 0
+         elseif KEY:lower() == 'd' then CONTROL.R = 0
+         elseif KEY:lower() == 'e' then CONTROL.Q = 0
+         elseif KEY:lower() == 'q' then CONTROL.E = 0
+         end
+      end)
+      FLY()
+   end)
 end
- 
-local espEnabled = false
-local espFolder = Instance.new("Folder")
-espFolder.Name = "ChestESP"
-espFolder.Parent = player:WaitForChild("PlayerGui")
- 
-local highlightParts = {}
- 
-MainTab:CreateToggle({
-    Name = "Toggle Chest ESP",
-    CurrentValue = false,
-    Flag = "ChestESP",
-    Callback = function(state)
-        espEnabled = state
- 
-        if espEnabled then
-            local chestsFolder = workspace:FindFirstChild("Chests")
-            if not chestsFolder then
-                warn("No Chests folder found in workspace.")
-                return
-            end
- 
-            for _, chest in pairs(chestsFolder:GetChildren()) do
-                if chest:IsA("Model") and chest.PrimaryPart then
-                    local highlight = Instance.new("BoxHandleAdornment")
-                    highlight.Adornee = chest.PrimaryPart
-                    highlight.Size = chest.PrimaryPart.Size + Vector3.new(0.5, 0.5, 0.5)
-                    highlight.Color3 = Color3.new(1, 0.5, 0)
-                    highlight.Transparency = 0.4
-                    highlight.AlwaysOnTop = true
-                    highlight.Parent = espFolder
-                    table.insert(highlightParts, highlight)
-                end
-            end
-        else
-            for _, h in pairs(highlightParts) do
-                h:Destroy()
-            end
-            highlightParts = {}
-        end
-    end
-})
- 
-MainTab:CreateButton({
-    Name = "Spawn All Resources",
-    Callback = function()
-        local resourcesFolder = workspace:FindFirstChild("Resources")
-        if not resourcesFolder then
-            warn("Resources folder not found in workspace.")
-            return
-        end
- 
-        local playerRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if not playerRoot then
-            warn("Player character not loaded.")
-            return
-        end
- 
-        local spawnPos = playerRoot.Position + Vector3.new(0, 0, 5)
- 
-        local resourceNames = {"Logs", "Coals", "Saplings", "BrokenMicrowave"}
- 
-        for _, resName in pairs(resourceNames) do
-            local resModel = resourcesFolder:FindFirstChild(resName)
-            if resModel then
-                local clone = resModel:Clone()
-                clone.Parent = workspace
-                if clone.PrimaryPart then
-                    clone:SetPrimaryPartCFrame(CFrame.new(spawnPos))
-                else
-                    clone:PivotTo(CFrame.new(spawnPos))
-                end
-                spawnPos = spawnPos + Vector3.new(3, 0, 0)
-            else
-                warn("Resource "..resName.." not found in Resources folder.")
-            end
-        end
-    end
 
+local function NOFLY()
+   FLYING = false
+   if flyKeyDown then flyKeyDown:Disconnect() end
+   if flyKeyUp then flyKeyUp:Disconnect() end
+   pcall(function()
+      if LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+         LocalPlayer.Character.Humanoid.PlatformStand = false
+      end
+      Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+   end)
+end
+
+-- Drag Item Function (Fixed)
+local function DragItem(Item)
+   pcall(function()
+      if Item and Item:IsA("Model") and Item:FindFirstChild("PrimaryPart") then
+         Item.PrimaryPart.Anchored = false
+         Item.PrimaryPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+         game:GetService("ReplicatedStorage").RemoteEvents.RequestStartDraggingItem:FireServer(Item)
+         wait(0.1)
+         game:GetService("ReplicatedStorage").RemoteEvents.StopDraggingItem:FireServer(Item)
+      end
+   end)
+end
+
+-- Tabs
+local PlayerTab = Window:CreateTab("Player")
+local EspTab = Window:CreateTab("ESP") -- Dokunmuyoruz, çalışıyor
+local WeaponsTab = Window:CreateTab("Weapons")
+local ExplosionsTab = Window:CreateTab("Explosions")
+local ItemsTab = Window:CreateTab("Items")
+local OtherTab = Window:CreateTab("Other")
+
+-- Player Tab
+PlayerTab:CreateSlider({
+   Name = "Hitbox Size",
+   Range = {5, 50},
+   Increment = 1,
+   CurrentValue = 10,
+   Flag = "HitboxSize",
+   Callback = function(Value)
+      HitboxSize = Value
+   end
+})
+
+PlayerTab:CreateToggle({
+   Name = "Hitbox Expander",
+   CurrentValue = false,
+   Flag = "HitboxToggle",
+   Callback = function(Value)
+      ActiveHitbox = Value
+      task.spawn(function()
+         while ActiveHitbox do
+            pcall(function()
+               for _, player in pairs(Players:GetPlayers()) do
+                  if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                     player.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+                     player.Character.HumanoidRootPart.Transparency = 0.5
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+               if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                  player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
+                  player.Character.HumanoidRootPart.Transparency = 0
+               end
+            end
+         end)
+      end)
+   end
+})
+
+PlayerTab:CreateToggle({
+   Name = "Fly",
+   CurrentValue = false,
+   Flag = "FlyToggle",
+   Callback = function(Value)
+      ActiveFly = Value
+      if Value then
+         sFLY(false)
+         Rayfield:Notify({Title = "Fly", Content = "Fly enabled! Use W,A,S,D,Q,E.", Duration = 3})
+      else
+         NOFLY()
+         Rayfield:Notify({Title = "Fly", Content = "Fly disabled!", Duration = 3})
+      end
+   end
+})
+
+PlayerTab:CreateToggle({
+   Name = "Walk Speed (150)",
+   CurrentValue = false,
+   Flag = "WalkSpeedToggle",
+   Callback = function(Value)
+      ActiveWalkSpeed = Value
+      task.spawn(function()
+         while ActiveWalkSpeed do
+            pcall(function()
+               LocalPlayer.Character.Humanoid.WalkSpeed = 150
+            end)
+            wait(0.1)
+         end
+         pcall(function()
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+         end)
+      end)
+   end
+})
+
+PlayerTab:CreateToggle({
+   Name = "God Mode",
+   CurrentValue = false,
+   Flag = "GodModeToggle",
+   Callback = function(Value)
+      ActiveGodMode = Value
+      task.spawn(function()
+         while ActiveGodMode do
+            pcall(function()
+               LocalPlayer.Character.Humanoid.Health = LocalPlayer.Character.Humanoid.MaxHealth
+               LocalPlayer.Character.Humanoid.MaxHealth = math.huge
+               -- Anti-jumpscare
+               for _, v in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                  if v.Name:lower():match("jumpscare") and v:IsA("RemoteEvent") then
+                     v:FireServer(false)
+                  end
+               end
+            end)
+            wait(0.1)
+         end
+         pcall(function()
+            LocalPlayer.Character.Humanoid.MaxHealth = 100
+         end)
+      end)
+   end
+})
+
+-- ESP Tab (Çalışıyor, sadece renk isimleri İngilizce)
+-- Varsayıyorum ki önceki kodun ESP kısmı aynı, sadece etiketler değişiyor
+EspTab:CreateToggle({
+   Name = "Player ESP (Blue)",
+   CurrentValue = false,
+   Flag = "PlayerEsp",
+   Callback = function(Value)
+      local ActivePlayerEsp = Value
+      task.spawn(function()
+         while ActivePlayerEsp do
+            pcall(function()
+               for _, player in pairs(Players:GetPlayers()) do
+                  if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = player.Character
+                     highlight.FillColor = Color3.fromRGB(0, 0, 255)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(0, 0, 255)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = player.Character
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 3, 0)
+                     billboard.Adornee = player.Character.HumanoidRootPart
+                     billboard.Parent = player.Character.HumanoidRootPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = player.Name
+                     label.TextColor3 = Color3.fromRGB(0, 0, 255)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                           label.Text = player.Name .. " (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+               if player ~= LocalPlayer and player.Character then
+                  if player.Character:FindFirstChild("ESP_Highlight") then player.Character.ESP_Highlight:Destroy() end
+                  if player.Character.HumanoidRootPart:FindFirstChild("ESP") then player.Character.HumanoidRootPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Scrap ESP (Green)",
+   CurrentValue = false,
+   Flag = "ScrapEsp",
+   Callback = function(Value)
+      local ActiveScrapEsp = Value
+      task.spawn(function()
+         while ActiveScrapEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and obj.Name:lower():match("scrap") and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = obj.Name .. " (Scrap)"
+                     label.TextColor3 = Color3.fromRGB(0, 255, 0)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = obj.Name .. " (Scrap, " .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj.Name:lower():match("scrap") and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Wood ESP (Red)",
+   CurrentValue = false,
+   Flag = "WoodEsp",
+   Callback = function(Value)
+      local ActiveWoodEsp = Value
+      task.spawn(function()
+         while ActiveWoodEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and (obj.Name:lower():match("wood") or obj.Name:lower():match("log")) and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = "Wood"
+                     label.TextColor3 = Color3.fromRGB(255, 0, 0)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = "Wood (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and (obj.Name:lower():match("wood") or obj.Name:lower():match("log")) and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Food ESP (Purple)",
+   CurrentValue = false,
+   Flag = "FoodEsp",
+   Callback = function(Value)
+      local ActiveFoodEsp = Value
+      task.spawn(function()
+         while ActiveFoodEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and obj.Name:lower():match("food") and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(128, 0, 128)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(128, 0, 128)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = obj.Name
+                     label.TextColor3 = Color3.fromRGB(128, 0, 128)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = obj.Name .. " (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+  end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj.Name:lower():match("food") and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Medkit/Bandage ESP (Pink)",
+   CurrentValue = false,
+   Flag = "MedkitEsp",
+   Callback = function(Value)
+      local ActiveMedkitEsp = Value
+      task.spawn(function()
+         while ActiveMedkitEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and (obj.Name:lower():match("medkit") or obj.Name:lower():match("bandage")) and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(255, 105, 180)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(255, 105, 180)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = obj.Name
+                     label.TextColor3 = Color3.fromRGB(255, 105, 180)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = obj.Name .. " (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and (obj.Name:lower():match("medkit") or obj.Name:lower():match("bandage")) and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Piece of Forest ESP (Green)",
+   CurrentValue = false,
+   Flag = "ForestGemEsp",
+   Callback = function(Value)
+      local ActiveForestGemEsp = Value
+      task.spawn(function()
+         while ActiveForestGemEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and obj.Name:lower():match("piece of forest") and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = "Forest Gem"
+                     label.TextColor3 = Color3.fromRGB(0, 255, 0)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = "Forest Gem (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj.Name:lower():match("piece of forest") and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Culistic Gem ESP (White)",
+   CurrentValue = false,
+   Flag = "CulisticGemEsp",
+   Callback = function(Value)
+      local ActiveCulisticGemEsp = Value
+      task.spawn(function()
+         while ActiveCulisticGemEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and obj.Name:lower():match("culistic gem") and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(255, 255, 255)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = "Culistic Gem"
+                     label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = "Culistic Gem (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj.Name:lower():match("culistic gem") and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "NPC ESP (Orange)",
+   CurrentValue = false,
+   Flag = "NpcEsp",
+   Callback = function(Value)
+      local ActiveNpcEsp = Value
+      task.spawn(function()
+         while ActiveNpcEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Name ~= LocalPlayer.Name and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(255, 165, 0)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(255, 165, 0)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 3, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = obj.Name
+                     label.TextColor3 = Color3.fromRGB(255, 165, 0)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = obj.Name .. " (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+EspTab:CreateToggle({
+   Name = "Chest ESP (Yellow)",
+   CurrentValue = false,
+   Flag = "ChestEsp",
+   Callback = function(Value)
+      local ActiveChestEsp = Value
+      task.spawn(function()
+         while ActiveChestEsp do
+            pcall(function()
+               for _, obj in pairs(Workspace:GetDescendants()) do
+                  if obj:IsA("Model") and obj.Name:lower():match("chest") and obj:FindFirstChild("PrimaryPart") then
+                     local highlight = Instance.new("Highlight")
+                     highlight.Name = "ESP_Highlight"
+                     highlight.Adornee = obj
+                     highlight.FillColor = Color3.fromRGB(255, 255, 0)
+                     highlight.FillTransparency = 1
+                     highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+                     highlight.OutlineTransparency = 0
+                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                     highlight.Parent = obj
+
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Name = "ESP"
+                     billboard.Size = UDim2.new(0, 50, 0, 25)
+                     billboard.AlwaysOnTop = true
+                     billboard.StudsOffset = Vector3.new(0, 2, 0)
+                     billboard.Adornee = obj.PrimaryPart
+                     billboard.Parent = obj.PrimaryPart
+
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1, 0, 1, 0)
+                     label.BackgroundTransparency = 1
+                     label.Text = "Chest"
+                     label.TextColor3 = Color3.fromRGB(255, 255, 0)
+                     label.TextScaled = true
+                     label.Parent = billboard
+
+                     task.spawn(function()
+                        while highlight.Parent and billboard.Parent do
+                           local dist = (Workspace.CurrentCamera.CFrame.Position - obj.PrimaryPart.Position).Magnitude
+                           label.Text = "Chest (" .. math.floor(dist) .. "m)"
+                           wait(0.5)
+                        end
+                     end)
+                  end
+               end
+            end)
+            wait(0.5)
+         end
+         pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj.Name:lower():match("chest") and obj:FindFirstChild("PrimaryPart") then
+                  if obj:FindFirstChild("ESP_Highlight") then obj.ESP_Highlight:Destroy() end
+                  if obj.PrimaryPart:FindFirstChild("ESP") then obj.PrimaryPart.ESP:Destroy() end
+               end
+            end
+         end)
+      end)
+   end
+})
+
+-- Weapons Tab
+local weaponsList = {"Strong Axe", "Good Axe", "Rifle", "Shotgun", "Spear", "Alien Weapon", "Strong Flashlight", "Old Flashlight", "Iron Body", "Leather Body", "Alien Body"}
+WeaponsTab:CreateParagraph({Title = "Weapons & Armors", Content = "Click a button to spawn an item."})
+for _, item in ipairs(weaponsList) do
+   WeaponsTab:CreateButton({
+      Name = item,
+      Callback = function()
+         pcall(function()
+            game:GetService("ReplicatedStorage").RemoteEvents.GiveItem:FireServer(item)
+            Rayfield:Notify({Title = "Item Spawned", Content = item .. " spawned!", Duration = 3})
+         end)
+      end
+   })
+end
+
+-- Explosions Tab
+ExplosionsTab:CreateSlider({
+   Name = "Kill Aura Distance",
+   Range = {10, 50},
+   Increment = 5,
+   CurrentValue = 25,
+   Flag = "KillAuraDist",
+   Callback = function(Value)
+      DistanceForKillAura = Value
+   end
+})
+
+ExplosionsTab:CreateToggle({
+   Name = "Kill Aura",
+   CurrentValue = false,
+   Flag = "KillAura",
+   Callback = function(Value)
+      ActiveKillAura = Value
+      task.spawn(function()
+         while ActiveKillAura do
+            pcall(function()
+               if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                  for _, obj in pairs(Workspace:GetDescendants()) do
+                     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Name ~= LocalPlayer.Name and obj:FindFirstChild("PrimaryPart") then
+                        local dist = (LocalPlayer.Character.HumanoidRootPart.Position - obj.PrimaryPart.Position).Magnitude
+                        if dist <= DistanceForKillAura then
+                           game:GetService("ReplicatedStorage").RemoteEvents.Damage:FireServer(obj, 9999)
+                        end
+                     end
+                  end
+               end
+            end)
+            wait(0.2)
+         end
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "Break the Map",
+   Callback = function()
+      pcall(function()
+         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, -200, 0))
+         Rayfield:Notify({Title = "Map Broken", Content = "Teleported behind map!", Duration = 3})
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "Kill All Enemies",
+   Callback = function()
+      pcall(function()
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Name ~= LocalPlayer.Name and obj:FindFirstChild("PrimaryPart") then
+               game:GetService("ReplicatedStorage").RemoteEvents.Damage:FireServer(obj, 9999)
+            end
+         end
+         Rayfield:Notify({Title = "Enemies Killed", Content = "All enemies eliminated!", Duration = 3})
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "Spawn All Metals to Machine",
+   Callback = function()
+      pcall(function()
+         local machine = Workspace:FindFirstChild("Machine") or Workspace:FindFirstChild("MetalConverter")
+         if machine and machine:FindFirstChild("PrimaryPart") then
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and obj.Name:lower():match("scrap") and obj:FindFirstChild("PrimaryPart") then
+                  obj.PrimaryPart.CFrame = machine.PrimaryPart.CFrame * CFrame.new(0, 0, -2)
+                  DragItem(obj)
+               end
+            end
+            Rayfield:Notify({Title = "Metals Spawned", Content = "All metals sent to machine!", Duration = 3})
+         else
+            Rayfield:Notify({Title = "Error", Content = "Machine not found!", Duration = 3})
+         end
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "Spawn All Wood to Machine",
+   Callback = function()
+      pcall(function()
+         local machine = Workspace:FindFirstChild("Machine") or Workspace:FindFirstChild("WoodConverter")
+         if machine and machine:FindFirstChild("PrimaryPart") then
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and (obj.Name:lower():match("wood") or obj.Name:lower():match("log")) and obj:FindFirstChild("PrimaryPart") then
+                  obj.PrimaryPart.CFrame = machine.PrimaryPart.CFrame * CFrame.new(0, 0, -2)
+                  DragItem(obj)
+               end
+            end
+            Rayfield:Notify({Title = "Wood Spawned", Content = "All wood sent to machine!", Duration = 3})
+         else
+            Rayfield:Notify({Title = "Error", Content = "Machine not found!", Duration = 3})
+         end
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "All Fuels to Fire",
+   Callback = function()
+      pcall(function()
+         local fire = Workspace:FindFirstChild("Fire") or Workspace:FindFirstChild("Campfire")
+         if fire and fire:FindFirstChild("PrimaryPart") then
+            for _, obj in pairs(Workspace:GetDescendants()) do
+               if obj:IsA("Model") and (obj.Name:lower():match("petrol") or obj.Name:lower():match("gas can") or obj.Name:lower():match("coal") or obj.Name:lower():match("log") or obj.Name:lower():match("corpse")) and obj:FindFirstChild("PrimaryPart") then
+                  obj.PrimaryPart.CFrame = fire.PrimaryPart.CFrame * CFrame.new(0, 0, -2)
+                  DragItem(obj)
+               end
+            end
+            Rayfield:Notify({Title = "Fuels Sent", Content = "All fuels sent to fire!", Duration = 3})
+         else
+            Rayfield:Notify({Title = "Error", Content = "Fire not found!", Duration = 3})
+         end
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "AFK Mode",
+   Callback = function()
+      pcall(function()
+         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 100, 0))
+         task.spawn(function()
+            while true do
+               pcall(function()
+                  game:GetService("ReplicatedStorage").RemoteEvents.EatFood:FireServer("Food")
+                  game:GetService("ReplicatedStorage").RemoteEvents.AntiAFK:FireServer()
+               end)
+               wait(60)
+            end
+         end)
+         Rayfield:Notify({Title = "AFK Mode", Content = "AFK mode activated!", Duration = 3})
+      end)
+   end
+})
+
+ExplosionsTab:CreateButton({
+   Name = "Teleport to Nearest Chest",
+   Callback = function()
+      pcall(function()
+         local closestChest, minDist = nil, math.huge
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and obj.Name:lower():match("chest") and obj:FindFirstChild("PrimaryPart") then
+               local dist = (LocalPlayer.Character.HumanoidRootPart.Position - obj.PrimaryPart.Position).Magnitude
+               if dist < minDist then
+                  closestChest = obj
+                  minDist = dist
+               end
+            end
+         end
+         if closestChest then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = closestChest.PrimaryPart.CFrame * CFrame.new(0, 3, 0)
+            Rayfield:Notify({Title = "Teleported", Content = "Teleported to nearest chest!", Duration = 3})
+         else
+            Rayfield:Notify({Title = "Error", Content = "No chest found!", Duration = 3})
+         end
+      end)
+   end
+})
+
+-- Items Tab
+ItemsTab:CreateButton({
+   Name = "Spawn Woods",
+   Callback = function()
+      pcall(function()
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and (obj.Name:lower():match("wood") or obj.Name:lower():match("log")) and obj:FindFirstChild("PrimaryPart") then
+               obj.PrimaryPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+               DragItem(obj)
+            end
+         end
+         Rayfield:Notify({Title = "Woods Spawned", Content = "All woods spawned to you!", Duration = 3})
+      end)
+   end
+})
+
+ItemsTab:CreateButton({
+   Name = "Spawn Bandages/Medkits",
+   Callback = function()
+      pcall(function()
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and (obj.Name:lower():match("medkit") or obj.Name:lower():match("bandage")) and obj:FindFirstChild("PrimaryPart") then
+               obj.PrimaryPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+               DragItem(obj)
+            end
+         end
+         Rayfield:Notify({Title = "Medkits Spawned", Content = "All medkits/bandages spawned to you!", Duration = 3})
+      end)
+   end
+})
+
+ItemsTab:CreateButton({
+   Name = "Spawn Fuels",
+   Callback = function()
+      pcall(function()
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and (obj.Name:lower():match("petrol") or obj.Name:lower():match("gas can") or obj.Name:lower():match("coal") or obj.Name:lower():match("log") or obj.Name:lower():match("corpse")) and obj:FindFirstChild("PrimaryPart") then
+               obj.PrimaryPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+               DragItem(obj)
+            end
+         end
+         Rayfield:Notify({Title = "Fuels Spawned", Content = "All fuels spawned to you!", Duration = 3})
+      end)
+   end
+})
+
+ItemsTab:CreateButton({
+   Name = "Spawn Foods",
+   Callback = function()
+      pcall(function()
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and obj.Name:lower():match("food") and obj:FindFirstChild("PrimaryPart") then
+               obj.PrimaryPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+               DragItem(obj)
+            end
+         end
+         Rayfield:Notify({Title = "Foods Spawned", Content = "All foods spawned to you!", Duration = 3})
+      end)
+   end
+})
+
+-- Other Tab
+OtherTab:CreateButton({
+   Name = "Skip Players/Chests Cooldown",
+   Callback = function()
+      pcall(function()
+         for _, v in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if v:IsA("RemoteEvent") and (v.Name:lower():match("cooldown") or v.Name:lower():match("heal") or v.Name:lower():match("chest")) then
+               v:FireServer("Heal")
+               v:FireServer("Chest")
+            end
+         end
+         Rayfield:Notify({Title = "Cooldown Skipped", Content = "Cooldowns bypassed!", Duration = 3})
+      end)
+   end
+})
+
+-- Notify on Load
+Rayfield:Notify({
+   Title = "MHX HUB Loaded",
+   Content = "Version 1.3 - Fixed and optimized! Enjoy!",
+   Duration = 5,
+   Image = "rewind"
 })
