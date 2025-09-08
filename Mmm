@@ -652,12 +652,11 @@ end
 
 MakeDraggable(DragPoint, MainWindow)
 
--- ==========================
--- زر التبديل الجديد (مستطيل أحمر مع صورة يمين ونص يسار)
--- ==========================
+
+-- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
 local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 200, 0, 40)
-ToggleBtn.Position = UDim2.new(0.5, -100, 0, -50)
+ToggleBtn.Size = UDim2.new(0, 180, 0, 36) -- تصغير الحجم شوي
+ToggleBtn.Position = UDim2.new(0.5, -90, 0, -50) -- فوق بالنص
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 ToggleBtn.Text = ""
@@ -666,7 +665,7 @@ ToggleBtn.Parent = Orion
 
 -- UICorner
 local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 8)
+Corner.CornerRadius = UDim.new(0, 1) -- تغيير من 8 إلى 1
 Corner.Parent = ToggleBtn
 
 -- UIStroke
@@ -675,7 +674,7 @@ Stroke.Thickness = 1
 Stroke.Color = Color3.fromRGB(255, 255, 255)
 Stroke.Parent = ToggleBtn
 
--- النص على اليسار داخل المستطيل
+-- النص على اليمين داخل المستطيل
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
 ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
@@ -684,13 +683,13 @@ ToggleLabel.Text = "فتح الواجهة"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Right -- النص يمين
 ToggleLabel.Parent = ToggleBtn
 
--- الصورة على اليمين داخل المستطيل
+-- الصورة على اليسار داخل المستطيل
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
-ToggleIcon.Position = UDim2.new(1, -32, 0.5, -12)
+ToggleIcon.Position = UDim2.new(0, 8, 0.5, -12) -- الصورة يسار
 ToggleIcon.BackgroundTransparency = 1
 ToggleIcon.Image = "rbxassetid://7072719338" -- عدل حسب الحاجة
 ToggleIcon.Parent = ToggleBtn
