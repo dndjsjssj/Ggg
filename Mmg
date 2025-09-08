@@ -646,6 +646,40 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowStuff
 	}), "Main")
 
+local Minimized = false
+local pressTime = 0
+
+MinimizeBtn.MouseButton1Down:Connect(function()
+    pressTime = tick()
+end)
+
+MinimizeBtn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    local duration = releaseTime - pressTime
+
+    if duration <= 0.3 then
+        if not Minimized then
+            MainWindow:TweenSize(
+                UDim2.new(0, 615, 0, 50),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.3,
+                true
+            )
+        else
+            MainWindow:TweenSize(
+                UDim2.new(0, 615, 0, 344),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.3,
+                true
+            )
+        end
+        Minimized = not Minimized
+    end
+end)
+
+
 	if WindowConfig.ShowIcon then
 		WindowName.Position = UDim2.new(0, 50, 0, -24)
 		local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
