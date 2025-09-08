@@ -675,24 +675,84 @@ function OrionLib:MakeWindow(WindowConfig)
 	end)
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
-		if Minimized then
-			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
-			MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-			wait(.02)
-			MainWindow.ClipsDescendants = false
-			WindowStuff.Visible = true
-			WindowTopBarLine.Visible = true
-		else
-			MainWindow.ClipsDescendants = true
-			WindowTopBarLine.Visible = false
-			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
+    if Minimized then
+        -- تكبير النافذة
+        TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 615, 0, 344)
+        }):Play()
+        MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
+        wait(.02)
+        MainWindow.ClipsDescendants = false
+        WindowStuff.Visible = true
+        WindowTopBarLine.Visible = true
 
-			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
-			wait(0.1)
-			WindowStuff.Visible = false	
-		end
-		Minimized = not Minimized    
-	end)
+        -- 🔴 امسح الإطار الثاني إذا موجود
+        local miniBorder = MainWindow:FindFirstChild("MiniBorder")
+        if miniBorder then
+            miniBorder:Destroy()
+        end
+    else
+        -- تصغير النافذة
+        MainWindow.ClipsDescendants = true
+        WindowTopBarLine.Visible = false
+        MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
+
+        TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)
+        }):Play()
+        wait(0.1)
+        WindowStuff.Visible = false	
+
+        -- ✨ هنا نضيف الإطار الثاني
+        if not MainWindow:FindFirstChild("MiniBorder") then
+            local miniBorder = Instance.new("Frame")
+            miniBorder.Name = "MiniBorder"
+            miniBorder.Size = UDim2.new(1, 0, 1, 0)
+            miniBorder.Position = UDim2.new(0, 0, 0, 0)
+            miniBorder.BackgroundTransparency = 1
+            miniBorder.ZIndex = MainWindow.ZIndex + 2
+            miniBorder.Parent = MainWindow
+
+            local stroke = Instance.new("UIStroke")
+            stroke.Thickness = 3
+            stroke.Color = Color3.fromRGB(255, 0, 0)
+            stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            stroke.Parent = miniBorder
+
+            local gradient = Instance.new("UIGradient")
+            gradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+                ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+                ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+                ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+                ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+                ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+            }
+            gradient.Parent = stroke
+
+            -- دوران متدرج
+            local speed = 40
+            local paused = false
+            game:GetService("RunService").Heartbeat:Connect(function(dt)
+                if not miniBorder.Parent then return end
+                if paused then return end
+
+                gradient.Rotation = gradient.Rotation + speed * dt
+                if gradient.Rotation >= 356 then
+                    gradient.Rotation = 356
+                    paused = true
+                    task.delay(1.5, function()
+                        if miniBorder.Parent then
+                            gradient.Rotation = 0
+                            paused = false
+                        end
+                    end)
+                end
+            end)
+        end
+    end
+    Minimized = not Minimized    
+end)
 
 	local function LoadSequence()
 		MainWindow.Visible = false
