@@ -657,87 +657,30 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	MakeDraggable(DragPoint, MainWindow)
 
-	-- إنشاء نافذة تأكيد الإغلاق
-local function CreateCloseConfirmation()
-    local CloseGui = Instance.new("TextButton")
-    CloseGui.Size = UDim2.new(1, 0, 1, 0)
-    CloseGui.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    CloseGui.BackgroundTransparency = 0.5
-    CloseGui.Text = ""
-    CloseGui.Parent = MainWindow
-    CloseGui.ZIndex = 10
-    CloseGui.AutoButtonColor = false
+local pressTime = 0
 
-    local CloseMenu = Instance.new("Frame")
-    CloseMenu.Size = UDim2.new(0, 0, 0, 0)
-    CloseMenu.Position = UDim2.new(0.5, 0, 0.5, 0)
-    CloseMenu.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseMenu.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    CloseMenu.Parent = CloseGui
+CloseBtn.MouseButton1Down:Connect(function()
+    pressTime = tick() -- نسجل وقت الضغط
+end)
 
-    local Msg = Instance.new("TextLabel")
-    Msg.Size = UDim2.new(0.8, 0, 0.25, 0)
-    Msg.Position = UDim2.new(0.1, 0, 0.2, 0)
-    Msg.Text = "Are you sure you want to close this script?"
-    Msg.TextColor3 = Color3.fromRGB(0,0,0)
-    Msg.BackgroundTransparency = 1
-    Msg.Parent = CloseMenu
+CloseBtn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    local duration = releaseTime - pressTime
 
-    local Confirm = Instance.new("TextButton")
-    Confirm.Size = UDim2.new(0.35, 0, 0.3, 0)
-    Confirm.Position = UDim2.new(0.1, 0, 0.5, 0)
-    Confirm.Text = "Close Script"
-    Confirm.TextColor3 = Color3.fromRGB(240,0,0)
-    Confirm.BackgroundColor3 = Color3.fromRGB(200,200,200)
-    Confirm.Parent = CloseMenu
-
-    local Cancel = Instance.new("TextButton")
-    Cancel.Size = UDim2.new(0.35, 0, 0.3, 0)
-    Cancel.Position = UDim2.new(0.9, 0, 0.5, 0)
-    Cancel.AnchorPoint = Vector2.new(1, 0)
-    Cancel.Text = "Cancel"
-    Cancel.TextColor3 = Color3.fromRGB(0,240,0)
-    Cancel.BackgroundColor3 = Color3.fromRGB(200,200,200)
-    Cancel.Parent = CloseMenu
-
-    -- Tween عند الظهور
-    CloseMenu:TweenSize(UDim2.new(0.7,0,0.7,0), "Out", "Quad", 0.2, true)
-
-    Cancel.MouseButton1Click:Connect(function()
-        CloseMenu:TweenSize(UDim2.new(0,0,0,0), "In", "Quad", 0.2, true, function()
-            CloseGui:Destroy()
-        end)
-    end)
-
-    Confirm.MouseButton1Click:Connect(function()
-        -- تغلق كل الواجهة تمامًا مع Tween
-        CreateTween(MainWindow, "Size", UDim2.new(), 0.3, true)
-        CreateTween(MainWindow, "Position", UDim2.new(0.5,0,0.5,0), 0.3, true)
-        task.wait(0.3)
-        MainWindow:Destroy()
+    if duration <= 0.3 then -- اذا كانت ضغطة سريعة
+        MainWindow.Visible = false
         UIHidden = true
         OrionLib:MakeNotification({
             Name = "تم اغلاق الواجهة",
             Content = "Martin dev",
             Time = 5
         })
-        if WindowConfig.CloseCallback then
-            WindowConfig.CloseCallback()
-        end
-    end)
-
-    -- النقر على أي مكان خارج CloseMenu يغلق النافذة
-    CloseGui.MouseButton1Click:Connect(function()
-        CloseMenu:TweenSize(UDim2.new(0,0,0,0), "In", "Quad", 0.2, true, function()
-            CloseGui:Destroy()
-        end)
-    end)
-end
-
--- ربط الزر بـ MainWindow
-AddConnection(CloseBtn.MouseButton1Click, function()
-    CreateCloseConfirmation()
+        WindowConfig.CloseCallback()
+    else
+        -- ضغطة مطولة: لا تسوي شي
+    end
 end)
+
 
 	AddConnection(UserInputService.InputBegan, function(Input)
 		if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
