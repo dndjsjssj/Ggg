@@ -665,8 +665,8 @@ local function CreateCloseConfirmation()
     CloseGui.BackgroundTransparency = 0.5
     CloseGui.Text = ""
     CloseGui.Parent = MainWindow
-    CloseGui.Visible = true
     CloseGui.ZIndex = 10
+    CloseGui.AutoButtonColor = false
 
     local CloseMenu = Instance.new("Frame")
     CloseMenu.Size = UDim2.new(0, 0, 0, 0)
@@ -710,8 +710,11 @@ local function CreateCloseConfirmation()
     end)
 
     Confirm.MouseButton1Click:Connect(function()
-        CloseGui:Destroy()
-        MainWindow.Visible = false
+        -- تغلق كل الواجهة تمامًا مع Tween
+        CreateTween(MainWindow, "Size", UDim2.new(), 0.3, true)
+        CreateTween(MainWindow, "Position", UDim2.new(0.5,0,0.5,0), 0.3, true)
+        task.wait(0.3)
+        MainWindow:Destroy()
         UIHidden = true
         OrionLib:MakeNotification({
             Name = "تم اغلاق الواجهة",
