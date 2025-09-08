@@ -599,7 +599,6 @@ function OrionLib:MakeWindow(WindowConfig)
 	}), "Second")
 
 	        
-
 local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
 	Size = UDim2.new(1, -30, 2, 0),
 	Position = UDim2.new(0, 25, 0, -24),
@@ -641,34 +640,6 @@ local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame",
 	WindowStuff
 }), "Main")
 
--- مربع أحمر بالنص فوق
-local RedBox = Instance.new("Frame")
-RedBox.Size = UDim2.new(0, 250, 0, 40)
-RedBox.Position = UDim2.new(0.5, -125, 0, -45)
-RedBox.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-RedBox.AnchorPoint = Vector2.new(0.5, 0)
-RedBox.Parent = MainWindow
-
--- صورة يسار المستطيل
-local Icon = Instance.new("ImageLabel")
-Icon.Size = UDim2.new(0, 24, 0, 24)
-Icon.Position = UDim2.new(0, 8, 0.5, -12)
-Icon.BackgroundTransparency = 1
-Icon.Image = "rbxassetid://7072719338"
-Icon.Parent = RedBox
-
--- نص يم الصورة
-local Label = Instance.new("TextLabel")
-Label.Size = UDim2.new(1, -50, 1, 0)
-Label.Position = UDim2.new(0, 40, 0, 0)
-Label.BackgroundTransparency = 1
-Label.Text = "هذا النص يم الصورة"
-Label.Font = Enum.Font.GothamBold
-Label.TextSize = 16
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.TextXAlignment = Enum.TextXAlignment.Left
-Label.Parent = RedBox
-
 if WindowConfig.ShowIcon then
 	WindowName.Position = UDim2.new(0, 50, 0, -24)
 	local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
@@ -679,18 +650,6 @@ if WindowConfig.ShowIcon then
 end	
 
 MakeDraggable(DragPoint, MainWindow)
-
--- زر صغير يظهر مكان الواجهة عند التصغير
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
-ToggleBtn.Position = UDim2.new(0, 20, 0.5, -25)
-ToggleBtn.Text = "☰"
-ToggleBtn.Font = Enum.Font.GothamBold
-ToggleBtn.TextSize = 20
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.Visible = false
-ToggleBtn.Parent = Orion
 
 -- زر الإغلاق
 local pressTime = 0
@@ -720,13 +679,43 @@ AddConnection(UserInputService.InputBegan, function(Input)
 	end
 end)
 
--- زر التصغير (يخفي الواجهة ويظهر الزر الصغير)
+-- زر التبديل الجديد (مستطيل أحمر فوق مع صورة يمين ونص يسار)
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 200, 0, 40) -- مستطيل
+ToggleBtn.Position = UDim2.new(0.5, -100, 0, -50) -- فوق بالنص
+ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0) -- أحمر
+ToggleBtn.Text = ""
+ToggleBtn.Visible = false
+ToggleBtn.Parent = Orion
+
+-- النص على اليسار
+local ToggleLabel = Instance.new("TextLabel")
+ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+ToggleLabel.BackgroundTransparency = 1
+ToggleLabel.Text = "فتح الواجهة"
+ToggleLabel.Font = Enum.Font.GothamBold
+ToggleLabel.TextSize = 16
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+ToggleLabel.Parent = ToggleBtn
+
+-- الصورة على اليمين
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
+ToggleIcon.Position = UDim2.new(1, -32, 0.5, -12)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = "rbxassetid://7072719338" -- غير حسب الحاجة
+ToggleIcon.Parent = ToggleBtn
+
+-- زر التصغير يخفي الواجهة ويظهر ToggleBtn
 MinimizeBtn.MouseButton1Click:Connect(function()
 	MainWindow.Visible = false
 	ToggleBtn.Visible = true
 end)
 
--- زر التبديل (يرجع الواجهة ويختفي هو)
+-- ToggleBtn يفتح الواجهة ويختفي
 ToggleBtn.MouseButton1Click:Connect(function()
 	MainWindow.Visible = true
 	ToggleBtn.Visible = false
@@ -774,6 +763,9 @@ local function LoadSequence()
 	LoadSequenceLogo:Destroy()
 	LoadSequenceText:Destroy()
 end
+
+
+
 
             -- ===== التحقق من إعدادات الواجهة =====
 if WindowConfig and WindowConfig.IntroEnabled then
