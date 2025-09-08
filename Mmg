@@ -646,12 +646,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowStuff
 	}), "Main")
 
--- إنشاء UIStroke للنافذة
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 4                     -- سماكة الحدود
-stroke.Color = Color3.fromRGB(255, 0, 0) -- لون أحمر
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = MainWindow               -- ربطها بالنافذة
+
 
 	if WindowConfig.ShowIcon then
 		WindowName.Position = UDim2.new(0, 50, 0, -24)
