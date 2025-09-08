@@ -599,7 +599,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	}), "Second")
 
 	        
-local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
+        local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
 	Size = UDim2.new(1, -30, 2, 0),
 	Position = UDim2.new(0, 25, 0, -24),
 	Font = Enum.Font.GothamBlack,
@@ -651,7 +651,64 @@ end
 
 MakeDraggable(DragPoint, MainWindow)
 
+-- ==========================
+-- زر التبديل الجديد (مستطيل أحمر مع صورة يمين ونص يسار)
+-- ==========================
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 200, 0, 40)
+ToggleBtn.Position = UDim2.new(0.5, -100, 0, -50)
+ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+ToggleBtn.Text = ""
+ToggleBtn.Visible = false
+ToggleBtn.Parent = Orion
+
+-- UICorner
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = ToggleBtn
+
+-- UIStroke
+local Stroke = Instance.new("UIStroke")
+Stroke.Thickness = 1
+Stroke.Color = Color3.fromRGB(255, 255, 255)
+Stroke.Parent = ToggleBtn
+
+-- النص على اليسار داخل المستطيل
+local ToggleLabel = Instance.new("TextLabel")
+ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+ToggleLabel.BackgroundTransparency = 1
+ToggleLabel.Text = "فتح الواجهة"
+ToggleLabel.Font = Enum.Font.GothamBold
+ToggleLabel.TextSize = 16
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+ToggleLabel.Parent = ToggleBtn
+
+-- الصورة على اليمين داخل المستطيل
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
+ToggleIcon.Position = UDim2.new(1, -32, 0.5, -12)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = "rbxassetid://7072719338" -- عدل حسب الحاجة
+ToggleIcon.Parent = ToggleBtn
+
+-- زر التصغير يخفي الواجهة ويظهر ToggleBtn
+MinimizeBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = false
+	ToggleBtn.Visible = true
+end)
+
+-- زر ToggleBtn يفتح الواجهة ويختفي
+ToggleBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = true
+	ToggleBtn.Visible = false
+end)
+
+-- ==========================
 -- زر الإغلاق
+-- ==========================
 local pressTime = 0
 CloseBtn.MouseButton1Down:Connect(function()
     pressTime = tick()
