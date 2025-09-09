@@ -678,7 +678,7 @@ stroke.Parent = ToggleBtn
 -- الصورة على يسار الزر
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
-ToggleIcon.Position = UDim2.new(0, 8, 0.5, -10)
+ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
 ToggleIcon.BackgroundTransparency = 1
 ToggleIcon.Image = "rbxassetid://108584636372574" -- غير حسب الحاجة
 ToggleIcon.Parent = ToggleBtn
@@ -686,7 +686,7 @@ ToggleIcon.Parent = ToggleBtn
 -- النص على يمين الصورة
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 25, 0, 0)
+ToggleLabel.Position = UDim2.new(0, 15, 0, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "فتح الواجها | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
