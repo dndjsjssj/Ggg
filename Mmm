@@ -653,46 +653,56 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
--- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
+-- زر التبديل الجديد (مستطيل أحمر فوق مع صورة يسار ونص يمين)
 local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 180, 0, 36) -- تصغير الحجم شوي
-ToggleBtn.Position = UDim2.new(0.5, -90, 0, -50) -- فوق بالنص
+ToggleBtn.Size = UDim2.new(0, 150, 0, 36) -- حجم الزر
+ToggleBtn.Position = UDim2.new(0.5, -50, 0, 20) -- بالنص مزاح شوي لليمين
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0) -- أحمر
 ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
 
--- UICorner
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 1) -- تغيير من 8 إلى 1
-Corner.Parent = ToggleBtn
+-- حواف مدورة
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = ToggleBtn
 
--- UIStroke
-local Stroke = Instance.new("UIStroke")
-Stroke.Thickness = 1
-Stroke.Color = Color3.fromRGB(255, 255, 255)
-Stroke.Parent = ToggleBtn
+-- حواف الزر
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Thickness = 1
+stroke.Parent = ToggleBtn
 
--- النص على اليمين داخل المستطيل
+-- الصورة على يسار الزر
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
+ToggleIcon.Position = UDim2.new(0, 8, 0.5, -10)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = "rbxassetid://7072719338" -- غير حسب الحاجة
+ToggleIcon.Parent = ToggleBtn
+
+-- النص على يمين الصورة
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+ToggleLabel.Position = UDim2.new(0, 35, 0, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "فتح الواجهة"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleLabel.TextXAlignment = Enum.TextXAlignment.Right -- النص يمين
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
--- الصورة على اليسار داخل المستطيل
-local ToggleIcon = Instance.new("ImageLabel")
-ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
-ToggleIcon.Position = UDim2.new(0, 8, 0.5, -12) -- الصورة يسار
-ToggleIcon.BackgroundTransparency = 1
-ToggleIcon.Image = "rbxassetid://7072719338" -- عدل حسب الحاجة
-ToggleIcon.Parent = ToggleBtn
+-- وظيفة زر الإظهار والإخفاء
+ToggleBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = not MainWindow.Visible
+	if MainWindow.Visible then
+		ToggleLabel.Text = "إخفاء الواجهة"
+	else
+		ToggleLabel.Text = "فتح الواجهة"
+	end
+end)
 
 -- زر التصغير يخفي الواجهة ويظهر ToggleBtn
 MinimizeBtn.MouseButton1Click:Connect(function()
@@ -700,11 +710,50 @@ MinimizeBtn.MouseButton1Click:Connect(function()
 	ToggleBtn.Visible = true
 end)
 
--- زر ToggleBtn يفتح الواجهة ويختفي
-ToggleBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = true
-	ToggleBtn.Visible = false
+-- تفعيل السحب والتحريك بالماوس
+local UserInputService = game:GetService("UserInputService")
+
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+	local delta = input.Position - dragStart
+	ToggleBtn.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = ToggleBtn.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
 end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		update(input)
+	end
+end)
+
 
 -- ==========================
 -- زر الإغلاق
