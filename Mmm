@@ -600,57 +600,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	        
 
-local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
-	Size = UDim2.new(1, -30, 2, 0),
-	Position = UDim2.new(0, 25, 0, -24),
-	Font = Enum.Font.GothamBlack,
-	TextSize = 20
-}), "Text")
-
-local WindowTopBarLine = AddThemeObject(SetProps(MakeElement("Frame"), {
-	Size = UDim2.new(1, 0, 0, 1),
-	Position = UDim2.new(0, 0, 1, -1)
-}), "Stroke")
-
-local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
-	Parent = Orion,
-	Position = UDim2.new(0.5, -307, 0.5, -172),
-	Size = UDim2.new(0, 615, 0, 344),
-	BackgroundTransparency = 0.3
-}), {
-	SetChildren(SetProps(MakeElement("TFrame"), {
-		Size = UDim2.new(1, 0, 0, 50),
-		Name = "TopBar"
-	}), {
-		WindowName,
-		WindowTopBarLine,
-		AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 7), {
-			Size = UDim2.new(0, 70, 0, 30),
-			Position = UDim2.new(1, -90, 0, 10)
-		}), {
-			AddThemeObject(MakeElement("Stroke"), "Stroke"),
-			AddThemeObject(SetProps(MakeElement("Frame"), {
-				Size = UDim2.new(0, 1, 1, 0),
-				Position = UDim2.new(0.5, 0, 0, 0)
-			}), "Stroke"), 
-			CloseBtn,
-			MinimizeBtn
-		}), "Second"), 
-	}),
-	DragPoint,
-	WindowStuff
-}), "Main")
-
-if WindowConfig.ShowIcon then
-	WindowName.Position = UDim2.new(0, 50, 0, -24)
-	local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
-		Size = UDim2.new(0, 20, 0, 20),
-		Position = UDim2.new(0, 25, 0, 15)
-	})
-	WindowIcon.Parent = MainWindow.TopBar
-end	
-
-MakeDraggable(DragPoint, MainWindow)
 
 
 -- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
@@ -663,14 +612,14 @@ ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
 
--- حواف مدورة للزر نفسه
+-- حواف مدورة للزر
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
 -- ====== Frame يمثل الإطار المستطيل ======
 local BorderFrame = Instance.new("Frame")
-BorderFrame.Size = UDim2.new(1, 4, 1, 4) -- أكبر شوي من الزر
+BorderFrame.Size = UDim2.new(1, 4, 1, 4) -- أكبر من الزر بشوي
 BorderFrame.Position = UDim2.new(0, -2, 0, -2)
 BorderFrame.BackgroundTransparency = 1
 BorderFrame.Parent = ToggleBtn
@@ -686,7 +635,7 @@ gradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- يمين أسود
 }
-gradient.Rotation = 0 -- يسار إلى يمين
+gradient.Rotation = 0
 gradient.Parent = stroke
 
 -- الصورة على يسار الزر
@@ -709,29 +658,25 @@ ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
-
--- ===== Animation فتح وغلق =====
-local TweenService = game:GetService("TweenService")
-
-local function OpenWindow()
+-- زر ToggleBtn لفتح الواجهة ويختفي بعدها
+ToggleBtn.MouseButton1Click:Connect(function()
 	MainWindow.Visible = true
 	ToggleBtn.Visible = false
-	TweenService:Create(MainWindow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
-end
+end)
 
-local function CloseWindow()
-	TweenService:Create(MainWindow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 0, 0)}):Play():Connect(function()
-		MainWindow.Visible = false
-		ToggleBtn.Visible = true
-	end)
-end
+-- زر التصغير يخفي الواجهة ويظهر ToggleBtn
+MinimizeBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = false
+	ToggleBtn.Visible = true
+end)
 
-ToggleBtn.MouseButton1Click:Connect(OpenWindow)
-MinimizeBtn.MouseButton1Click:Connect(CloseWindow)
-
--- ===== Dragging =====
+-- تفعيل السحب والتحريك بالماوس
 local UserInputService = game:GetService("UserInputService")
-local dragging, dragInput, dragStart, startPos
+
+local dragging
+local dragInput
+local dragStart
+local startPos
 
 local function update(input)
 	local delta = input.Position - dragStart
@@ -748,6 +693,7 @@ ToggleBtn.InputBegan:Connect(function(input)
 		dragging = true
 		dragStart = input.Position
 		startPos = ToggleBtn.Position
+
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
 				dragging = false
@@ -767,7 +713,7 @@ UserInputService.InputChanged:Connect(function(input)
 		update(input)
 	end
 end)
-		
+
 
 -- ==========================
 -- زر الإغلاق
