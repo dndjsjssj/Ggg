@@ -657,7 +657,7 @@ MakeDraggable(DragPoint, MainWindow)
 -- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 150, 0, 36) -- حجم الزر
-ToggleBtn.Position = UDim2.new(0.5, -80, 0, -50) -- بالنص مزاح شوي لليمين
+ToggleBtn.Position = UDim2.new(0.5, -50, 0, -50) -- بالنص مزاح شوي لليمين
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0) -- أحمر
 ToggleBtn.Text = ""
