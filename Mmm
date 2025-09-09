@@ -653,33 +653,7 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
--- ===== إطار ملون حول MainWindow =====
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = MainWindow.ZIndex + 1
-borderFrame.Parent = MainWindow
-
-local borderCorner = Instance.new("UICorner")
-borderCorner.CornerRadius = UDim.new(0, 8)
-borderCorner.Parent = borderFrame
-
-local borderStroke = Instance.new("UIStroke")
-borderStroke.Thickness = 4
-borderStroke.Color = Color3.fromRGB(255, 0, 0)
-borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-borderStroke.Parent = borderFrame
-
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),   -- أحمر يسار
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0))      -- أسود يمين
-}
-gradient.Rotation = 0
-gradient.Parent = borderStroke
-
--- ===== Toggle Button =====
+-- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 150, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
@@ -689,14 +663,31 @@ ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
 
+-- حواف مدورة للزر نفسه
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
+-- ====== Frame يمثل الإطار المستطيل ======
+local BorderFrame = Instance.new("Frame")
+BorderFrame.Size = UDim2.new(1, 4, 1, 4) -- أكبر شوي من الزر
+BorderFrame.Position = UDim2.new(0, -2, 0, -2)
+BorderFrame.BackgroundTransparency = 1
+BorderFrame.Parent = ToggleBtn
+
+-- خط الإطار
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Thickness = 1
-stroke.Parent = ToggleBtn
+stroke.Thickness = 2
+stroke.Parent = BorderFrame
+
+-- التدرج (أحمر يسار → أسود يمين)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- يمين أسود
+}
+gradient.Rotation = 0 -- يسار إلى يمين
+gradient.Parent = stroke
 
 -- الصورة على يسار الزر
 local ToggleIcon = Instance.new("ImageLabel")
@@ -709,14 +700,15 @@ ToggleIcon.Parent = ToggleBtn
 -- النص على يمين الصورة
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 35, 0, 0)
+ToggleLabel.Position = UDim2.new(0, 15, 0, 0)
 ToggleLabel.BackgroundTransparency = 1
-ToggleLabel.Text = "فتح الواجهة | Open"
+ToggleLabel.Text = "فتح الواجها | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
+
 
 -- ===== Animation فتح وغلق =====
 local TweenService = game:GetService("TweenService")
