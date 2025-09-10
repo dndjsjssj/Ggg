@@ -655,7 +655,7 @@ MakeDraggable(DragPoint, MainWindow)
 
 -- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر شوي
+ToggleFrame.Size = UDim2.new(0, 145, 0, 38) -- أصغر شوي
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
