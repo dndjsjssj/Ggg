@@ -610,30 +610,14 @@ ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- أحمر
 ToggleBtn.Text = ""
 ToggleBtn.Visible = false
-ToggleBtn.ZIndex = 2
 ToggleBtn.Parent = Orion
 
--- ===== خلفية ورا الزر =====
-local BackFrame = Instance.new("Frame")
-BackFrame.Size = UDim2.new(0, 160, 0, 44) -- أكبر من الزر شوي
-BackFrame.Position = UDim2.new(0.5, -15, 0, -54)
-BackFrame.AnchorPoint = Vector2.new(0.5, 0)
-BackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- أسود
-BackFrame.BackgroundTransparency = 0.2 -- يخليها مثل ظل
-BackFrame.ZIndex = 1
-BackFrame.Parent = Orion
-
--- حواف مدورة للخلفية
-local backCorner = Instance.new("UICorner")
-backCorner.CornerRadius = UDim.new(0, 10)
-backCorner.Parent = BackFrame
-
--- حواف مدورة للزر
+-- حواف مدورة
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
--- حواف الزر (حد أبيض)
+-- حواف الزر
 local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.fromRGB(255, 255, 255)
 stroke.Thickness = 1
@@ -661,16 +645,14 @@ ToggleLabel.Parent = ToggleBtn
 
 -- زر ToggleBtn لفتح الواجهة ويختفي بعدها
 ToggleBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = true
-	ToggleBtn.Visible = false
-	BackFrame.Visible = false
+MainWindow.Visible = true
+ToggleBtn.Visible = false
 end)
 
 -- زر التصغير يخفي الواجهة ويظهر ToggleBtn
 MinimizeBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = false
-	ToggleBtn.Visible = true
-	BackFrame.Visible = true
+MainWindow.Visible = false
+ToggleBtn.Visible = true
 end)
 
 -- تفعيل السحب والتحريك بالماوس
@@ -682,46 +664,42 @@ local dragStart
 local startPos
 
 local function update(input)
-	local delta = input.Position - dragStart
-	ToggleBtn.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X,
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y
-	)
-	BackFrame.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X - 5, -- نخليه يلحق الزر
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y - 4
-	)
+local delta = input.Position - dragStart
+ToggleBtn.Position = UDim2.new(
+startPos.X.Scale,
+startPos.X.Offset + delta.X,
+startPos.Y.Scale,
+startPos.Y.Offset + delta.Y
+)
 end
 
 ToggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = ToggleBtn.Position
+if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+dragging = true
+dragStart = input.Position
+startPos = ToggleBtn.Position
 
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
+input.Changed:Connect(function()  
+		if input.UserInputState == Enum.UserInputState.End then  
+			dragging = false  
+		end  
+	end)  
+end
+
 end)
 
 ToggleBtn.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
+if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+dragInput = input
+end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
-	end
+if input == dragInput and dragging then
+update(input)
+end
 end)
+
 
 
 -- ==========================
