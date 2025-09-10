@@ -653,50 +653,48 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
--- ===== الإطار الخلفي للزر =====
+-- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
 ToggleFrame.Size = UDim2.new(0, 155, 0, 40) -- أصغر شوي
-ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
+ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false -- ما يطلع عند تشغيل السكربت
+ToggleFrame.Visible = false
 ToggleFrame.Parent = Orion
 
--- زوايا مدورة للإطار
+-- حواف مدورة للإطار
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
--- حواف الإطار
+-- UIStroke + Gradient
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 2
 frameStroke.Parent = ToggleFrame
 
--- تدرج لوني للإطار (أحمر وأسود)
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- أسود
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0))
 }
 frameGradient.Parent = frameStroke
 
-
--- ===== زر التبديل =====
+-- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 145, 0, 32)
-ToggleBtn.Position = UDim2.new(0.5, 0, 0.5, 0)
-ToggleBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+ToggleBtn.Size = UDim2.new(0, 145, 0, 36) -- أكبر من السابق شوي بالنسبة للإطار
+ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 ToggleBtn.Text = ""
-ToggleBtn.Visible = false -- ما يطلع عند تشغيل السكربت
-ToggleBtn.Parent = ToggleFrame
+ToggleBtn.Visible = false
+ToggleBtn.Parent = Orion
 
 -- حواف الزر
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
--- الصورة على يسار الزر
+-- الصورة والنص
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
 ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
@@ -704,7 +702,6 @@ ToggleIcon.BackgroundTransparency = 1
 ToggleIcon.Image = "rbxassetid://108584636372574"
 ToggleIcon.Parent = ToggleBtn
 
--- النص على يمين الصورة
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
 ToggleLabel.Position = UDim2.new(0, 15, 0, 0)
@@ -712,49 +709,33 @@ ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "فتح الواجها | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.TextColor3 = Color3.fromRGB(255,255,255)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
+-- ===== الربط بين الزر والإطار =====
+local frameOffset = Vector2.new(
+	ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
+	ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
+)
 
--- ===== منطق الفتح والتصغير =====
-ToggleBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = true
-	ToggleFrame.Visible = false -- يخفي الإطار مع الزر
-end)
-
-MinimizeBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = false
-	ToggleFrame.Visible = true -- يطلع الإطار مع الزر
-end)
-
--- زر ToggleBtn لفتح الواجهة ويختفي بعدها
-ToggleBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = true
-	ToggleBtn.Visible = false
-end)
-
--- زر التصغير يخفي الواجهة ويظهر ToggleBtn
-MinimizeBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = false
-	ToggleBtn.Visible = true
-end)
-
--- تفعيل السحب والتحريك بالماوس
 local UserInputService = game:GetService("UserInputService")
-
-local dragging
-local dragInput
-local dragStart
-local startPos
+local dragging, dragInput, dragStart, startPos
 
 local function update(input)
 	local delta = input.Position - dragStart
-	ToggleBtn.Position = UDim2.new(
+	local newPos = UDim2.new(
 		startPos.X.Scale,
 		startPos.X.Offset + delta.X,
 		startPos.Y.Scale,
 		startPos.Y.Offset + delta.Y
+	)
+	ToggleBtn.Position = newPos
+	ToggleFrame.Position = UDim2.new(
+		newPos.X.Scale,
+		newPos.X.Offset + frameOffset.X,
+		newPos.Y.Scale,
+		newPos.Y.Offset + frameOffset.Y
 	)
 end
 
@@ -764,11 +745,11 @@ ToggleBtn.InputBegan:Connect(function(input)
 		dragStart = input.Position
 		startPos = ToggleBtn.Position
 
-		input.Changed:Connect(function()  
-			if input.UserInputState == Enum.UserInputState.End then  
-				dragging = false  
-			end  
-		end)  
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
 	end
 end)
 
