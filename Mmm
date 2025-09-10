@@ -655,10 +655,11 @@ MakeDraggable(DragPoint, MainWindow)
 
 -- ===== الإطار الخلفي للزر =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 160, 0, 44) -- أكبر من الزر شوي
+ToggleFrame.Size = UDim2.new(0, 155, 0, 40) -- أصغر شوي
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.BackgroundTransparency = 1
+ToggleFrame.Visible = false -- ما يطلع عند تشغيل السكربت
 ToggleFrame.Parent = Orion
 
 -- زوايا مدورة للإطار
@@ -677,19 +678,18 @@ frameGradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- أسود
 }
-frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
 
 
 -- ===== زر التبديل =====
 local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 150, 0, 36)
+ToggleBtn.Size = UDim2.new(0, 145, 0, 32)
 ToggleBtn.Position = UDim2.new(0.5, 0, 0.5, 0)
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 ToggleBtn.Text = ""
-ToggleBtn.Visible = false
-ToggleBtn.Parent = ToggleFrame -- نخلي الزر جوه الإطار
+ToggleBtn.Visible = false -- ما يطلع عند تشغيل السكربت
+ToggleBtn.Parent = ToggleFrame
 
 -- حواف الزر
 local corner = Instance.new("UICorner")
@@ -715,6 +715,18 @@ ToggleLabel.TextSize = 16
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
+
+
+-- ===== منطق الفتح والتصغير =====
+ToggleBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = true
+	ToggleFrame.Visible = false -- يخفي الإطار مع الزر
+end)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = false
+	ToggleFrame.Visible = true -- يطلع الإطار مع الزر
+end)
 
 -- زر ToggleBtn لفتح الواجهة ويختفي بعدها
 ToggleBtn.MouseButton1Click:Connect(function()
