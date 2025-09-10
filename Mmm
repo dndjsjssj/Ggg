@@ -655,9 +655,9 @@ MakeDraggable(DragPoint, MainWindow)
 
 -- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 38) -- أصغر شوي
+ToggleFrame.Size = UDim2.new(0, 148, 0, 36) -- أصغر شوي
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
-ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleFrame.Position = UDim2.new(0.5, -10, 0, -51)
 ToggleFrame.BackgroundTransparency = 1
 ToggleFrame.Visible = false
 ToggleFrame.Parent = Orion
@@ -669,13 +669,13 @@ frameCorner.Parent = ToggleFrame
 
 -- UIStroke + Gradient
 local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 2
+frameStroke.Thickness = 4
 frameStroke.Parent = ToggleFrame
 
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0))
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
 }
 frameGradient.Parent = frameStroke
 
