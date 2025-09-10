@@ -765,6 +765,19 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
+-- ===== منطق الفتح والتصغير =====
+ToggleBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = true
+	ToggleBtn.Visible = false
+	ToggleFrame.Visible = false
+end)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = false
+	ToggleBtn.Visible = true
+	ToggleFrame.Visible = true
+end)
+
 -- ==========================
 -- زر الإغلاق
 -- ==========================
