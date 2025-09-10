@@ -653,9 +653,9 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
--- ===== الإطار =====
+	-- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر شوي
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- حجم الإطار
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
@@ -667,21 +667,42 @@ local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
--- UIStroke + Gradient
+-- UIStroke + Gradient أحمر → أسود
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 4
 frameStroke.Parent = ToggleFrame
 
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(175,0,0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0,0,0))
 }
+frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
+
+-- تحريك الـ Gradient
+local normalSpeed = 40
+local paused = false
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not frameStroke.Parent then return end
+
+    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt
+    if frameGradient.Rotation >= 356 then
+        frameGradient.Rotation = 356
+        paused = true
+        task.delay(1.5, function()
+            if frameStroke.Parent then
+                frameGradient.Rotation = 0
+                paused = false
+            end
+        end)
+    end
+end)
 
 -- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 145, 0, 36) -- أكبر من السابق شوي بالنسبة للإطار
+ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
@@ -715,67 +736,67 @@ ToggleLabel.Parent = ToggleBtn
 
 -- ===== الربط بين الزر والإطار =====
 local frameOffset = Vector2.new(
-	ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
-	ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
+    ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
+    ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
 )
 
 local UserInputService = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
 
 local function update(input)
-	local delta = input.Position - dragStart
-	local newPos = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X,
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y
-	)
-	ToggleBtn.Position = newPos
-	ToggleFrame.Position = UDim2.new(
-		newPos.X.Scale,
-		newPos.X.Offset + frameOffset.X,
-		newPos.Y.Scale,
-		newPos.Y.Offset + frameOffset.Y
-	)
+    local delta = input.Position - dragStart
+    local newPos = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+    ToggleBtn.Position = newPos
+    ToggleFrame.Position = UDim2.new(
+        newPos.X.Scale,
+        newPos.X.Offset + frameOffset.X,
+        newPos.Y.Scale,
+        newPos.Y.Offset + frameOffset.Y
+    )
 end
 
 ToggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = ToggleBtn.Position
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleBtn.Position
 
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
 end)
 
 ToggleBtn.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
-	end
+    if input == dragInput and dragging then
+        update(input)
+    end
 end)
 
 -- ===== منطق الفتح والتصغير =====
 ToggleBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = true
-	ToggleBtn.Visible = false
-	ToggleFrame.Visible = false
+    MainWindow.Visible = true
+    ToggleBtn.Visible = false
+    ToggleFrame.Visible = false
 end)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
-	MainWindow.Visible = false
-	ToggleBtn.Visible = true
-	ToggleFrame.Visible = true
+    MainWindow.Visible = false
+    ToggleBtn.Visible = true
+    ToggleFrame.Visible = true
 end)
 
 -- ==========================
