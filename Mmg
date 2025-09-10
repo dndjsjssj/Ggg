@@ -598,76 +598,229 @@ function OrionLib:MakeWindow(WindowConfig)
 		}),
 	}), "Second")
 
-	local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
-		Size = UDim2.new(1, -30, 2, 0),
-		Position = UDim2.new(0, 25, 0, -24),
-		Font = Enum.Font.GothamBlack,
-		TextSize = 20
-	}), "Text")
 
-	local WindowTopBarLine = AddThemeObject(SetProps(MakeElement("Frame"), {
-		Size = UDim2.new(1, 0, 0, 1),
-		Position = UDim2.new(0, 0, 1, -1)
-	}), "Stroke")
+local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
+	Size = UDim2.new(1, -30, 2, 0),
+	Position = UDim2.new(0, 25, 0, -24),
+	Font = Enum.Font.GothamBlack,
+	TextSize = 20
+}), "Text")
 
-	local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
-		Parent = Orion,
-		Position = UDim2.new(0.5, -307, 0.5, -172),
-		Size = UDim2.new(0, 615, 0, 344),
-		BackgroundTransparency = 0.3
+local WindowTopBarLine = AddThemeObject(SetProps(MakeElement("Frame"), {
+	Size = UDim2.new(1, 0, 0, 1),
+	Position = UDim2.new(0, 0, 1, -1)
+}), "Stroke")
+
+local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
+	Parent = Orion,
+	Position = UDim2.new(0.5, -307, 0.5, -172),
+	Size = UDim2.new(0, 615, 0, 344),
+	BackgroundTransparency = 0.3
+}), {
+	SetChildren(SetProps(MakeElement("TFrame"), {
+		Size = UDim2.new(1, 0, 0, 50),
+		Name = "TopBar"
 	}), {
-		--SetProps(MakeElement("Image", "rbxassetid://3523728077"), {
-		--	AnchorPoint = Vector2.new(0.5, 0.5),
-		--	Position = UDim2.new(0.5, 0, 0.5, 0),
-		--	Size = UDim2.new(1, 80, 1, 320),
-		--	ImageColor3 = Color3.fromRGB(33, 33, 33),
-		--	ImageTransparency = 0.7
-		--}),
-		SetChildren(SetProps(MakeElement("TFrame"), {
-			Size = UDim2.new(1, 0, 0, 50),
-			Name = "TopBar"
+		WindowName,
+		WindowTopBarLine,
+		AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 7), {
+			Size = UDim2.new(0, 70, 0, 30),
+			Position = UDim2.new(1, -90, 0, 10)
 		}), {
-			WindowName,
-			WindowTopBarLine,
-			AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 7), {
-				Size = UDim2.new(0, 70, 0, 30),
-				Position = UDim2.new(1, -90, 0, 10)
-			}), {
-				AddThemeObject(MakeElement("Stroke"), "Stroke"),
-				AddThemeObject(SetProps(MakeElement("Frame"), {
-					Size = UDim2.new(0, 1, 1, 0),
-					Position = UDim2.new(0.5, 0, 0, 0)
-				}), "Stroke"), 
-				CloseBtn,
-				MinimizeBtn
-			}), "Second"), 
-		}),
-		DragPoint,
-		WindowStuff
-	}), "Main")
+			AddThemeObject(MakeElement("Stroke"), "Stroke"),
+			AddThemeObject(SetProps(MakeElement("Frame"), {
+				Size = UDim2.new(0, 1, 1, 0),
+				Position = UDim2.new(0.5, 0, 0, 0)
+			}), "Stroke"), 
+			CloseBtn,
+			MinimizeBtn
+		}), "Second"), 
+	}),
+	DragPoint,
+	WindowStuff
+}), "Main")
 
-	if WindowConfig.ShowIcon then
-		WindowName.Position = UDim2.new(0, 50, 0, -24)
-		local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
-			Size = UDim2.new(0, 20, 0, 20),
-			Position = UDim2.new(0, 25, 0, 15)
-		})
-		WindowIcon.Parent = MainWindow.TopBar
-	end	
+if WindowConfig.ShowIcon then
+	WindowName.Position = UDim2.new(0, 50, 0, -24)
+	local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
+		Size = UDim2.new(0, 20, 0, 20),
+		Position = UDim2.new(0, 25, 0, 15)
+	})
+	WindowIcon.Parent = MainWindow.TopBar
+end	
 
-	MakeDraggable(DragPoint, MainWindow)
+MakeDraggable(DragPoint, MainWindow)
 
+
+	-- ===== الإطار =====
+local ToggleFrame = Instance.new("Frame")
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر قليلاً من الزر
+ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
+ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleFrame.BackgroundTransparency = 1
+ToggleFrame.Visible = false
+ToggleFrame.Parent = Orion
+
+-- حواف مدورة للإطار
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 10)
+frameCorner.Parent = ToggleFrame
+
+-- UIStroke
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Thickness = 4
+frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+frameStroke.Parent = ToggleFrame
+
+-- UIGradient جوه الـ Stroke
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- أسود
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
+frameGradient.Rotation = 0
+frameGradient.Parent = frameStroke
+
+-- ===== حركة Gradient حول الإطار =====
+local normalSpeed = 40 -- سرعة الدوران
+local paused = false
+
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not frameStroke.Parent then return end
+
+    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt  
+
+    if frameGradient.Rotation >= 356 then  
+        frameGradient.Rotation = 356  
+        paused = true  
+
+        task.delay(1.5, function()  
+            if frameStroke.Parent then  
+                frameGradient.Rotation = 0  
+                paused = false  
+            end  
+        end)  
+    end
+end)
+
+
+-- ===== الزر =====
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
+ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+ToggleBtn.Text = ""
+ToggleBtn.Visible = false
+ToggleBtn.Parent = Orion
+
+-- حواف الزر
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = ToggleBtn
+
+-- الصورة والنص
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
+ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = "rbxassetid://108584636372574"
+ToggleIcon.Parent = ToggleBtn
+
+local ToggleLabel = Instance.new("TextLabel")
+ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+ToggleLabel.Position = UDim2.new(0, 20, 0, 0)
+ToggleLabel.BackgroundTransparency = 1
+ToggleLabel.Text = "فتح الواجها | Open"
+ToggleLabel.Font = Enum.Font.GothamBold
+ToggleLabel.TextSize = 16
+ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+ToggleLabel.Parent = ToggleBtn
+
+-- ===== الربط بين الزر والإطار =====
+local frameOffset = Vector2.new(
+    ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
+    ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
+)
+
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    local newPos = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+    ToggleBtn.Position = newPos
+    ToggleFrame.Position = UDim2.new(
+        newPos.X.Scale,
+        newPos.X.Offset + frameOffset.X,
+        newPos.Y.Scale,
+        newPos.Y.Offset + frameOffset.Y
+    )
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleBtn.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- ===== منطق الفتح والتصغير =====
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainWindow.Visible = true
+    ToggleBtn.Visible = false
+    ToggleFrame.Visible = false
+end)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    MainWindow.Visible = false
+    ToggleBtn.Visible = true
+    ToggleFrame.Visible = true
+end)
+
+-- ==========================
+-- زر الإغلاق
+-- ==========================
 local pressTime = 0
-
 CloseBtn.MouseButton1Down:Connect(function()
-    pressTime = tick() -- نسجل وقت الضغط
+    pressTime = tick()
 end)
 
 CloseBtn.MouseButton1Up:Connect(function()
     local releaseTime = tick()
     local duration = releaseTime - pressTime
 
-    if duration <= 0.3 then -- اذا كانت ضغطة سريعة
+    if duration <= 0.3 then
         MainWindow.Visible = false
         UIHidden = true
         OrionLib:MakeNotification({
@@ -676,86 +829,57 @@ CloseBtn.MouseButton1Up:Connect(function()
             Time = 5
         })
         WindowConfig.CloseCallback()
-    else
-        -- ضغطة مطولة: لا تسوي شي
     end
 end)
 
-
-	AddConnection(UserInputService.InputBegan, function(Input)
-		if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
-			MainWindow.Visible = true
-		end
-	end)
-
-	local pressTime = 0
-
-MinimizeBtn.MouseButton1Down:Connect(function()
-    pressTime = tick() -- نسجل وقت بداية الضغط
-end)
-
-MinimizeBtn.MouseButton1Up:Connect(function()
-    local releaseTime = tick()
-    local duration = releaseTime - pressTime
-
-    if duration <= 0.3 then -- ضغط سريع
-        if Minimized then
-            -- تكبير النافذة
-            TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
-            MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-            wait(0.02)
-            MainWindow.ClipsDescendants = false
-            WindowStuff.Visible = true
-            WindowTopBarLine.Visible = true
-        else
-            -- تصغير النافذة
-            MainWindow.ClipsDescendants = true
-            WindowTopBarLine.Visible = false
-            MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
-            TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
-            wait(0.1)
-            WindowStuff.Visible = false
-        end
-        Minimized = not Minimized
-    else
-        -- ضغطة مطولة: لا تفعل شي
-    end
-end)
-
-	local function LoadSequence()
-		MainWindow.Visible = false
-		local LoadSequenceLogo = SetProps(MakeElement("Image", WindowConfig.IntroIcon), {
-			Parent = Orion,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.4, 0),
-			Size = UDim2.new(0, 28, 0, 28),
-			ImageColor3 = Color3.fromRGB(255, 0, 0
-
-),
-			ImageTransparency = 1
-		})
-
-		local LoadSequenceText = SetProps(MakeElement("Label", WindowConfig.IntroText, 14), {
-			Parent = Orion,
-			Size = UDim2.new(1, 0, 1, 0),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 19, 0.5, 0),
-			TextXAlignment = Enum.TextXAlignment.Center,
-			Font = Enum.Font.GothamBold,
-			TextTransparency = 1
-		})
-
-		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-		wait(0.8)
-		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -(LoadSequenceText.TextBounds.X/2), 0.5, 0)}):Play()
-		wait(0.3)
-		TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-		wait(2)
-		TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+AddConnection(UserInputService.InputBegan, function(Input)
+	if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
 		MainWindow.Visible = true
-		LoadSequenceLogo:Destroy()
-		LoadSequenceText:Destroy()
-	end 
+	end
+end)
+
+-- شاشة البداية
+local function LoadSequence()
+	MainWindow.Visible = false
+	local LoadSequenceLogo = SetProps(MakeElement("Image", WindowConfig.IntroIcon), {
+		Parent = Orion,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.4, 0),
+		Size = UDim2.new(0, 28, 0, 28),
+		ImageColor3 = Color3.fromRGB(255, 0, 0),
+		ImageTransparency = 1
+	})
+
+	local LoadSequenceText = SetProps(MakeElement("Label", WindowConfig.IntroText, 14), {
+		Parent = Orion,
+		Size = UDim2.new(1, 0, 1, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 19, 0.5, 0),
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Font = Enum.Font.GothamBold,
+		TextTransparency = 1
+	})
+
+	TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		ImageTransparency = 0, 
+		Position = UDim2.new(0.5, 0, 0.5, 0)
+	}):Play()
+	wait(0.8)
+	TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, -(LoadSequenceText.TextBounds.X/2), 0.5, 0)
+	}):Play()
+	wait(0.3)
+	TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		TextTransparency = 0
+	}):Play()
+	wait(2)
+	TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		TextTransparency = 1
+	}):Play()
+	MainWindow.Visible = true
+	LoadSequenceLogo:Destroy()
+	LoadSequenceText:Destroy()
+end
 
 
 
