@@ -1180,70 +1180,30 @@ end)
 
 local pressTime = 0
 
-Btn.MouseButton1Down:Connect(function()
-    pressTime = tick()
-end)
+Btn.MouseButton1Down:Connect(function() pressTime = tick() end)
 
-Btn.MouseButton1Up:Connect(function()
-    local releaseTime = tick()
-    local duration = releaseTime - pressTime
-    if duration <= 0.3 then
-        if Btn.Callback then
-            Btn.Callback()
-        end
-    end
-end)
-
+Btn.MouseButton1Up:Connect(function() local releaseTime = tick() local duration = releaseTime - pressTime if duration <= 0.3 then if Btn.Callback then Btn.Callback() end end end)
 local thickness = 2
-local cornerRadius = UDim.new(0, 5)
-local normalSpeed = 40
+local cornerRadius = UDim.new(0, 5) local normalSpeed = 40
 
--- ✨ إطار الحدود
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-borderFrame.Parent = ButtonFrame   -- جوه الزر نفسه
+local borderFrame = Instance.new("Frame") borderFrame.Size = UDim2.new(1, 0, 1, 0) borderFrame.Position = UDim2.new(0, 0, 0, 0) borderFrame.BackgroundTransparency = 1 borderFrame.ZIndex = ButtonFrame.ZIndex + 1 borderFrame.Parent = ButtonFrame   -- ✨ جوه الزر نفسه
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = cornerRadius
-corner.Parent = borderFrame
+local corner = Instance.new("UICorner") corner.CornerRadius = cornerRadius corner.Parent = borderFrame
 
--- ✨ خط الحدود
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = thickness
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
+local stroke = Instance.new("UIStroke") stroke.Thickness = thickness stroke.Color = Color3.fromRGB(255, 0, 0) stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border stroke.Parent = borderFrame
 
--- ✨ Gradient أحمر وأسود
 local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),  -- أحمر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))     -- أسود
-})
+gradient.Color = ColorSequence.new{
+ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
+ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- أسود
+}
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ✨ حركة الدوران
-local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
+local RunService = game:GetService("RunService") local currentSpeed = normalSpeed local paused = false
 
-RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
-
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt    
-
-    if gradient.Rotation >= 356 then  
-        gradient.Rotation = 356  
-        paused = true  
-
-        task.delay(1.5, function()  
-            gradient.Rotation = 0  
-            paused = false  
-        end)  
-    end
+RunService.Heartbeat:Connect(function(dt) if paused then return end
+gradient.Rotation = gradient.Rotation + currentSpeed * dt         if gradient.Rotation >= 356 then       gradient.Rotation = 356       paused = true               task.delay(1.5, function()           gradient.Rotation = 0           paused = false       end)   end
 end)
 
 				AddConnection(Click.MouseEnter, function()
