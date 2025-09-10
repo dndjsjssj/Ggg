@@ -653,40 +653,55 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
-	-- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 150, 0, 36) -- حجم الزر
-ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50) -- بالنص مزاح شوي لليمين
-ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- أحمر
-ToggleBtn.Text = ""
-ToggleBtn.Visible = false
-ToggleBtn.Parent = Orion
+-- ===== الإطار الخلفي للزر =====
+local ToggleFrame = Instance.new("Frame")
+ToggleFrame.Size = UDim2.new(0, 160, 0, 44) -- أكبر من الزر شوي
+ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
+ToggleFrame.BackgroundTransparency = 1
+ToggleFrame.Parent = Orion
 
--- حواف مدورة
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
-corner.Parent = ToggleBtn
+-- زوايا مدورة للإطار
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 10)
+frameCorner.Parent = ToggleFrame
 
--- حواف الزر (Stroke مع تدرج)
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 3
-stroke.Parent = ToggleBtn
+-- حواف الإطار
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Thickness = 2
+frameStroke.Parent = ToggleFrame
 
--- تدرج أحمر + أسود للـ UIStroke
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
+-- تدرج لوني للإطار (أحمر وأسود)
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- أسود
 }
-gradient.Parent = stroke
+frameGradient.Rotation = 0
+frameGradient.Parent = frameStroke
+
+
+-- ===== زر التبديل =====
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 150, 0, 36)
+ToggleBtn.Position = UDim2.new(0.5, 0, 0.5, 0)
+ToggleBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ToggleBtn.Text = ""
+ToggleBtn.Visible = false
+ToggleBtn.Parent = ToggleFrame -- نخلي الزر جوه الإطار
+
+-- حواف الزر
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = ToggleBtn
 
 -- الصورة على يسار الزر
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
 ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
 ToggleIcon.BackgroundTransparency = 1
-ToggleIcon.Image = "rbxassetid://108584636372574" -- غير حسب الحاجة
+ToggleIcon.Image = "rbxassetid://108584636372574"
 ToggleIcon.Parent = ToggleBtn
 
 -- النص على يمين الصورة
