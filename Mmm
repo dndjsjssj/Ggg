@@ -715,7 +715,7 @@ ToggleIcon.Parent = ToggleBtn
 
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+ToggleLabel.Position = UDim2.new(0, 10, 0, 16)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "فتح الواجها | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
