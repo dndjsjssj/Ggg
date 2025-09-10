@@ -655,7 +655,7 @@ MakeDraggable(DragPoint, MainWindow)
 
 	-- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- حجم الإطار
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
@@ -667,38 +667,28 @@ local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
--- UIStroke + Gradient أحمر → أسود
+-- UIStroke + Gradient أحمر → أسود يدور حول الإطار
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 4
 frameStroke.Parent = ToggleFrame
 
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0,0,0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),  -- الأحمر
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,0,0)),    -- الأسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))   -- الأحمر يعود
 }
 frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
 
--- تحريك الـ Gradient
-local normalSpeed = 40
-local paused = false
+-- تحريك التدرج حول الإطار
+local rotationSpeed = 100
 game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if paused then return end
-    if not frameStroke.Parent then return end
-
-    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt
-    if frameGradient.Rotation >= 356 then
-        frameGradient.Rotation = 356
-        paused = true
-        task.delay(1.5, function()
-            if frameStroke.Parent then
-                frameGradient.Rotation = 0
-                paused = false
-            end
-        end)
+    if frameStroke.Parent then
+        frameGradient.Rotation = (frameGradient.Rotation + rotationSpeed * dt) % 360
     end
 end)
+
 
 -- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
