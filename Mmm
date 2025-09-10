@@ -655,7 +655,7 @@ MakeDraggable(DragPoint, MainWindow)
 
 	-- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر قليلاً من الزر
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
@@ -667,27 +667,47 @@ local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
--- UIStroke + Gradient أحمر → أسود يدور حول الإطار
+-- UIStroke + Gradient أحمر وأسود
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 4
 frameStroke.Parent = ToggleFrame
 
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,0,0)),  -- الأحمر
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,0,0)),    -- الأسود
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,0,0))   -- الأحمر يعود
+ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
+ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- أسود
+ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
 }
 frameGradient.Rotation = 0
-frameGradient.Parent = frameStroke
+frameGradient.Parent= frameStroke
 
--- تحريك التدرج حول الإطار
-local rotationSpeed = 100
+-- ===== حركة Gradient حول الإطار =====
+local normalSpeed = 40 -- سرعة الدوران
+local paused = false
+
 game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if frameStroke.Parent then
-        frameGradient.Rotation = (frameGradient.Rotation + rotationSpeed * dt) % 360
-    end
+if paused then return end
+if not frameStroke.Parent then return end
+
+frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt  
+
+if frameGradient.Rotation >= 356 then  
+    frameGradient.Rotation = 356  
+    paused = true  
+
+    task.delay(1.5, function()  
+        if frameStroke.Parent then  
+            frameGradient.Rotation = 0  
+            paused = false  
+        end  
+    end)  
+end
+
 end)
+
 
 
 -- ===== الزر =====
