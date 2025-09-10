@@ -653,41 +653,33 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
-	local ToggleBtn = Instance.new("TextButton")
+	-- زر التبديل الجديد (مستطيل أحمر مع صورة يسار ونص يمين)
+local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 150, 0, 36) -- حجم الزر
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50) -- بالنص مزاح شوي لليمين
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- أحمر
 ToggleBtn.Text = ""
 ToggleBtn.Visible = false
-ToggleBtn.ZIndex = 2
 ToggleBtn.Parent = Orion
 
--- ===== خلفية ورا الزر =====
-local BackFrame = Instance.new("Frame")
-BackFrame.Size = UDim2.new(0, 160, 0, 44) -- أكبر من الزر شوي
-BackFrame.Position = UDim2.new(0.5, -15, 0, -54)
-BackFrame.AnchorPoint = Vector2.new(0.5, 0)
-BackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- أسود
-BackFrame.BackgroundTransparency = 0.2 -- يخليها مثل ظل
-BackFrame.ZIndex = 1
-BackFrame.Parent = Orion
-
--- حواف مدورة للخلفية
-local backCorner = Instance.new("UICorner")
-backCorner.CornerRadius = UDim.new(0, 10)
-backCorner.Parent = BackFrame
-
--- حواف مدورة للزر
+-- حواف مدورة
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
--- حواف الزر (حد أبيض)
+-- حواف الزر (Stroke مع تدرج)
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Thickness = 1
+stroke.Thickness = 3
 stroke.Parent = ToggleBtn
+
+-- تدرج أحمر + أسود للـ UIStroke
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- أسود
+}
+gradient.Parent = stroke
 
 -- الصورة على يسار الزر
 local ToggleIcon = Instance.new("ImageLabel")
@@ -713,14 +705,12 @@ ToggleLabel.Parent = ToggleBtn
 ToggleBtn.MouseButton1Click:Connect(function()
 	MainWindow.Visible = true
 	ToggleBtn.Visible = false
-	BackFrame.Visible = false
 end)
 
 -- زر التصغير يخفي الواجهة ويظهر ToggleBtn
 MinimizeBtn.MouseButton1Click:Connect(function()
 	MainWindow.Visible = false
 	ToggleBtn.Visible = true
-	BackFrame.Visible = true
 end)
 
 -- تفعيل السحب والتحريك بالماوس
@@ -739,12 +729,6 @@ local function update(input)
 		startPos.Y.Scale,
 		startPos.Y.Offset + delta.Y
 	)
-	BackFrame.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X - 5, -- نخليه يلحق الزر
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y - 4
-	)
 end
 
 ToggleBtn.InputBegan:Connect(function(input)
@@ -753,11 +737,11 @@ ToggleBtn.InputBegan:Connect(function(input)
 		dragStart = input.Position
 		startPos = ToggleBtn.Position
 
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
+		input.Changed:Connect(function()  
+			if input.UserInputState == Enum.UserInputState.End then  
+				dragging = false  
+			end  
+		end)  
 	end
 end)
 
@@ -772,9 +756,6 @@ UserInputService.InputChanged:Connect(function(input)
 		update(input)
 	end
 end)
-
-
-
 
 -- ==========================
 -- زر الإغلاق
