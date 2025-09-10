@@ -675,7 +675,7 @@ frameStroke.Parent = ToggleFrame
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(175,0,0))
 }
 frameGradient.Parent = frameStroke
 
