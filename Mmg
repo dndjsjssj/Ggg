@@ -883,15 +883,12 @@ if WindowConfig and WindowConfig.IntroEnabled then
     LoadSequence()
 end
 
--- ===== الإعدادات =====
-local thickness = 5                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 8)    -- نصف قطر الزوايا
-local normalSpeed = 40                -- السرعة العادية
-local slowSpeed = 2                    -- السرعة أثناء التباطؤ
-local slowDuration = 5                 -- مدة التباطؤ بالثواني
-local transitionTime = 1               -- وقت الانتقال بين السرعتين
+local thickness = 4
+local cornerRadius = UDim.new(0, 8)
+local normalSpeed = 40
+local maxRotation = 160
+local direction = 1
 
--- ===== إنشاء الإطار =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -899,52 +896,34 @@ borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = MainWindow.ZIndex + 1
 borderFrame.Parent = MainWindow
 
--- ===== الزوايا =====
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  -- أحمر
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), -- الأحمر الأول أطول
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- بداية الأسود
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   -- نهاية الأسود (أطول بالنص)
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), -- بداية الأحمر الثاني
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== تحريك التدرج =====
 local RunService = game:GetService("RunService")
 
-local currentSpeed = normalSpeed
-local paused = false
-
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
-
-    gradient.Rotation = (gradient.Rotation + currentSpeed * dt)
-
-    -- إذا وصل 356 أو تعداها
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-
-        -- يوقف 3 ثواني وبعدين يرجع يتحرك طبيعي
-        task.delay(1.5, function()
-            gradient.Rotation = 0 -- يرجع من البداية
-            paused = false
-        end)
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
 
