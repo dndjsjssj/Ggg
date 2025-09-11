@@ -665,21 +665,18 @@ ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false
+ToggleFrame.Visible = true -- خليته ظاهر حتى يسحب
 ToggleFrame.Parent = Orion
 
--- حواف مدورة للإطار
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
--- UIStroke
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 4
 frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 frameStroke.Parent = ToggleFrame
 
--- UIGradient
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
@@ -694,14 +691,9 @@ frameGradient.Parent = frameStroke
 
 -- ===== حركة Gradient =====
 local normalSpeed = 40
-local paused = false
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
     if not frameStroke.Parent then return end
-    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt
-    if frameGradient.Rotation >= 356 then
-        frameGradient.Rotation = 0
-    end
+    frameGradient.Rotation = (frameGradient.Rotation + normalSpeed * dt) % 360
 end)
 
 -- ===== الزر =====
@@ -714,12 +706,10 @@ ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
 
--- حواف الزر
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
--- الصورة والنص
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
 ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
@@ -787,39 +777,33 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ===== انميشن الفتح والإغلاق =====
-local function OpenFrame()
-    ToggleFrame.Visible = true
-    ToggleBtn.Visible = true
-
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-    
-    TweenService:Create(ToggleFrame, tweenInfo, {Size = UDim2.new(0, 145, 0, 35), BackgroundTransparency = 0}):Play()
-    TweenService:Create(ToggleBtn, tweenInfo, {Size = UDim2.new(0, 145, 0, 36), BackgroundTransparency = 0}):Play()
+-- ===== انميشن MainWindow =====
+local function OpenMainWindow()
+    MainWindow.Visible = true
+    MainWindow.Size = UDim2.new(0, 0, 0, 0) -- ابدأ صغير
+    local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 400, 0, 300)})
+    tween:Play()
 end
 
-local function CloseFrame()
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
-    
-    local frameTween = TweenService:Create(ToggleFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1})
-    frameTween:Play()
-    
-    local btnTween = TweenService:Create(ToggleBtn, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1})
-    btnTween:Play()
-    
-    btnTween.Completed:Connect(function()
-        ToggleFrame.Visible = false
-        ToggleBtn.Visible = false
+local function CloseMainWindow()
+    local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+    tween:Play()
+    tween.Completed:Connect(function()
+        MainWindow.Visible = false
     end)
 end
 
 -- ===== ربط الأزرار بالانميشن =====
 ToggleBtn.MouseButton1Click:Connect(function()
-    CloseFrame()
+    OpenMainWindow()
+    ToggleBtn.Visible = false
+    ToggleFrame.Visible = false
 end)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
-    OpenFrame()
+    CloseMainWindow()
+    ToggleBtn.Visible = true
+    ToggleFrame.Visible = true
 end)
 
 
