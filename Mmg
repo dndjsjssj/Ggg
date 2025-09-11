@@ -398,7 +398,7 @@ function OrionLib:MakeNotification(NotificationConfig)
 	spawn(function()
 		NotificationConfig.Name = NotificationConfig.Name or "Notification"
 		NotificationConfig.Content = NotificationConfig.Content or "Test"
-		NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://4384403532"
+		NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://115714662895227"
 		NotificationConfig.Time = NotificationConfig.Time or 15
 
 		local NotificationParent = SetProps(MakeElement("TFrame"), {
@@ -426,7 +426,7 @@ function OrionLib:MakeNotification(NotificationConfig)
 				Position = UDim2.new(0, 30, 0, 0),
 				Font = Enum.Font.GothamBold,
 				Name = "Title",
-				TextColor3 = Color3.fromRGB(187, 134, 252
+				TextColor3 = Color3.fromRGB(200, 0, 0
 
 )  -- Cor da legenda (título)
 			}),
@@ -436,7 +436,7 @@ function OrionLib:MakeNotification(NotificationConfig)
 				Font = Enum.Font.GothamSemibold,
 				Name = "Content",
 				AutomaticSize = Enum.AutomaticSize.Y,
-				TextColor3 = Color3.fromRGB(187, 134, 252
+				TextColor3 = Color3.fromRGB(200, 0, 0
 
 ),  -- Cor do conteúdo				TextWrapped = true
 			})
