@@ -692,8 +692,8 @@ game:GetService("RunService").Heartbeat:Connect(function(dt)
 
     frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt  
 
-    if frameGradient.Rotation >= 180 then  
-        frameGradient.Rotation = 180  
+    if frameGradient.Rotation >= 356 then  
+        frameGradient.Rotation = 356
         paused = true  
 
         task.delay(1.5, function()  
@@ -934,8 +934,8 @@ RunService.Heartbeat:Connect(function(dt)
     gradient.Rotation = (gradient.Rotation + currentSpeed * dt)
 
     -- إذا وصل 356 أو تعداها
-    if gradient.Rotation >= 180 then
-        gradient.Rotation = 180
+    if gradient.Rotation >= 356 then
+        gradient.Rotation = 356
         paused = true
 
         -- يوقف 3 ثواني وبعدين يرجع يتحرك طبيعي
