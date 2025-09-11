@@ -653,12 +653,63 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
+
+-- ===== الخدمات =====
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- ===== الإطار =====
+local ToggleFrame = Instance.new("Frame")
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
+ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
+ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleFrame.BackgroundTransparency = 1
+ToggleFrame.Visible = false
+ToggleFrame.Parent = Orion
+
+-- حواف مدورة للإطار
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 10)
+frameCorner.Parent = ToggleFrame
+
+-- UIStroke
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Thickness = 4
+frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+frameStroke.Parent = ToggleFrame
+
+-- UIGradient
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+}
+frameGradient.Rotation = 0
+frameGradient.Parent = frameStroke
+
+-- ===== حركة Gradient =====
+local normalSpeed = 40
+local paused = false
+RunService.Heartbeat:Connect(function(dt)
+    if paused then return end
+    if not frameStroke.Parent then return end
+    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt
+    if frameGradient.Rotation >= 356 then
+        frameGradient.Rotation = 0
+    end
+end)
+
 -- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(255,255,255) -- يمكن تغييره لأي لون
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
@@ -667,22 +718,6 @@ ToggleBtn.Parent = Orion
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
-
--- UIStroke للزر
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 4
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = ToggleBtn
-
--- UIGradient على الـ Stroke
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 255))
-}
-gradient.Rotation = 0
-gradient.Parent = stroke
 
 -- الصورة والنص
 local ToggleIcon = Instance.new("ImageLabel")
@@ -703,10 +738,13 @@ ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
--- ===== سحب وتحريك الزر =====
-local UserInputService = game:GetService("UserInputService")
-local dragging, dragInput, dragStart, startPos
+-- ===== سحب الزر والإطار =====
+local frameOffset = Vector2.new(
+    ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
+    ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
+)
 
+local dragging, dragInput, dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
     local newPos = UDim2.new(
@@ -716,6 +754,12 @@ local function update(input)
         startPos.Y.Offset + delta.Y
     )
     ToggleBtn.Position = newPos
+    ToggleFrame.Position = UDim2.new(
+        newPos.X.Scale,
+        newPos.X.Offset + frameOffset.X,
+        newPos.Y.Scale,
+        newPos.Y.Offset + frameOffset.Y
+    )
 end
 
 ToggleBtn.InputBegan:Connect(function(input)
@@ -723,7 +767,6 @@ ToggleBtn.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = ToggleBtn.Position
-
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -744,15 +787,39 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ===== منطق الفتح والتصغير =====
+-- ===== انميشن الفتح والإغلاق =====
+local function OpenFrame()
+    ToggleFrame.Visible = true
+    ToggleBtn.Visible = true
+
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    
+    TweenService:Create(ToggleFrame, tweenInfo, {Size = UDim2.new(0, 145, 0, 35), BackgroundTransparency = 0}):Play()
+    TweenService:Create(ToggleBtn, tweenInfo, {Size = UDim2.new(0, 145, 0, 36), BackgroundTransparency = 0}):Play()
+end
+
+local function CloseFrame()
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+    
+    local frameTween = TweenService:Create(ToggleFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1})
+    frameTween:Play()
+    
+    local btnTween = TweenService:Create(ToggleBtn, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1})
+    btnTween:Play()
+    
+    btnTween.Completed:Connect(function()
+        ToggleFrame.Visible = false
+        ToggleBtn.Visible = false
+    end)
+end
+
+-- ===== ربط الأزرار بالانميشن =====
 ToggleBtn.MouseButton1Click:Connect(function()
-    MainWindow.Visible = true
-    ToggleBtn.Visible = false
+    CloseFrame()
 end)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
-    MainWindow.Visible = false
-    ToggleBtn.Visible = true
+    OpenFrame()
 end)
 
 
