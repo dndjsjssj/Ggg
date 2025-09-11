@@ -398,7 +398,7 @@ function OrionLib:MakeNotification(NotificationConfig)
 	spawn(function()
 		NotificationConfig.Name = NotificationConfig.Name or "Notification"
 		NotificationConfig.Content = NotificationConfig.Content or "Test"
-		NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://115714662895227"
+		NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://105066004053129"
 		NotificationConfig.Time = NotificationConfig.Time or 15
 
 		local NotificationParent = SetProps(MakeElement("TFrame"), {
@@ -857,8 +857,8 @@ CloseBtn.MouseButton1Up:Connect(function()
         MainWindow.Visible = false
         UIHidden = true
         OrionLib:MakeNotification({
-            Name = "تم اغلاق الواجهة",
-            Content = "Martin dev",
+            Name = "الاشعار",
+            Content = "تم اغلاق السكربت",
             Time = 5
         })
         WindowConfig.CloseCallback()
