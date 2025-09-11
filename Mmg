@@ -653,17 +653,20 @@ MakeDraggable(DragPoint, MainWindow)
 
 
 
+
+
+-- ===== انميشن MainWindow =====
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-
+-- Toggle Frame
 local ToggleFrame = Instance.new("Frame")
 ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false 
+ToggleFrame.Visible = false
 ToggleFrame.Parent = Orion
 
 local frameCorner = Instance.new("UICorner")
@@ -687,14 +690,13 @@ frameGradient.Color = ColorSequence.new{
 frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
 
-
 local normalSpeed = 40
 RunService.Heartbeat:Connect(function(dt)
     if not frameStroke.Parent then return end
     frameGradient.Rotation = (frameGradient.Rotation + normalSpeed * dt) % 360
 end)
 
-
+-- Toggle Button
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
@@ -726,7 +728,7 @@ ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
--- ===== سحب الزر والإطار =====
+-- Dragging
 local frameOffset = Vector2.new(
     ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
     ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
@@ -775,10 +777,31 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ===== انميشن MainWindow =====
+-- Toggle Fade animations
+local function OpenToggle()
+    ToggleBtn.Visible = true
+    ToggleFrame.Visible = true
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    TweenService:Create(ToggleFrame, tweenInfo, {BackgroundTransparency = 0}):Play()
+    TweenService:Create(ToggleBtn, tweenInfo, {BackgroundTransparency = 0}):Play()
+end
+
+local function CloseToggle()
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+    local frameTween = TweenService:Create(ToggleFrame, tweenInfo, {BackgroundTransparency = 1})
+    local btnTween = TweenService:Create(ToggleBtn, tweenInfo, {BackgroundTransparency = 1})
+    frameTween:Play()
+    btnTween:Play()
+    btnTween.Completed:Connect(function()
+        ToggleBtn.Visible = false
+        ToggleFrame.Visible = false
+    end)
+end
+
+-- MainWindow animations
 local function OpenMainWindow()
     MainWindow.Visible = true
-    MainWindow.Size = UDim2.new(0, 0, 0, 0) -- ابدأ صغير
+    MainWindow.Size = UDim2.new(0, 0, 0, 0)
     local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 330)})
     tween:Play()
 end
@@ -791,17 +814,30 @@ local function CloseMainWindow()
     end)
 end
 
--- ===== ربط الأزرار بالانميشن =====
-ToggleBtn.MouseButton1Click:Connect(function()
-    OpenMainWindow()
-    ToggleBtn.Visible = false
-    ToggleFrame.Visible = false
+-- ToggleBtn with pressTime
+local pressTimeToggle = 0
+ToggleBtn.MouseButton1Down:Connect(function()
+    pressTimeToggle = tick()
+end)
+ToggleBtn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    if releaseTime - pressTimeToggle <= 0.3 then
+        OpenMainWindow()
+        CloseToggle()
+    end
 end)
 
-MinimizeBtn.MouseButton1Click:Connect(function()
-    CloseMainWindow()
-    ToggleBtn.Visible = true
-    ToggleFrame.Visible = true
+-- MinimizeBtn with pressTime
+local pressTimeMinimize = 0
+MinimizeBtn.MouseButton1Down:Connect(function()
+    pressTimeMinimize = tick()
+end)
+MinimizeBtn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    if releaseTime - pressTimeMinimize <= 0.3 then
+        CloseMainWindow()
+        OpenToggle()
+    end
 end)
 
 
