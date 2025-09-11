@@ -614,7 +614,7 @@ local WindowTopBarLine = AddThemeObject(SetProps(MakeElement("Frame"), {
 local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
 	Parent = Orion,
 	Position = UDim2.new(0.5, -307, 0.5, -172),
-	Size = UDim2.new(0, 615, 0, 344),
+	Size = UDim2.new(0, 600, 0, 330),
 	BackgroundTransparency = 0.3
 }), {
 	SetChildren(SetProps(MakeElement("TFrame"), {
@@ -651,33 +651,34 @@ end
 
 MakeDraggable(DragPoint, MainWindow)
 
+-- ===== الخدمات =====
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
-	-- ===== الإطار =====
+-- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر قليلاً من الزر
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false
+ToggleFrame.Visible = false -- خليته ظاهر حتى يسحب
 ToggleFrame.Parent = Orion
 
--- حواف مدورة للإطار
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
--- UIStroke
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 4
 frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 frameStroke.Parent = ToggleFrame
 
--- UIGradient جوه الـ Stroke
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- أسود
+    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
     ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
     ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
     ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
@@ -685,29 +686,12 @@ frameGradient.Color = ColorSequence.new{
 frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
 
--- ===== حركة Gradient حول الإطار =====
-local normalSpeed = 40 -- سرعة الدوران
-local paused = false
-
-game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if paused then return end
+-- ===== حركة Gradient =====
+local normalSpeed = 40
+RunService.Heartbeat:Connect(function(dt)
     if not frameStroke.Parent then return end
-
-    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt  
-
-    if frameGradient.Rotation >= 356 then  
-        frameGradient.Rotation = 356  
-        paused = true  
-
-        task.delay(1.5, function()  
-            if frameStroke.Parent then  
-                frameGradient.Rotation = 0  
-                paused = false  
-            end  
-        end)  
-    end
+    frameGradient.Rotation = (frameGradient.Rotation + normalSpeed * dt) % 360
 end)
-
 
 -- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
@@ -719,12 +703,10 @@ ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
 
--- حواف الزر
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
--- الصورة والنص
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
 ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
@@ -743,15 +725,13 @@ ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
--- ===== الربط بين الزر والإطار =====
+-- ===== سحب الزر والإطار =====
 local frameOffset = Vector2.new(
     ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
     ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
 )
 
-local UserInputService = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
-
 local function update(input)
     local delta = input.Position - dragStart
     local newPos = UDim2.new(
@@ -774,7 +754,6 @@ ToggleBtn.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = ToggleBtn.Position
-
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -795,18 +774,35 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ===== منطق الفتح والتصغير =====
-ToggleBtn.MouseButton1Click:Connect(function()
+-- ===== انميشن MainWindow =====
+local function OpenMainWindow()
     MainWindow.Visible = true
+    MainWindow.Size = UDim2.new(0, 0, 0, 0) -- ابدأ صغير
+    local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 330)})
+    tween:Play()
+end
+
+local function CloseMainWindow()
+    local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+    tween:Play()
+    tween.Completed:Connect(function()
+        MainWindow.Visible = false
+    end)
+end
+
+-- ===== ربط الأزرار بالانميشن =====
+ToggleBtn.MouseButton1Click:Connect(function()
+    OpenMainWindow()
     ToggleBtn.Visible = false
     ToggleFrame.Visible = false
 end)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
-    MainWindow.Visible = false
+    CloseMainWindow()
     ToggleBtn.Visible = true
     ToggleFrame.Visible = true
 end)
+
 
 -- ==========================
 -- زر الإغلاق
@@ -880,8 +876,6 @@ local function LoadSequence()
 	LoadSequenceLogo:Destroy()
 	LoadSequenceText:Destroy()
 end
-
-
 
 
             -- ===== التحقق من إعدادات الواجهة =====
