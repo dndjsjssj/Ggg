@@ -1107,45 +1107,33 @@ end)
 
 				ParagraphFrame.Content.Text = Content
 
--- ندور على ال UIStroke جوه الباراجراف
 local paragraphStroke = ParagraphFrame:FindFirstChildOfClass("UIStroke")
 if paragraphStroke then
-    paragraphStroke.Thickness = 2 -- سمك الخط
+    paragraphStroke.Thickness = 2
 
-    -- 🔥 Gradient متدرج ملون
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))
     }
     gradient.Rotation = 0
     gradient.Parent = paragraphStroke
 
-    -- ===== التحريك مع توقف عند 356 =====
-    local normalSpeed = 40 -- 🔥 السرعة
-    local currentSpeed = normalSpeed
-    local paused = false
+    local normalSpeed = 40
+    local maxRotation = 160
+    local direction = 1
 
     game:GetService("RunService").Heartbeat:Connect(function(dt)
-        if paused then return end
-        if not paragraphStroke.Parent then return end -- حماية
+        if not paragraphStroke.Parent then return end
 
-        gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+        gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-        if gradient.Rotation >= 356 then
-            gradient.Rotation = 356
-            paused = true
-
-            task.delay(1.5, function()
-                if paragraphStroke.Parent then
-                    gradient.Rotation = 0
-                    paused = false
-                end
-            end)
+        if gradient.Rotation >= maxRotation then
+            gradient.Rotation = maxRotation
+            direction = -1
+        elseif gradient.Rotation <= 0 then
+            gradient.Rotation = 0
+            direction = 1
         end
     end)
 end
