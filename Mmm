@@ -665,7 +665,7 @@ ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = true -- خليته ظاهر حتى يسحب
+ToggleFrame.Visible = false -- خليته ظاهر حتى يسحب
 ToggleFrame.Parent = Orion
 
 local frameCorner = Instance.new("UICorner")
