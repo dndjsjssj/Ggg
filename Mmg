@@ -651,18 +651,19 @@ end
 
 MakeDraggable(DragPoint, MainWindow)
 
--- ===== الخدمات =====
+
+
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- ===== الإطار =====
+
 local ToggleFrame = Instance.new("Frame")
 ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false -- خليته ظاهر حتى يسحب
+ToggleFrame.Visible = false 
 ToggleFrame.Parent = Orion
 
 local frameCorner = Instance.new("UICorner")
@@ -686,14 +687,14 @@ frameGradient.Color = ColorSequence.new{
 frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
 
--- ===== حركة Gradient =====
+
 local normalSpeed = 40
 RunService.Heartbeat:Connect(function(dt)
     if not frameStroke.Parent then return end
     frameGradient.Rotation = (frameGradient.Rotation + normalSpeed * dt) % 360
 end)
 
--- ===== الزر =====
+
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
@@ -1192,24 +1193,22 @@ Btn.MouseButton1Up:Connect(function()
     end
 end)
 
-
-    local thickness = 2                    
-local cornerRadius = UDim.new(0, 5)    
-local normalSpeed = 40                 
-
+local thickness = 2
+local cornerRadius = UDim.new(0, 5)
+local normalSpeed = 40
+local maxRotation = 160
+local direction = 1
 
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = ButtonFrame.ZIndex + 1
-borderFrame.Parent = ButtonFrame   -- ✨ جوه الزر نفسه
-
+borderFrame.Parent = ButtonFrame
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
-
 
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
@@ -1217,41 +1216,29 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
-
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- يمين أسود
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
-
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
-
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end  
+    if not stroke.Parent then return end
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-    
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-
-        
-        task.delay(1.5, function()
-            gradient.Rotation = 0
-            paused = false
-        end)
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
+    
 
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
@@ -1330,58 +1317,46 @@ end)
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
 local normalSpeed = 40
+local maxRotation = 160
+local direction = 1
 
--- ===== إنشاء إطار للتلجوري =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = ToggleFrame.ZIndex + 1
-borderFrame.Parent = ToggleFrame   -- ✨ جوه التلجوري نفسه
+borderFrame.Parent = ToggleFrame
 
--- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- يمين أسود
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== التحريك مع التوقف عند 356 =====
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
-
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
+    if not stroke.Parent then return end
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-
-        task.delay(1.5, function()
-            gradient.Rotation = 0
-            paused = false
-        end)
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
 
@@ -1480,64 +1455,51 @@ end)
 					SliderBar
 				}), "Second")
 
+
+
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
 local normalSpeed = 40
+local maxRotation = 160
+local direction = 1
 
--- ===== إنشاء إطار للسلايدر =====
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
 borderFrame.Position = UDim2.new(0, 0, 0, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = SliderFrame.ZIndex + 1
-borderFrame.Parent = SliderFrame   -- ✨ جوه السلايدر نفسه
+borderFrame.Parent = SliderFrame
 
--- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== التحريك مع التوقف عند 356 =====
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
-
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
-    if not borderFrame.Parent then return end  -- حماية
+    if not borderFrame.Parent then return end
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-
-        task.delay(1.5, function()
-            if borderFrame.Parent then
-                gradient.Rotation = 0
-                paused = false
-            end
-        end)
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
 
@@ -1648,48 +1610,39 @@ end)
 					MakeElement("Corner")
 				}), "Second")
 
+
 local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
-    local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
 if dropdownStroke then
     dropdownStroke.Thickness = 2
 
-    -- 🔥 Gradient متدرج مثل الكود الثاني
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-        ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-        ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))
     }
     gradient.Rotation = 0
     gradient.Parent = dropdownStroke
 
-    -- ===== التحريك مع توقف عند 356 =====
-    local normalSpeed = 40 -- 🔥 تتحكم بالسرعة هنا (غيّر الرقم)
-    local currentSpeed = normalSpeed
-    local paused = false
+    local normalSpeed = 40
+    local maxRotation = 160
+    local direction = 1
 
+    local RunService = game:GetService("RunService")
     RunService.Heartbeat:Connect(function(dt)
-        if paused then return end
-        if not dropdownStroke.Parent then return end -- حماية
+        if not dropdownStroke.Parent then return end
 
-        gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+        gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-        if gradient.Rotation >= 356 then
-            gradient.Rotation = 356
-            paused = true
-
-            task.delay(1.5, function()
-                if dropdownStroke.Parent then
-                    gradient.Rotation = 0
-                    paused = false
-                end
-            end)
+        if gradient.Rotation >= maxRotation then
+            gradient.Rotation = maxRotation
+            direction = -1
+        elseif gradient.Rotation <= 0 then
+            gradient.Rotation = 0
+            direction = 1
         end
     end)
 end
+
 
 				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
@@ -1714,69 +1667,52 @@ end
 
 
 
--- ===== إعدادات =====
-local thickness = 2                    -- سماكة الحواف
-local cornerRadius = UDim.new(0, 3)    -- نصف قطر الزوايا (صغير)
-local normalSpeed = 40                 -- السرعة العادية
+local thickness = 2
+local cornerRadius = UDim.new(0, 3)
+local normalSpeed = 40
+local maxRotation = 160
+local direction = 1
 
--- ===== إنشاء إطار للزر (OptionBtn) =====
 local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(0.98, 0, 0.83, 0)       -- 90% من حجم الزر
-borderFrame.Position = UDim2.new(0.010, 0, 0.05, 0) -- مركزي داخل الزر
+borderFrame.Size = UDim2.new(0.98, 0, 0.83, 0)
+borderFrame.Position = UDim2.new(0.010, 0, 0.05, 0)
 borderFrame.BackgroundTransparency = 1
 borderFrame.ZIndex = OptionBtn.ZIndex + 1
-borderFrame.Parent = OptionBtn   -- ✨ جوه الزر نفسه
+borderFrame.Parent = OptionBtn
 
--- ===== زوايا الإطار =====
 local corner = Instance.new("UICorner")
 corner.CornerRadius = cornerRadius
 corner.Parent = borderFrame
 
--- ===== الحدود =====
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = thickness
 stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج الأحمر/الأسود =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
--- ===== التحريك مع التوقف عند 356 =====
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
-
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end  -- إذا متوقف حالياً، ما يتحرك
-    if not borderFrame.Parent then return end -- حماية
+    if not borderFrame.Parent then return end
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-    -- إذا وصل 356 أو أكثر
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-
-        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
-        task.delay(1.5, function()
-            if borderFrame.Parent then
-                gradient.Rotation = 0
-                paused = false
-            end
-        end)
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
+
 
 						AddConnection(OptionBtn.MouseButton1Click, function()
 							Dropdown:Set(Option)
@@ -2010,10 +1946,12 @@ end)
     Click
 }), "Second")
 
--- ===== الإطار الأحمر/الأسود للتكست بوكس =====
+
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
 local normalSpeed = 40
+local maxRotation = 160
+local direction = 1
 
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -2034,36 +1972,24 @@ stroke.Parent = borderFrame
 
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),  
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),   
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)), 
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))   
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
 
 local RunService = game:GetService("RunService")
-local currentSpeed = normalSpeed
-local paused = false
-
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end
     if not borderFrame.Parent then return end
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt  
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-    if gradient.Rotation >= 356 then
-        gradient.Rotation = 356
-        paused = true
-
-        task.delay(1.5, function()
-            if borderFrame.Parent then
-                gradient.Rotation = 0
-                paused = false
-            end
-        end)
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
 
