@@ -654,71 +654,56 @@ MakeDraggable(DragPoint, MainWindow)
 
 
 -- ===== الزر =====
-local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
-ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
-ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
-ToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-ToggleFrame.Visible = true
-ToggleFrame.Parent = Orion
-
--- 🎨 UIGradient على الإطار فقط
-local frameGradient = Instance.new("UIGradient")
-frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر يسار
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- أسود يمين
-}
-frameGradient.Rotation = 0
-frameGradient.Parent = ToggleFrame
-
--- ===== حركة التدرج للإطار =====
-local RunService = game:GetService("RunService")
-local normalSpeed = 60
-local direction = 1
-local maxRotation = 160
-
-RunService.Heartbeat:Connect(function(dt)
-    if not frameGradient.Parent then return end
-    frameGradient.Rotation = frameGradient.Rotation + (normalSpeed * dt * direction)
-
-    if frameGradient.Rotation >= maxRotation then
-        frameGradient.Rotation = maxRotation
-        direction = -1
-    elseif frameGradient.Rotation <= 0 then
-        frameGradient.Rotation = 0
-        direction = 1
-    end
-end)
-
--- ===== الزر ToggleBtn بدون أي إضافات =====
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- لون ثابت
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(255,255,255) -- يمكن تغييره لأي لون
 ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
 
+-- حواف الزر
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = ToggleBtn
 
--- ===== النص =====
+-- UIStroke للزر
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 4
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = ToggleBtn
+
+-- UIGradient على الـ Stroke
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 255))
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- الصورة والنص
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
+ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = "rbxassetid://108584636372574"
+ToggleIcon.Parent = ToggleBtn
+
 local ToggleLabel = Instance.new("TextLabel")
-ToggleLabel.Size = UDim2.new(1, -20, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+ToggleLabel.Position = UDim2.new(0, 35, 0, 0)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "فتح الواجها | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
--- ===== الربط بين الزر والإطار =====
-local frameOffset = Vector2.new(
-    ToggleFrame.Position.X.Offset - ToggleBtn.Position.X.Offset,
-    ToggleFrame.Position.Y.Offset - ToggleBtn.Position.Y.Offset
-)
-
+-- ===== سحب وتحريك الزر =====
 local UserInputService = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
 
@@ -731,12 +716,6 @@ local function update(input)
         startPos.Y.Offset + delta.Y
     )
     ToggleBtn.Position = newPos
-    ToggleFrame.Position = UDim2.new(
-        newPos.X.Scale,
-        newPos.X.Offset + frameOffset.X,
-        newPos.Y.Scale,
-        newPos.Y.Offset + frameOffset.Y
-    )
 end
 
 ToggleBtn.InputBegan:Connect(function(input)
@@ -769,13 +748,11 @@ end)
 ToggleBtn.MouseButton1Click:Connect(function()
     MainWindow.Visible = true
     ToggleBtn.Visible = false
-    ToggleFrame.Visible = false
 end)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
     MainWindow.Visible = false
     ToggleBtn.Visible = true
-    ToggleFrame.Visible = true
 end)
 
 
