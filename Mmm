@@ -654,64 +654,52 @@ MakeDraggable(DragPoint, MainWindow)
 
 
 -- ===== الزر =====
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
-ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
-ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- لون خلفية الزر
-ToggleBtn.Text = ""
-ToggleBtn.Visible = true
-ToggleBtn.Parent = Orion
+local ToggleFrame = Instance.new("Frame")
+ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
+ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
+ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleFrame.Visible = true
+ToggleFrame.Parent = Orion
 
--- حواف الزر
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
-corner.Parent = ToggleBtn
-
--- ===== الإطار حوالين الزر =====
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 0, 1, 0)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundTransparency = 1
-borderFrame.Parent = ToggleBtn
-
--- حواف الإطار
-local borderCorner = Instance.new("UICorner")
-borderCorner.CornerRadius = UDim.new(0, 8)
-borderCorner.Parent = borderFrame
-
--- Stroke مع تدرج
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 3
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = borderFrame
-
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- أسود
+-- 🎨 UIGradient على الإطار فقط
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر يسار
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- أسود يمين
 }
-gradient.Rotation = 0
-gradient.Parent = borderFrame  -- ✅ نخليه على الـ Frame مو على UIStroke
+frameGradient.Rotation = 0
+frameGradient.Parent = ToggleFrame
 
--- ===== حركة التدرج =====
+-- ===== حركة التدرج للإطار =====
 local RunService = game:GetService("RunService")
 local normalSpeed = 60
 local direction = 1
 local maxRotation = 160
 
 RunService.Heartbeat:Connect(function(dt)
-    if not borderFrame.Parent then return end
-    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
+    if not frameGradient.Parent then return end
+    frameGradient.Rotation = frameGradient.Rotation + (normalSpeed * dt * direction)
 
-    if gradient.Rotation >= maxRotation then
-        gradient.Rotation = maxRotation
+    if frameGradient.Rotation >= maxRotation then
+        frameGradient.Rotation = maxRotation
         direction = -1
-    elseif gradient.Rotation <= 0 then
-        gradient.Rotation = 0
+    elseif frameGradient.Rotation <= 0 then
+        frameGradient.Rotation = 0
         direction = 1
     end
 end)
+
+-- ===== الزر ToggleBtn بدون أي إضافات =====
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
+ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
+ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- لون ثابت
+ToggleBtn.Text = ""
+ToggleBtn.Visible = false
+ToggleBtn.Parent = Orion
+
 
 -- ===== النص =====
 local ToggleLabel = Instance.new("TextLabel")
