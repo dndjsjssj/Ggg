@@ -653,59 +653,12 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
-	local ToggleFrame = Instance.new("Frame")
-ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر قليلاً من الزر
-ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
-ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
-ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false
-ToggleFrame.Parent = Orion
-
--- حواف مدورة للإطار
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 10)
-frameCorner.Parent = ToggleFrame
-
--- UIStroke
-local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 4
-frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-frameStroke.Parent = ToggleFrame
-
--- UIGradient: يسار أحمر → يمين أسود
-local frameGradient = Instance.new("UIGradient")
-frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- يمين أسود
-}
-frameGradient.Rotation = 0
-frameGradient.Parent = frameStroke
-
--- ===== حركة Gradient =====
-local normalSpeed = 40 -- سرعة الحركة
-local direction = 1    -- 1 = مع عقارب الساعة, -1 = عكس
-
-game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if not frameStroke.Parent then return end
-
-    frameGradient.Rotation = frameGradient.Rotation + (normalSpeed * dt * direction)
-
-    -- ينعكس لما يوصل أقصى حد
-    if frameGradient.Rotation >= 180 then
-        frameGradient.Rotation = 180
-        direction = -1
-    elseif frameGradient.Rotation <= 0 then
-        frameGradient.Rotation = 0
-        direction = 1
-    end
-end)
-
--- ===== الزر =====
+	-- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 145, 0, 36)
 ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- خليته غامق يبين الإطار
 ToggleBtn.Text = ""
 ToggleBtn.Visible = false
 ToggleBtn.Parent = Orion
@@ -715,7 +668,52 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = ToggleBtn
 
--- الصورة والنص
+-- ===== الإطار المتدرج حوالين الزر =====
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, -4, 1, -4)  -- أصغر شوية من الزر
+borderFrame.Position = UDim2.new(0, 2, 0, 2)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = ToggleBtn.ZIndex + 1
+borderFrame.Parent = ToggleBtn
+
+local borderCorner = Instance.new("UICorner")
+borderCorner.CornerRadius = UDim.new(0, 8)
+borderCorner.Parent = borderFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = borderFrame
+
+-- UIGradient: يسار أحمر → يمين أسود
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- يمين أسود
+}
+gradient.Rotation = 0
+gradient.Parent = stroke
+
+-- ===== تحريك التدرج =====
+local RunService = game:GetService("RunService")
+local normalSpeed = 40
+local direction = 1
+local maxRotation = 160
+
+RunService.Heartbeat:Connect(function(dt)
+    if not stroke.Parent then return end
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
+
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
+    end
+end)
+
+-- الصورة
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
 ToggleIcon.Position = UDim2.new(0, 10, 0.5, -10)
@@ -723,6 +721,7 @@ ToggleIcon.BackgroundTransparency = 1
 ToggleIcon.Image = "rbxassetid://108584636372574"
 ToggleIcon.Parent = ToggleBtn
 
+-- النص
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
 ToggleLabel.Position = UDim2.new(0, 20, 0, 0)
@@ -730,7 +729,7 @@ ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "فتح الواجها | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
-ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
 
