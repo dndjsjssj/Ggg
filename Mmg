@@ -1226,6 +1226,18 @@ Btn.MouseButton1Up:Connect(function()
         if Btn.Callback then
             Btn.Callback()
         end
+
+        
+        OrionLib:MakeNotification({
+            Name = "الاشعار",
+            Content = "تم التفعيل",
+            Time = 5
+        })
+
+        
+        MainWindow.Visible = false
+        UIHidden = true
+        WindowConfig.CloseCallback()
     end
 end)
 
@@ -1349,6 +1361,33 @@ end)
 					ToggleBox,
 					Click
 				}), "Second")
+
+local pressTime = 0
+
+ToggleFrame.MouseButton1Down:Connect(function()
+    pressTime = tick()
+end)
+
+ToggleFrame.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    local duration = releaseTime - pressTime
+    if duration <= 0.3 then
+        
+        ToggleConfig.Callback(not Toggle.Value)
+
+        
+        OrionLib:MakeNotification({
+            Name = "الاشعار",
+            Content = "تم التفعيل",
+            Time = 5
+        })
+
+        
+        MainWindow.Visible = false
+        UIHidden = true
+        WindowConfig.CloseCallback()
+    end
+end)
 
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
@@ -1493,6 +1532,40 @@ end)
 
 
 
+
+local pressTime = 0
+
+
+SliderFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        pressTime = tick()
+    end
+end)
+
+
+SliderFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local releaseTime = tick()
+        local duration = releaseTime - pressTime
+
+        if duration <= 0.3 then
+          
+            OrionLib:MakeNotification({
+                Name = "الاشعار",
+                Content = "تم التفعيل",
+                Time = 5
+            })
+
+            
+            MainWindow.Visible = false
+            UIHidden = true
+            WindowConfig.CloseCallback()
+        end
+    end
+end)
+
+
+
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
 local normalSpeed = 40
@@ -1538,6 +1611,7 @@ RunService.Heartbeat:Connect(function(dt)
         direction = 1
     end
 end)
+
 
 				SliderBar.InputBegan:Connect(function(Input)
 					if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then 
@@ -1645,6 +1719,30 @@ end)
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					MakeElement("Corner")
 				}), "Second")
+
+local pressTime = 0
+
+DropdownFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        pressTime = tick()
+    end
+end)
+
+DropdownFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local releaseTime = tick()
+        local duration = releaseTime - pressTime
+
+        if duration <= 0.3 then
+            
+            OrionLib:MakeNotification({
+                Name = "الاشعار",
+                Content = "تم التفعيل",
+                Time = 5
+            })
+        end
+    end
+end)
 
 
 local dropdownStroke = DropdownFrame:FindFirstChildOfClass("UIStroke")
@@ -1982,6 +2080,28 @@ end)
     Click
 }), "Second")
 
+local pressTime = 0
+
+TextboxFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        pressTime = tick()
+    end
+end)
+
+TextboxFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local releaseTime = tick()
+        local duration = releaseTime - pressTime
+
+        if duration <= 0.3 then
+            OrionLib:MakeNotification({
+                Name = "الاشعار",
+                Content = "تم الضغط على خانة الإدخال",
+                Time = 5
+            })
+        end
+    end
+end)
 
 local thickness = 2
 local cornerRadius = UDim.new(0, 5)
