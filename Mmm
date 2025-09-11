@@ -653,8 +653,7 @@ end
 MakeDraggable(DragPoint, MainWindow)
 
 
-	-- ===== الإطار =====
-local ToggleFrame = Instance.new("Frame")
+	local ToggleFrame = Instance.new("Frame")
 ToggleFrame.Size = UDim2.new(0, 145, 0, 35) -- أصغر قليلاً من الزر
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
@@ -673,42 +672,33 @@ frameStroke.Thickness = 4
 frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 frameStroke.Parent = ToggleFrame
 
--- UIGradient جوه الـ Stroke
+-- UIGradient: يسار أحمر → يمين أسود
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- أحمر
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),   -- أسود
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- يسار أحمر
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- يمين أسود
 }
 frameGradient.Rotation = 0
 frameGradient.Parent = frameStroke
 
--- ===== حركة Gradient حول الإطار =====
-local normalSpeed = 40 -- سرعة الدوران
-local paused = false
+-- ===== حركة Gradient =====
+local normalSpeed = 40 -- سرعة الحركة
+local direction = 1    -- 1 = مع عقارب الساعة, -1 = عكس
 
 game:GetService("RunService").Heartbeat:Connect(function(dt)
-    if paused then return end
     if not frameStroke.Parent then return end
 
-    frameGradient.Rotation = frameGradient.Rotation + normalSpeed * dt  
+    frameGradient.Rotation = frameGradient.Rotation + (normalSpeed * dt * direction)
 
-    if frameGradient.Rotation >= 356 then  
-        frameGradient.Rotation = 356
-        paused = true  
-
-        task.delay(1.5, function()  
-            if frameStroke.Parent then  
-                frameGradient.Rotation = 0  
-                paused = false  
-            end  
-        end)  
+    -- ينعكس لما يوصل أقصى حد
+    if frameGradient.Rotation >= 180 then
+        frameGradient.Rotation = 180
+        direction = -1
+    elseif frameGradient.Rotation <= 0 then
+        frameGradient.Rotation = 0
+        direction = 1
     end
 end)
-
 
 -- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
@@ -808,6 +798,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     ToggleBtn.Visible = true
     ToggleFrame.Visible = true
 end)
+
 
 -- ==========================
 -- زر الإغلاق
