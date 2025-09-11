@@ -781,7 +781,7 @@ end)
 local function OpenMainWindow()
     MainWindow.Visible = true
     MainWindow.Size = UDim2.new(0, 0, 0, 0) -- ابدأ صغير
-    local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 400, 0, 300)})
+    local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 330)})
     tween:Play()
 end
 
