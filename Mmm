@@ -989,11 +989,11 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = borderFrame
 
--- ===== التدرج اللوني (خط أسود بالنص متساوي) =====
+-- ===== التدرج اللوني: أحمر يسار → أسود يمين =====
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)), -- يسار احمر
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))   -- يمين اسود
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 0, 0))    -- يمين اسود
 }
 gradient.Rotation = 0
 gradient.Parent = stroke
@@ -1001,29 +1001,25 @@ gradient.Parent = stroke
 -- ===== تحريك التدرج =====
 local RunService = game:GetService("RunService")
 
-local normalSpeed = 40      -- سرعة الدوران
-local stopPoint = 180       -- النقطة اللي يوقف عندها
-local pauseTime = 1.5       -- مدة التوقف بالثواني (1.5 ثانية)
-local currentSpeed = normalSpeed
-local paused = false
+local normalSpeed = 40   -- سرعة الحركة
+local direction = 1      -- 1 = للأمام, -1 = للخلف
+local maxRotation = 160  -- أقصى زاوية يروح إلها
 
 RunService.Heartbeat:Connect(function(dt)
-    if paused then return end  -- إذا متوقف حالياً ما يتحرك
+    if not gradient.Parent then return end
 
-    gradient.Rotation = gradient.Rotation + currentSpeed * dt
+    gradient.Rotation = gradient.Rotation + (normalSpeed * dt * direction)
 
-    -- إذا وصل 356 أو تجاوزها
-    if gradient.Rotation >= stopPoint then
-        gradient.Rotation = stopPoint
-        paused = true
-
-        -- يوقف 1.5 ثانية وبعدين يرجع من البداية
-        task.delay(pauseTime, function()
-            gradient.Rotation = 0
-            paused = false
-        end)
+    -- انعكاس الاتجاه تدريجي
+    if gradient.Rotation >= maxRotation then
+        gradient.Rotation = maxRotation
+        direction = -1
+    elseif gradient.Rotation <= 0 then
+        gradient.Rotation = 0
+        direction = 1
     end
 end)
+
 		if GetIcon(TabConfig.Icon) ~= nil then
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end	
