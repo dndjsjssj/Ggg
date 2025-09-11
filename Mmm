@@ -654,10 +654,44 @@ MakeDraggable(DragPoint, MainWindow)
 
 
 
+
+
 -- ===== الخدمات =====
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+
+-- ===== دالة إضافة انميشن Gradient لأي إطار أو زر =====
+local function AddAnimatedGradient(Object)
+    local stroke = Object:FindFirstChildOfClass("UIStroke")
+    if not stroke then
+        stroke = Instance.new("UIStroke")
+        stroke.Thickness = 4
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.Parent = Object
+    end
+
+    local gradient = stroke:FindFirstChildOfClass("UIGradient")
+    if not gradient then
+        gradient = Instance.new("UIGradient")
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+        }
+        gradient.Rotation = 0
+        gradient.Parent = stroke
+    end
+
+    local normalSpeed = 40
+    RunService.Heartbeat:Connect(function(dt)
+        if not stroke.Parent then return end
+        gradient.Rotation = (gradient.Rotation + normalSpeed * dt) % 360
+    end)
+end
 
 -- ===== الإطار =====
 local ToggleFrame = Instance.new("Frame")
@@ -665,36 +699,14 @@ ToggleFrame.Size = UDim2.new(0, 145, 0, 35)
 ToggleFrame.AnchorPoint = Vector2.new(0.5, 0)
 ToggleFrame.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleFrame.BackgroundTransparency = 1
-ToggleFrame.Visible = false -- خليته ظاهر حتى يسحب
+ToggleFrame.Visible = true
 ToggleFrame.Parent = Orion
 
 local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 10)
 frameCorner.Parent = ToggleFrame
 
-local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 4
-frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-frameStroke.Parent = ToggleFrame
-
-local frameGradient = Instance.new("UIGradient")
-frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 0, 0)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 0, 0)),
-    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
-}
-frameGradient.Rotation = 0
-frameGradient.Parent = frameStroke
-
--- ===== حركة Gradient =====
-local normalSpeed = 40
-RunService.Heartbeat:Connect(function(dt)
-    if not frameStroke.Parent then return end
-    frameGradient.Rotation = (frameGradient.Rotation + normalSpeed * dt) % 360
-end)
+AddAnimatedGradient(ToggleFrame)
 
 -- ===== الزر =====
 local ToggleBtn = Instance.new("TextButton")
@@ -703,7 +715,7 @@ ToggleBtn.Position = UDim2.new(0.5, -10, 0, -50)
 ToggleBtn.AnchorPoint = Vector2.new(0.5, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 ToggleBtn.Text = ""
-ToggleBtn.Visible = false
+ToggleBtn.Visible = true
 ToggleBtn.Parent = Orion
 
 local corner = Instance.new("UICorner")
@@ -721,12 +733,14 @@ local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
 ToggleLabel.Position = UDim2.new(0, 35, 0, 0)
 ToggleLabel.BackgroundTransparency = 1
-ToggleLabel.Text = "فتح الواجها | Open"
+ToggleLabel.Text = "فتح الواجهة | Open"
 ToggleLabel.Font = Enum.Font.GothamBold
 ToggleLabel.TextSize = 16
 ToggleLabel.TextColor3 = Color3.fromRGB(0,0,0)
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 ToggleLabel.Parent = ToggleBtn
+
+AddAnimatedGradient(ToggleBtn)
 
 -- ===== سحب الزر والإطار =====
 local frameOffset = Vector2.new(
@@ -780,12 +794,13 @@ end)
 -- ===== انميشن MainWindow =====
 local function OpenMainWindow()
     MainWindow.Visible = true
-    MainWindow.Size = UDim2.new(0, 0, 0, 0) -- ابدأ صغير
+    MainWindow.Size = UDim2.new(0, 0, 0, 0)
     local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 330)})
     tween:Play()
 end
 
 local function CloseMainWindow()
+    MainWindow.Size = UDim2.new(0, 600, 0, 330)
     local tween = TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
     tween:Play()
     tween.Completed:Connect(function()
@@ -793,17 +808,30 @@ local function CloseMainWindow()
     end)
 end
 
--- ===== ربط الأزرار بالانميشن =====
+-- ===== زر التصغير مع لمسة قصيرة + انميشن =====
+AddAnimatedGradient(MinimizeBtn)
+
+local pressTime = 0
+MinimizeBtn.MouseButton1Down:Connect(function()
+    pressTime = tick()
+end)
+
+MinimizeBtn.MouseButton1Up:Connect(function()
+    local releaseTime = tick()
+    local duration = releaseTime - pressTime
+
+    if duration <= 0.3 then
+        CloseMainWindow()
+        ToggleBtn.Visible = true
+        ToggleFrame.Visible = true
+    end
+end)
+
+-- ===== ربط ToggleBtn بالفتح =====
 ToggleBtn.MouseButton1Click:Connect(function()
     OpenMainWindow()
     ToggleBtn.Visible = false
     ToggleFrame.Visible = false
-end)
-
-MinimizeBtn.MouseButton1Click:Connect(function()
-    CloseMainWindow()
-    ToggleBtn.Visible = true
-    ToggleFrame.Visible = true
 end)
 
 
