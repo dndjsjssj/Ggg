@@ -1215,16 +1215,17 @@ function ElementFunction:AddButton(ButtonConfig)
 
 local pressTime = 0
 
-Btn.MouseButton1Down:Connect(function()
-    pressTime = tick()
+Click.MouseButton1Down:Connect(function()
+    pressTime = tick() -- نسجل وقت بداية الضغط
 end)
 
-Btn.MouseButton1Up:Connect(function()
+Click.MouseButton1Up:Connect(function()
     local releaseTime = tick()
     local duration = releaseTime - pressTime
-    if duration <= 0.3 then
-        if Btn.Callback then
-            Btn.Callback()
+
+    if duration <= 0.3 then -- اذا ضغطة سريعة
+        if ButtonConfig.Callback then
+            ButtonConfig.Callback()
         end
     end
 end)
